@@ -1,10 +1,14 @@
 package com.team4.lib.util;
 
+import java.util.Arrays;
+
 /**
  * General math equations we use 
  */
 
 public class ElementMath {
+
+	static double prevArrVal;
 
 	// Higher sensitivity on joystick
 	public static double squareInput(double input) {
@@ -61,5 +65,39 @@ public class ElementMath {
 
 	}
 
+	public static double rotationsToTicks(double rotations, double ppr){
+		return rotations * ppr;
+	}
+
+	public static double ticksToRotations(double ticks, double ppr){
+		return ticks / ppr;
+	}
+
+	public static double tickPer100msToRPM(double ticks, double ppr){
+		return ticksToRotations(ticks, ppr) * 600;
+	}
+
+	public static double rpmToTicksPer100ms(double rpm, double ppr){
+		return rotationsToTicks(rpm, ppr) / 600;
+	}
+
+	public static double[] addElementToArray(double[] arr, double a){
+		
+		arr = Arrays.copyOf(arr, arr.length + 1);
+
+		arr[arr.length-1] = a;
+
+		return arr;
+	}
+
+	public static double[][] addArrayToMultArray(double[][] arr, double[] a){
+		
+		arr = Arrays.copyOf(arr, arr.length + 1);
+
+		arr[arr.length-1] = a;
+		
+
+		return arr;
+	}
 
 }

@@ -1,4 +1,4 @@
-package com.team4.robot.auto.actions;
+package com.team4.robot.actions;
 
 import com.team254.lib.geometry.Translation2d;
 import com.team4.lib.actionbase.Action;

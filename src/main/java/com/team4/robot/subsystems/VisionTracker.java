@@ -1,7 +1,6 @@
 package com.team4.robot.subsystems;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import com.team254.lib.geometry.Translation2d;
 import com.team254.lib.util.CrashTracker;
@@ -32,11 +31,6 @@ public class VisionTracker extends Subsystem {
 
 	private VisionTracker() {
 		mCurrentTargetingLimelightNT = limelightNT;
-	}
-
-	public static VisionTracker getInstance(List<Subsystem> subsystemList) {
-		subsystemList.add(getInstance());
-		return mInstance;
 	}
 	
 	private final Loop mLoop = new Loop() {
@@ -123,7 +117,7 @@ public class VisionTracker extends Subsystem {
 				mPeriodicIO.targetSkew = mCurrentTargetingLimelightNT.getEntry("ts").getDouble(0);
 				mPeriodicIO.targetLatency = mCurrentTargetingLimelightNT.getEntry("tl").getDouble(0);
 				mPeriodicIO.getPipelineValue = mCurrentTargetingLimelightNT.getEntry("getpipe").getDouble(0);
-				// mPeriodicIO.cameraA1 = Math.atan((TargetingConstants.kHatchTargetHeight - TargetingConstants.kFloorToLens)/25 /*25 inches to find what A1 is */) - mPeriodicIO.targetVerticalDeviation;
+				mPeriodicIO.cameraA1 = Math.toDegrees(Math.atan((TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens)/100 /*100 inches to find what A1 is */))-mPeriodicIO.targetVerticalDeviation;
 
 				try {
 					double xArr[] = mCurrentTargetingLimelightNT.getEntry("tcornx").getDoubleArray(new double[]{0});
@@ -154,7 +148,7 @@ public class VisionTracker extends Subsystem {
 //						(TargetingConstants.kRocketBallTargetHeight - TargetingConstants.kLimelightFrontMountedHeightToFloor) /
 //								Math.atan(TargetingConstants.kLimelightFrontMountedAngleWrtFloor + mPeriodicIO.targetVerticalDeviation) :
 						(TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens) /
-								Math.atan(TargetingConstants.kFloorToLensAngle + mPeriodicIO.targetVerticalDeviation);
+							/*	Math.toDegrees(*/Math.tan(Math.toRadians(TargetingConstants.kFloorToLensAngle + mPeriodicIO.targetVerticalDeviation))/*)*/;
 			}
 			else {
 				mPeriodicIO.targetValid = 0;
@@ -200,6 +194,7 @@ public class VisionTracker extends Subsystem {
 		SmartDashboard.putNumber("Valid Target Value", mPeriodicIO.targetValid);
 		SmartDashboard.putNumber("Distance", mPeriodicIO.targetDistance);
 		SmartDashboard.putNumber("Camera A1", mPeriodicIO.cameraA1);
+		SmartDashboard.putNumber("Vertical Deviation", mPeriodicIO.targetVerticalDeviation);
 	}
 
 	public void setLEDMode(LedMode mode){

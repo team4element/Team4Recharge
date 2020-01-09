@@ -8,9 +8,10 @@ public class TargetingConstants {
       public static final double kVPH = 2.0 * Math.tan(Math.toRadians(kVerticalFOV / 2.0));
       public static final double kImageCaptureLatency = 11.0 / 1000.0; // seconds
   
-      public static final double kFloorToLens = 7.25;
-      public static final double kFloorToLensAngle = 15.09;
-      public static final double kFloorToTarget = 0;
+      public static final double kFloorToLens = 26.5;
+      public static final double kFloorToLensAngle = 28.75;
+      //6'9" 1/4 + (1'5")/2       81.25+(17/2) 81.25+8.5
+      public static final double kFloorToTarget = 89.75;
 
       public static final double kMaxTrackerDistance = 9.0;
       public static final double kMaxGoalTrackAge = 2.5;

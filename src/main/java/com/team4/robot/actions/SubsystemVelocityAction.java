@@ -4,6 +4,7 @@ import com.team254.lib.util.DriveSignal;
 import com.team4.lib.actionbase.Action;
 import com.team4.lib.util.Subsystem;
 import com.team4.robot.subsystems.Drive;
+import com.team4.robot.subsystems.Shooter;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -36,6 +37,10 @@ public class SubsystemVelocityAction implements Action{
             if(mSetpoint > Drive.getInstance().getLinearVelocity()){
                 Drive.getInstance().setVelocityIPS(new DriveSignal(mSetpoint, mSetpoint), new DriveSignal(0, 0));
             }
+        }else if (mSubsystem == Shooter.getInstance()){
+            if(mSetpoint > Shooter.getInstance().getVelocity()){
+                Shooter.getInstance().setVelocity(mSetpoint, 0);
+            }
         }else{
             //TODO: add logic for subsystems
         }
@@ -44,7 +49,13 @@ public class SubsystemVelocityAction implements Action{
 
     @Override
     public void update() {
-        isFinished = mSetpoint <= Drive.getInstance().getLinearVelocity();
+        if(mSubsystem == Drive.getInstance()){
+            isFinished = mSetpoint <= Drive.getInstance().getLinearVelocity();
+        }else if(mSubsystem == Shooter.getInstance()){
+            isFinished = mSetpoint <= Shooter.getInstance().getVelocity();
+        }else{
+            //TODO: add logic for subsystems
+        }
     }
 
     @Override

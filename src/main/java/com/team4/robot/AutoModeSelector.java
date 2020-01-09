@@ -43,8 +43,8 @@ public class AutoModeSelector {
         DesiredMode desiredMode = mModeChooser.getSelected();
         StartingPosition staringPosition = mStartPositionChooser.getSelected();
         if (mCachedDesiredMode != desiredMode || staringPosition != mCachedStartingPosition) {
-            System.out.println("Auto selection changed, updating creator: desiredMode->" + desiredMode.name()
-                    + ", starting position->" + staringPosition.name());
+            // System.out.println("Auto selection changed, updating creator: desiredMode->" + desiredMode.name()
+                    // + ", starting position->" + staringPosition.name());
             mAutoMode = getAutoModeForParams(desiredMode, staringPosition);
         }
         mCachedDesiredMode = desiredMode;

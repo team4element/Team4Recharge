@@ -20,7 +20,6 @@ import com.team254.lib.geometry.Twist2d;
 import com.team254.lib.util.DriveSignal;
 import com.team254.lib.util.ReflectingCSVWriter;
 import com.team254.lib.util.SynchronousPIDF;
-import com.team254.lib.util.Util;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.drivers.MotorChecker;
 import com.team4.lib.drivers.NavX;
@@ -280,20 +279,12 @@ public class Drive extends Subsystem {
         return rotations * (DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveWheelGearRatio);
     }
 
-    private static double rpmToInchesPerSecond(double rpm) {
-        return rotationsToInches(rpm) / 60;
-    }
-
     private static double inchesToRotations(double inches) {
         return inches / (DriveConstants.kDriveWheelGearRatio * DriveConstants.kDriveWheelCircumferenceInches);
     }
 
     private static double inchesToRadians(double inches){
         return inchesToRotations(inches) * (2*Math.PI);
-    }
-
-    private static double inchesPerSecondToRpm(double inches_per_second) {
-        return inchesToRotations(inches_per_second) * 60;
     }
 
     private static double radiansPerSecondToTicksPer100ms(double rad_s) {
@@ -316,37 +307,6 @@ public class Drive extends Subsystem {
         mPeriodicIO.right_demand = signal.getRight();
         mPeriodicIO.left_feedforward = 0.0;
         mPeriodicIO.right_feedforward = 0.0;
-    }
-
-    public synchronized void setCheesyishDrive(double throttle, double wheel, boolean quickTurn, boolean steerHelp) {
-        if (Util.epsilonEquals(throttle, 0.0, 0.04)) {
-            throttle = 0.0;
-        }
-
-        if (Util.epsilonEquals(wheel, 0.0, 0.035)) {
-            wheel = 0.0;
-        }
-
-        final double kWheelGain = 0.05;
-        final double kWheelNonlinearity = 0.05;
-        final double denominator = Math.sin(Math.PI / 2.0 * kWheelNonlinearity);
-        // Apply a sin function that's scaled to make it feel better.
-        if (!quickTurn) {
-            wheel = Math.sin(Math.PI / 2.0 * kWheelNonlinearity * wheel);
-            wheel = Math.sin(Math.PI / 2.0 * kWheelNonlinearity * wheel);
-            wheel = wheel / (denominator * denominator);
-        }
-        
-
-        wheel *= kWheelGain;
-        
-        if(steerHelp){
-            wheel = updateSteerTurn();
-        }
-        
-        DriveSignal signal = Kinematics.inverseKinematics(new Twist2d(throttle, 0.0, wheel));
-        double scaling_factor = Math.max(1.0, Math.max(Math.abs(signal.getLeft()), Math.abs(signal.getRight())));
-        setOpenLoop(new DriveSignal(signal.getLeft() / scaling_factor, signal.getRight() / scaling_factor));
     }
 
     public synchronized void setVelocity(DriveSignal signal, DriveSignal feedforward){

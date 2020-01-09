@@ -11,14 +11,22 @@ import java.util.Optional;
 
 import com.team254.lib.geometry.Pose2d;
 import com.team254.lib.geometry.Rotation2d;
+import com.team254.lib.util.CheesyDriveHelper;
 import com.team254.lib.util.CrashTracker;
 import com.team4.lib.autobase.AutoModeBase;
 import com.team4.lib.autobase.AutoModeExecutor;
 import com.team4.lib.loops.Looper;
+import com.team4.lib.util.DriveHelper;
+import com.team4.lib.util.ElementMath;
 import com.team4.lib.util.SubsystemManager;
 import com.team4.lib.wpilib.TimedRobot;
+import com.team4.robot.constants.Constants;
+import com.team4.robot.controlboard.ControlBoard;
+import com.team4.robot.controlboard.IControlBoard;
+import com.team4.robot.subsystems.Conveyor;
 import com.team4.robot.subsystems.Drive;
 import com.team4.robot.subsystems.RobotStateEstimator;
+import com.team4.robot.subsystems.Shooter;
 import com.team4.robot.subsystems.VisionTracker;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -31,6 +39,8 @@ public class Robot extends TimedRobot{
     private final VisionTracker mVisionTracker = VisionTracker.getInstance();
 
     private final Drive mDrive = Drive.getInstance();
+    private final Shooter mShooter = Shooter.getInstance();
+    private final Conveyor mConveyor = Conveyor.getInstance();
 
     private final RobotState mRobotState = RobotState.getInstance();
     private final RobotStateEstimator mRobotStateEstimator = RobotStateEstimator.getInstance();
@@ -38,6 +48,10 @@ public class Robot extends TimedRobot{
     private AutoModeSelector mAutoSelector;
     private AutoModeExecutor mAutoModeExecutor;
   
+    private IControlBoard mControlBoard = ControlBoard.getInstance();
+
+    private DriveHelper mDriveHelper = DriveHelper.getInstance();
+    CheesyDriveHelper mCheesyDriveHelper = new CheesyDriveHelper();
 
     public Robot(){
         CrashTracker.logRobotConstruction();
@@ -50,14 +64,18 @@ public class Robot extends TimedRobot{
               mSubsystemManager.setSubsystems(
                 mRobotStateEstimator,
                 mDrive,
-                mVisionTracker);
+                mVisionTracker,
+                mShooter,
+                mConveyor);
               
                 mSubsystemManager.configEnabledLoop(mEnabledLooper);
                 mSubsystemManager.configDisabledLoops(mDisabledLooper);
         
-                mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity(), Rotation2d.identity());
+                mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
                 mDrive.setHeading(Rotation2d.identity());
         
+                mAutoSelector = new AutoModeSelector();
+                mAutoModeExecutor = new AutoModeExecutor();
                 // mLLManager.setAllLeds(Limelight.LedMode.OFF);
         
                 System.out.println("Finished robot init");
@@ -99,7 +117,7 @@ public class Robot extends TimedRobot{
             mDisabledLooper.stop();
       
             // Robot starts forwards.
-            mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity(), Rotation2d.identity());
+            mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
             mDrive.setHeading(Rotation2d.identity());
       
             mAutoModeExecutor.start();
@@ -130,6 +148,7 @@ public class Robot extends TimedRobot{
     @Override
     public void robotPeriodic() {
         try {
+            
             mSubsystemManager.outputToSmartDashboard();
             mRobotState.outputToSmartDashboard();
             mVisionTracker.readPeriodicInputs();
@@ -166,10 +185,46 @@ public class Robot extends TimedRobot{
 
     @Override
     public void teleopPeriodic() {
+        mShooter.handleDistanceRPM(100);
+        manualControl();
     }
 
     @Override
     public void testPeriodic() {
+    }
+
+    public void manualControl(){
+        double throttle = ElementMath.handleDeadband(mControlBoard.getThrottle(), Constants.kJoystickThreshold);
+        double turn;
+        boolean wants_auto_steer = mControlBoard.getVisionEnable();
+ 
+        mVisionTracker.setVisionEnabled(wants_auto_steer);
+    
+        if (mVisionTracker.isVisionEnabled() && mVisionTracker.isTargetFound()) {
+    
+            turn = Math.max(Math.min(VisionTracker.getInstance().getTargetHorizAngleDev() * 0.005, 0.1), -0.1);
+            mDrive.setOpenLoop(mCheesyDriveHelper.cheesyDrive(throttle, turn, true));
+            // mDrive.autoSteer(Util.limit(throttle, 0.3), drive_aim_params.get());
+        }else{
+            turn = ElementMath.handleDeadband(-mControlBoard.getTurn(), Constants.kJoystickThreshold);
+            mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, false));
+            
+        }
+
+
+        if(mControlBoard.getShoot()){
+            mShooter.setShooterOpenLoop(.7);
+        }else{
+            mShooter.setShooterOpenLoop(0);   
+        }
+
+        if(mControlBoard.getMoveConveyor()){
+            mConveyor.setOpenLoop(.3);
+        }else{
+            mConveyor.setOpenLoop(0);
+        }
+
+
     }
 
 }

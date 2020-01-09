@@ -1,6 +1,5 @@
 package com.team4.robot.actions;
 
-import com.team254.lib.geometry.Rotation2d;
 import com.team4.lib.actionbase.RunOnceAction;
 import com.team4.lib.paths.PathContainer;
 import com.team4.robot.RobotState;
@@ -16,6 +15,6 @@ public class ResetPoseFromPathAction extends RunOnceAction{
 
     @Override
     public void runOnce() {
-        RobotState.getInstance().reset(Timer.getFPGATimestamp(), mPathContainer.getStartPose(), Rotation2d.identity());
+        RobotState.getInstance().reset(Timer.getFPGATimestamp(), mPathContainer.getStartPose());
     }
 }

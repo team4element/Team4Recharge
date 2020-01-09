@@ -43,4 +43,9 @@ public class AutoConstants{
     public static final double kPathFollowingGoalVelTolerance = 12.0;
     public static final double kPathStopSteeringDistance = 12.0;
 
+    public static final double kShooterKp = 1;
+    public static final double kShooterKi = 0;
+    public static final double kShooterKd = 0;
+    public static final double kShooterKf = .2;
+    public static final int kShooterIZone = 0;
 }
