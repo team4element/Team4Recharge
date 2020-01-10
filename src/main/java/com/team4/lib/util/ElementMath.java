@@ -44,17 +44,6 @@ public class ElementMath {
 		return isTrue;
 	}
 
-	public static double ticksToInches(double ticks, double circumference, double gearRatio,
-			double TicksPerRevolution) {
-		return ticks * ((circumference * gearRatio) / TicksPerRevolution);
-
-	}
-	public static double ticksToInchesPerSec(double ticks, double circumference, double gearRatio,
-	double TicksPerRevolution, double hunderedmsPerMinute) {
-			return (ticks * ((circumference * gearRatio) / (TicksPerRevolution * hunderedmsPerMinute)))/60;
-
-	}
-
 	
 	public static double inchesToRotations(double inches, double circumference, double gearRatio) {
 		return inches / ((circumference * gearRatio));
@@ -81,6 +70,15 @@ public class ElementMath {
 		return rotationsToTicks(rpm, ppr) / 600;
 	}
 
+	public static double scaleRPM(double initRPM, double gearRatio){
+		return initRPM / gearRatio;
+	}
+
+	public static double unscaleRPM(double finRPM, double gearRatio){
+		return finRPM * gearRatio;
+	}
+
+	/**
 	public static double[] addElementToArray(double[] arr, double a){
 		
 		arr = Arrays.copyOf(arr, arr.length + 1);
@@ -98,6 +96,6 @@ public class ElementMath {
 		
 
 		return arr;
-	}
+	}*/
 
 }

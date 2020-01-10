@@ -48,4 +48,5 @@ public class AutoConstants{
     public static final double kShooterKd = 0;
     public static final double kShooterKf = .2;
     public static final int kShooterIZone = 0;
+    public static final double kShooterRampRate = 0.0;
 }

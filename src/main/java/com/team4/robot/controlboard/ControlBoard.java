@@ -47,4 +47,14 @@ public class ControlBoard implements IControlBoard{
     public boolean getVisionEnable() {
         return mDriveControlBoard.getVisionEnable();
     }
+
+    @Override
+    public boolean getReadyToManipulateControlPanel() {
+        return mOperatorControlBoard.getReadyToManipulateControlPanel();
+    }
+
+    @Override
+    public boolean getUpdateControlPanelMode() {
+        return mOperatorControlBoard.getUpdateControlPanelMode();
+    }
 }

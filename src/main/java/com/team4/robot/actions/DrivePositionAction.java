@@ -18,13 +18,13 @@ public class DrivePositionAction implements Action{
 
     @Override
     public void start() {
-        mInitPosition = mDrive.getEncoderDinstance();
+        mInitPosition = mDrive.getRightEncoderDistance();
         mDrive.setPosition(new DriveSignal(mSetpoint, mSetpoint));
     }
 
     @Override
     public void update() {
-        isFinished = (mInitPosition + mSetpoint) <= mDrive.getEncoderDinstance();
+        isFinished = (mInitPosition + mSetpoint) <= mDrive.getRightEncoderDistance();
     }
 
     @Override

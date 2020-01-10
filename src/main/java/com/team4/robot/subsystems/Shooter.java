@@ -2,35 +2,34 @@ package com.team4.robot.subsystems;
 
 import java.util.ArrayList;
 
-import com.ctre.phoenix.ErrorCode;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.DemandType;
-import com.ctre.phoenix.motorcontrol.FeedbackDevice;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
-import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
-import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.team254.lib.util.Units;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.drivers.MotorChecker;
-import com.team4.lib.drivers.TalonSRXChecker;
+import com.team4.lib.drivers.TalonFXChecker;
+import com.team4.lib.drivers.TalonUtil;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.ElementMath;
 import com.team4.lib.util.Subsystem;
 import com.team4.robot.constants.AutoConstants;
-import com.team4.robot.constants.Constants;
 import com.team4.robot.constants.ShooterConstants;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shooter extends Subsystem{
     private static Shooter mInstance = null;
 
-    private TalonSRX mMasterMotor;
-    private VictorSPX mSlaveMotor;
+    // private TalonSRX mMasterMotor;
+    // private VictorSPX mSlaveMotor;
+
+    private TalonFX mMasterMotor, mSlaveMotor;
+
+    private boolean mIsBrakeMode = false;
 
     private ShooterState mControlState;
 
@@ -41,9 +40,15 @@ public class Shooter extends Subsystem{
         public void onLoop(double timestamp){
             switch (mControlState){
                 case OPEN_LOOP:
-                    setShooterOpenLoop(1);
+                    setOpenLoop(1);
+                    break;
                 case VELOCITY:
                     handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
+                    break;
+                case IDLE:
+                    setOpenLoop(0);
+                default:
+                    break;
             }
         }
         public void onStop(double timestamp){
@@ -60,34 +65,35 @@ public class Shooter extends Subsystem{
         return mInstance;
     }
 
-    private void configureMaster(TalonSRX talon) {
-        talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5, 100);
-        final ErrorCode sensorPresent = talon.configSelectedFeedbackSensor(FeedbackDevice
-                .CTRE_MagEncoder_Relative, 0, 100); //primary closed-loop, 100 ms timeout
-        if (sensorPresent != ErrorCode.OK) {
-            DriverStation.reportError("Could not detect " + ("Motor") + " encoder: " + sensorPresent, false);
-        }
-        talon.setSensorPhase(true);
-        // talon.enableVoltageCompensation(true);
-        // talon.configVoltageCompSaturation(12.0, IOConstants.kLongCANTimeoutMs);
-        talon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_50Ms, Constants.kLongCANTimeoutMs);
-        talon.configVelocityMeasurementWindow(1, Constants.kLongCANTimeoutMs);
-        talon.configClosedloopRamp(AutoConstants.kDriveVoltageRampRate, Constants.kLongCANTimeoutMs);
-        talon.configNeutralDeadband(0.04, 0);
-    }
+    
 
     private Shooter(){
-        mMasterMotor = CANSpeedControllerFactory.createDefaultTalonSRX(ShooterConstants.kMasterMotorId);
-        configureMaster(mMasterMotor);
+        mMasterMotor = CANSpeedControllerFactory.createDefaultTalonFX(ShooterConstants.kMasterMotorId);
+        TalonUtil.configureMasterTalonFX(mMasterMotor);
 
-        mSlaveMotor = CANSpeedControllerFactory.createPermanentSlaveVictor(ShooterConstants.kSlaveMotorId, mMasterMotor);
+        mSlaveMotor = CANSpeedControllerFactory.createPermanentSlaveTalonFX(ShooterConstants.kSlaveMotorId, ShooterConstants.kMasterMotorId);
 
-        mSlaveMotor.setInverted(false);
+        mSlaveMotor.setInverted(true);
+
+        setBrakeMode(true);
 
         mPeriodicIO = new PeriodicIO();
 
-        mControlState = ShooterState.VELOCITY;
+        mControlState = ShooterState.OPEN_LOOP;
 
+    }
+
+    public synchronized void setBrakeMode(boolean on) {
+        if (mIsBrakeMode != on) {
+            mIsBrakeMode = on;
+            NeutralMode mode = on ? NeutralMode.Brake : NeutralMode.Coast;
+            mMasterMotor.setNeutralMode(mode);
+            mSlaveMotor.setNeutralMode(mode);
+        }
+    }
+
+    public void setControlState(ShooterState state){
+        mControlState = state;
     }
 
     @Override
@@ -107,8 +113,8 @@ public class Shooter extends Subsystem{
         }else if (mControlState == ShooterState.VELOCITY){
             mMasterMotor.set(ControlMode.Velocity, mPeriodicIO.demand, DemandType.ArbitraryFeedForward,
             mPeriodicIO.feedforward + AutoConstants.kShooterKd * mPeriodicIO.accel / (ShooterConstants.kShooterEnconderPPR/4.0));
-        }else{
-
+        }else{ //force default Open Loop
+            mMasterMotor.set(ControlMode.PercentOutput, mPeriodicIO.demand);
         }
 
     }
@@ -122,23 +128,23 @@ public class Shooter extends Subsystem{
         double mPrevVel = 0;
 
         for(double i=4; i <=ShooterConstants.kShooterMaxSpeed; i = i + .05 ){
-            for(double j = 0; j <= 2.5; j = j + .05){
+            for(double j = 0; j <= 6; j = j + .05){
                     double t = j;
 
-                    double x = (ShooterConstants.mass / ShooterConstants.drag) * 
+                    double x = (ShooterConstants.kMass / ShooterConstants.kDrag) * 
                     i * Math.cos(ShooterConstants.kShooterAngle) * 
-                    (1 - Math.pow(Math.E, (-(ShooterConstants.drag*t)/ShooterConstants.mass)));
+                    (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass)));
 
-                    double y = ((-(ShooterConstants.mass*ShooterConstants.g) * t)/ 
-                    ShooterConstants.drag) + (ShooterConstants.mass/ShooterConstants.drag) *
-                    (i*Math.sin(ShooterConstants.kShooterAngle)+(ShooterConstants.mass*ShooterConstants.g)/ShooterConstants.drag) * 
-                    (1 - Math.pow(Math.E, (-(ShooterConstants.drag*t)/ShooterConstants.mass))) + ShooterConstants.kShooterHeight;
+                    double y = ((-(ShooterConstants.kMass*ShooterConstants.kGravityConstant) * t)/ 
+                    ShooterConstants.kDrag) + (ShooterConstants.kMass/ShooterConstants.kDrag) *
+                    (i*Math.sin(ShooterConstants.kShooterAngle)+(ShooterConstants.kMass*ShooterConstants.kGravityConstant)/ShooterConstants.kDrag) * 
+                    (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass))) + ShooterConstants.kShooterHeight;
 
                     if (y < 0){
                         break;
                     }
 
-                    if(Math.abs(x - distanceInMeters) < .1 && Math.abs(y - ShooterConstants.kTargetInMeters) < .1){
+                    if(Math.abs(x - distanceInMeters) < .2 && Math.abs(y - ShooterConstants.kTargetInMeters) < .2){
                         if(isFirstCorrectVel){
                             firstCorrectVel = i;
                             isFirstCorrectVel = false;
@@ -162,7 +168,8 @@ public class Shooter extends Subsystem{
 
         double rpm = Math.abs(low_speed_rpm + high_speed_rpm)/2;
 
-        mPeriodicIO.demand = rpm;
+        rpm = ElementMath.scaleRPM(rpm, ShooterConstants.kShooterGearRatio);
+        // mPeriodicIO.demand = rpm;
         setVelocity(rpm, 0);
         // System.out.println(rpm);
     }
@@ -173,7 +180,7 @@ public class Shooter extends Subsystem{
         return rpm;
     }
 
-    public void setShooterOpenLoop(double pow){
+    public void setOpenLoop(double pow){
         if(mControlState != ShooterState.OPEN_LOOP){
             mControlState = ShooterState.OPEN_LOOP;
         }
@@ -193,17 +200,18 @@ public class Shooter extends Subsystem{
 
     @Override
     public boolean checkSystem() {
-        boolean master = TalonSRXChecker.checkMotors(this,
-        new ArrayList<MotorChecker.MotorConfig<TalonSRX>>() {
+        boolean master = TalonFXChecker.checkMotors(this,
+        new ArrayList<MotorChecker.MotorConfig<TalonFX>>() {
             private static final long serialVersionUID = 3643247888353037677L;
 
             {
-                add(new MotorChecker.MotorConfig<>("left_master", mMasterMotor));
+                add(new MotorChecker.MotorConfig<>("Master", mMasterMotor));
+                add(new MotorChecker.MotorConfig<>("Slave", mSlaveMotor));
             }
         }, new MotorChecker.CheckerConfig() {
             {
                 mCurrentFloor = 2;
-                mRPMFloor = 1500;
+                mRPMFloor = 1600;
                 mCurrentEpsilon = 2.0;
                 mRPMEpsilon = 250;
                 mRPMSupplier = () -> mMasterMotor.getSelectedSensorVelocity(0);
@@ -214,7 +222,8 @@ public class Shooter extends Subsystem{
 
     @Override
     public void outputTelemetry() {
-        //Nothing to output
+        // Nothing to output
+        SmartDashboard.putString("Current Shooter Mode", mControlState.toString());
     }
 
     @Override
@@ -240,12 +249,13 @@ public class Shooter extends Subsystem{
         mMasterMotor.configClosedloopRamp(0);
     
 
-        System.out.println("Switching to velocity");
+        System.out.println("Switching shooter to velocity");
     }
 
-    private enum ShooterState{
+    public enum ShooterState{
         OPEN_LOOP,
-        VELOCITY
+        VELOCITY,
+        IDLE
     }
 
     private static class PeriodicIO{

@@ -13,9 +13,8 @@ public class DriveConstants {
     public static final double kDriveWheelDiameterInches = 6;
     public static final double kDriveWheelCircumferenceInches = Math.PI * kDriveWheelDiameterInches;
     public static final double kDriveWheelRadiusInches = kDriveWheelDiameterInches / 2.0;
-    public static final double kTrackScrubFactor = 1.0;  // Tune me!
-    public static final double kDriveWheelGearRatio = .633;
-
+    public static final double kTrackScrubFactor = 1.0;  // Tune me!    
+    public static final double kDriveGearRatio = .633;
 
     // Tuned dynamics
     public static final double kRobotLinearInertia = 60.0;  // kg TODO tune
@@ -32,8 +31,11 @@ public class DriveConstants {
     public static final double kCenterToSideBumperDistance = 33.75 / 2.0;
     
     // Gearing and mechanical constants.
-    public static final double kDriveVelocity = 9.5 * 12.0;  // inches per second
-    public static final double kDriveAngularVelocity = Math.PI / 2.0; // rad/sec
+    public static final double kDriveDownShiftVelocity = 9.5 * 12.0;  // inches per second
+    public static final double kDriveDownShiftAngularVelocity = Math.PI / 2.0; // rad/sec
+    public static final double kDriveUpShiftVelocity = 11.0 * 12.0;  // inches per second
 
-    public static final double kDriveEncoderPPR = 4096.0;
+    public static final double kPathKX = 4.0;  // units/s per unit of error
+    public static final double kPathLookaheadTime = 0.4;  // seconds to look ahead along the path for steering
+    public static final double kPathMinLookaheadDistance = 24.0;  // inches
 }   

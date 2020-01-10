@@ -27,4 +27,15 @@ public class GamepadOperatorControlBoard implements IOperatorControlBoard{
     public boolean getMoveConveyor() {
         return mController.getButton(Button.RB);
     }
+
+    @Override
+    public boolean getUpdateControlPanelMode() {
+        return mController.getButton(Button.Y);
+    }
+
+    @Override
+    public boolean getReadyToManipulateControlPanel() {
+        return mController.getButton(Button.X);
+    }
+    
 }

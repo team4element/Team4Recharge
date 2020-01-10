@@ -27,8 +27,11 @@ import com.team4.robot.subsystems.Conveyor;
 import com.team4.robot.subsystems.Drive;
 import com.team4.robot.subsystems.RobotStateEstimator;
 import com.team4.robot.subsystems.Shooter;
+import com.team4.robot.subsystems.Shooter.ShooterState;
 import com.team4.robot.subsystems.VisionTracker;
+import com.team4.robot.subsystems.WheelHandler;
 
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot{
@@ -36,12 +39,15 @@ public class Robot extends TimedRobot{
     private final Looper mDisabledLooper = new Looper();
 
     private final SubsystemManager mSubsystemManager = SubsystemManager.getInstance();
-    private final VisionTracker mVisionTracker = VisionTracker.getInstance();
-
+    
+    //Subsystem Initialization
     private final Drive mDrive = Drive.getInstance();
+    private final VisionTracker mVisionTracker = VisionTracker.getInstance();
     private final Shooter mShooter = Shooter.getInstance();
     private final Conveyor mConveyor = Conveyor.getInstance();
+    private final WheelHandler mWheelHandler = WheelHandler.getInstance();
 
+    //Robot State Initialization
     private final RobotState mRobotState = RobotState.getInstance();
     private final RobotStateEstimator mRobotStateEstimator = RobotStateEstimator.getInstance();
   
@@ -66,13 +72,14 @@ public class Robot extends TimedRobot{
                 mDrive,
                 mVisionTracker,
                 mShooter,
-                mConveyor);
+                mConveyor,
+                mWheelHandler);
               
                 mSubsystemManager.configEnabledLoop(mEnabledLooper);
                 mSubsystemManager.configDisabledLoops(mDisabledLooper);
         
-                mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
-                mDrive.setHeading(Rotation2d.identity());
+                // mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
+                // mDrive.setHeading(Rotation2d.identity());
         
                 mAutoSelector = new AutoModeSelector();
                 mAutoModeExecutor = new AutoModeExecutor();
@@ -99,11 +106,8 @@ public class Robot extends TimedRobot{
       
             mDisabledLooper.start();
       
-          //   mLLManager.setAllLeds(Limelight.LedMode.OFF);
-            // mLLManager.triggerOutputs();
-      
+
             mDrive.setBrakeMode(false);
-            // mLLManager.writePeriodicOutputs();
         } catch (Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -122,6 +126,8 @@ public class Robot extends TimedRobot{
       
             mAutoModeExecutor.start();
       
+            mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
+
             mEnabledLooper.start();
           } catch (Throwable t) {
               CrashTracker.logThrowableCrash(t);
@@ -132,12 +138,16 @@ public class Robot extends TimedRobot{
     @Override
     public void teleopInit() {
       // Reset all auto mode state.
+      
       if (mAutoModeExecutor != null) {
           mAutoModeExecutor.stop();
-      }
-      mAutoModeExecutor = new AutoModeExecutor();
-  
-      mDisabledLooper.stop();
+        }
+        mAutoModeExecutor = new AutoModeExecutor();
+    
+        mDisabledLooper.stop();
+        
+      mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
+
       mEnabledLooper.start();
     }
 
@@ -148,11 +158,8 @@ public class Robot extends TimedRobot{
     @Override
     public void robotPeriodic() {
         try {
-            
             mSubsystemManager.outputToSmartDashboard();
             mRobotState.outputToSmartDashboard();
-            mVisionTracker.readPeriodicInputs();
-            mVisionTracker.writePeriodicOutputs();
         } catch (Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -166,13 +173,15 @@ public class Robot extends TimedRobot{
                 // mLLManager.triggerOutputs();
                 // mLLManager.writePeriodicOutputs();
   
-          // mDrive.zeroSensors();]
+        //   mDrive.zeroSensors();
           mAutoSelector.updateModeCreator();
+        //   Optional<AutoModeBase> autoMode = Optional.of(());
             Optional<AutoModeBase> autoMode = mAutoSelector.getAutoMode();
             if (autoMode.isPresent() && autoMode.get() != mAutoModeExecutor.getAutoMode()) {
                 // System.out.println("Set auto mode to: " + autoMode.get().getClass().toString());
                 mAutoModeExecutor.setAutoMode(autoMode.get());
             }
+            mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
         } catch (Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -185,7 +194,7 @@ public class Robot extends TimedRobot{
 
     @Override
     public void teleopPeriodic() {
-        mShooter.handleDistanceRPM(100);
+        // mShooter.handleDistanceRPM(100);
         manualControl();
     }
 
@@ -213,13 +222,13 @@ public class Robot extends TimedRobot{
 
 
         if(mControlBoard.getShoot()){
-            mShooter.setShooterOpenLoop(.7);
+            mShooter.setControlState(ShooterState.OPEN_LOOP);
         }else{
-            mShooter.setShooterOpenLoop(0);   
+            mShooter.setControlState(ShooterState.IDLE); 
         }
 
         if(mControlBoard.getMoveConveyor()){
-            mConveyor.setOpenLoop(.3);
+            mConveyor.setOpenLoop(.6);
         }else{
             mConveyor.setOpenLoop(0);
         }

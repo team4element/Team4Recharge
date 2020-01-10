@@ -56,7 +56,7 @@ public class AutoModeSelector {
             case DO_NOTHING:
                 return Optional.of(new DoNothingMode());
             case CHARACTERIZE_DRIVE_BASE:
-                return Optional.of(new CharacterizeDrivebaseMode(false, false));
+                return Optional.of(new CharacterizeHighGearStraight());
             default:
                 break;
         }

@@ -3,6 +3,7 @@ package com.team4.lib.drivers;
 import java.util.ArrayList;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.team4.lib.util.Subsystem;
@@ -15,10 +16,11 @@ public class TalonFXChecker extends MotorChecker<TalonFX> {
 
     protected ArrayList<StoredTalonFXConfiguration> mStoredConfigurations = new ArrayList<>();
 
+
     public static boolean checkMotors(Subsystem subsystem,
-                                      ArrayList<MotorConfig<TalonSRX>> motorsToCheck,
-                                      CheckerConfig checkerConfig) {
-        TalonSRXChecker checker = new TalonSRXChecker();
+        ArrayList<MotorConfig<TalonFX>> motorsToCheck,
+        CheckerConfig checkerConfig) {
+        TalonFXChecker checker = new TalonFXChecker();    
         return checker.checkMotorsImpl(subsystem, motorsToCheck, checkerConfig);
     }
 
@@ -47,7 +49,7 @@ public class TalonFXChecker extends MotorChecker<TalonFX> {
 
     @Override
     protected void setMotorOutput(TalonFX motor, double output) {
-        motor.set(ControlMode.PercentOutput, output);
+        motor.set(TalonFXControlMode.PercentOutput, output);
     }
 
     @Override

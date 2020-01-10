@@ -6,7 +6,7 @@ package com.team254.lib.util;
  */
 public class MinTimeBoolean {
     private LatchedBoolean mLatchedBoolean;
-    private final double mMinTime;
+    private double mMinTime;
     private double mRisingEdgeTime;
 
     public MinTimeBoolean(double minTime) {

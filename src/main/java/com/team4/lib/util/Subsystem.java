@@ -22,7 +22,7 @@ public abstract class Subsystem {
     public void writePeriodicOutputs() {}
 
     // Optional way to get velocity on a particular subsystem. Not used on all subsystems.
-    public double getVelocity(){return Double.NaN}
+    public double getVelocity(){return Double.NaN;}
 
     public void addLooper(ILooper mEnabledLooper) {}
 

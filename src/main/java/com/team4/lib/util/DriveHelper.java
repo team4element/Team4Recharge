@@ -18,6 +18,8 @@ public class DriveHelper{
     public DriveHelper(){
     }
 
+
+    //TODO: scale throttle and turn to optimal amount where driver can control
     public DriveSignal elementDrive(double throttle, double wheel, boolean quickTurn) {
         if (Util.epsilonEquals(throttle, 0.0, 0.04)) {
             throttle = 0.0;
@@ -26,6 +28,12 @@ public class DriveHelper{
         if (Util.epsilonEquals(wheel, 0.0, 0.035)) {
             wheel = 0.0;
         }
+
+        final double kThrottleGain = .25;
+        final double kThrottleLinearity = 1.5;
+        throttle = Math.sin(Math.PI / 2.0 * kThrottleLinearity * throttle);
+        throttle *= kThrottleGain;
+
 
         final double kWheelGain = 0.05;
         final double kWheelNonlinearity = 0.05;
@@ -42,7 +50,7 @@ public class DriveHelper{
            
         DriveSignal signal = Kinematics.inverseKinematics(new Twist2d(throttle, 0.0, wheel));
         double scaling_factor = Math.max(1.0, Math.max(Math.abs(signal.getLeft()), Math.abs(signal.getRight())));
-            return new DriveSignal(signal.getLeft() / scaling_factor, signal.getRight() / scaling_factor);
-            
+        
+        return new DriveSignal(signal.getLeft() / scaling_factor, signal.getRight() / scaling_factor);
     }
 }

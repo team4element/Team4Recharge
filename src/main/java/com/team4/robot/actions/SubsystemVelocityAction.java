@@ -35,7 +35,7 @@ public class SubsystemVelocityAction implements Action{
     public void start() {
         if(mSubsystem == Drive.getInstance()){
             if(mSetpoint > Drive.getInstance().getLinearVelocity()){
-                Drive.getInstance().setVelocityIPS(new DriveSignal(mSetpoint, mSetpoint), new DriveSignal(0, 0));
+                Drive.getInstance().setVelocityInchesPerSecond(new DriveSignal(mSetpoint, mSetpoint));
             }
         }else if (mSubsystem == Shooter.getInstance()){
             if(mSetpoint > Shooter.getInstance().getVelocity()){

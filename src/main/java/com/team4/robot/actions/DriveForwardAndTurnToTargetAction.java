@@ -102,7 +102,7 @@ public class DriveForwardAndTurnToTargetAction implements Action {
         // System.out.println("LEFT COMMAND " + leftCommand + "!!!!!!!!");
         // System.out.println("RIGHT COMMAND " + rightCommand + "!!!!!!!!");
 
-       mDrive.setVelocityIPS(new DriveSignal(leftCommand, rightCommand), new DriveSignal(0, 0));
+       mDrive.setVelocityInchesPerSecond(new DriveSignal(leftCommand, rightCommand));
 
         lastTime = Timer.getFPGATimestamp();
 

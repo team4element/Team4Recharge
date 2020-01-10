@@ -3,25 +3,34 @@ package com.team254.lib.physics;
 import com.team254.lib.util.PolynomialRegression;
 import com.team254.lib.util.Util;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class DriveCharacterization {
     public static class CharacterizationConstants {
-        public double ks; // voltage needed to break static friction
-        public double kv; // v / rad/s
-        public double ka; // v / rad/s^2
+        public double ks; //voltage needed to break static friction
+        public double kv;
+        public double ka;
     }
 
-    public static class DataPoint {
+    public static class VelocityDataPoint {
         public final double velocity;
         public final double power;
-        public final double time;
 
-        public DataPoint(double velocity, double power, double time) {
+        public VelocityDataPoint(double velocity, double power) {
             this.velocity = velocity;
             this.power = power;
-            this.time = time;
+        }
+    }
+
+    public static class AccelerationDataPoint {
+        public final double velocity;
+        public final double power;
+        public final double acceleration;
+
+        public AccelerationDataPoint(double velocity, double power, double acceleration) {
+            this.velocity = velocity;
+            this.power = power;
+            this.acceleration = acceleration;
         }
     }
 
@@ -39,9 +48,9 @@ public class DriveCharacterization {
         }
     }
 
-    public static CharacterizationConstants characterizeDrive(List<DataPoint> velocityData, List<DataPoint> accelerationData) {
+    public static CharacterizationConstants characterizeDrive(List<VelocityDataPoint> velocityData, List<AccelerationDataPoint> accelerationData) {
         CharacterizationConstants rv = getVelocityCharacterization(getVelocityData(velocityData));
-        getAccelerationCharacterization(accelerationData, rv);
+        getAccelerationCharacterization(getAccelerationData(accelerationData, rv), rv);
         return rv;
     }
 
@@ -57,53 +66,21 @@ public class DriveCharacterization {
         return constants;
     }
 
-    private static CharacterizationConstants getAccelerationCharacterization(List<DataPoint> input, CharacterizationConstants velocityCharacterization) {
-        if (input.isEmpty()) {
-            return velocityCharacterization;
+    private static CharacterizationConstants getAccelerationCharacterization(double[][] points, CharacterizationConstants velocityChacterization) {
+        if (points == null) {
+            return velocityChacterization;
         }
 
-        DataPoint prev_point = null;
-        DataPoint first_valid_measurement = null;
-        DataPoint last_valid_measurement = null;
-        List<Double> accel_voltages = new ArrayList<Double>();
-        // Include all points between 20% and 80% of theoretical free speed.
-        for (DataPoint point : input) {
-            if (prev_point != null && point.time == prev_point.time) {
-                // Duplicate point.
-                continue;
-            }
-            final double steady_state_vel = (point.power - velocityCharacterization.ks) / velocityCharacterization.kv;
-            if (point.velocity > 0.2 * steady_state_vel && first_valid_measurement == null) {
-                first_valid_measurement = point;
-            }
-            if (first_valid_measurement != null) {
-                accel_voltages.add(point.power - velocityCharacterization.ks - velocityCharacterization.kv * point.velocity);
-            }
-            if (point.velocity > 0.8 * steady_state_vel) {
-                last_valid_measurement = point;
-                break;
-            }
-            prev_point = point;
-        }
-        if (first_valid_measurement == null || last_valid_measurement == null) {
-            return velocityCharacterization;
-        }
-        double avg_accel = (last_valid_measurement.velocity - first_valid_measurement.velocity) / (last_valid_measurement.time - first_valid_measurement.time);
-        System.out.println("Average accel " + avg_accel + " over " + (last_valid_measurement.time - first_valid_measurement.time) + " seconds");
-        double avg_accel_v = 0.0;
-        for (Double v : accel_voltages) {
-            avg_accel_v += v;
-        }
-        avg_accel_v = avg_accel_v / accel_voltages.size();
-        velocityCharacterization.ka = avg_accel_v / avg_accel;
-        System.out.println("ka: " + velocityCharacterization.ka);
-        return velocityCharacterization;
+        PolynomialRegression p = new PolynomialRegression(points, 1);
+        System.out.println("r^2: " + p.R2());
+        velocityChacterization.ka = p.beta(1);
+        return velocityChacterization;
     }
 
     /**
      * removes data points with a velocity of zero to get a better line fit
      */
-    private static double[][] getVelocityData(List<DataPoint> input) {
+    private static double[][] getVelocityData(List<VelocityDataPoint> input) {
         double[][] output = null;
         int startTrim = 0;
         for (int i = 0; i < input.size(); ++i) {
@@ -115,6 +92,15 @@ public class DriveCharacterization {
                 output[i - startTrim][0] = input.get(i).velocity;
                 output[i - startTrim][1] = input.get(i).power;
             }
+        }
+        return output;
+    }
+
+    private static double[][] getAccelerationData(List<AccelerationDataPoint> input, CharacterizationConstants constants) {
+        double[][] output = new double[input.size()][2];
+        for (int i = 0; i < input.size(); ++i) {
+            output[i][0] = input.get(i).acceleration;
+            output[i][1] = input.get(i).power - constants.kv * input.get(i).velocity - constants.ks;
         }
         return output;
     }

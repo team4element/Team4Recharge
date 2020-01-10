@@ -5,4 +5,8 @@ public interface IOperatorControlBoard{
 
     boolean getMoveConveyor();
 
+    boolean getUpdateControlPanelMode();
+
+    boolean getReadyToManipulateControlPanel();
+
 }
