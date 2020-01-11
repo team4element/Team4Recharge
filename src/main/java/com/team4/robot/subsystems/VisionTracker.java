@@ -211,7 +211,7 @@ public class VisionTracker extends Subsystem {
 		}
 	}
 
-	public static class PeriodicIO {
+	protected static class PeriodicIO {
 		//Making members public here will automatically add them to logs
 		//Read values
 		public double targetValid;

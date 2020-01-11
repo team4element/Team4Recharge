@@ -30,8 +30,8 @@ import com.team4.robot.subsystems.Shooter;
 import com.team4.robot.subsystems.Shooter.ShooterState;
 import com.team4.robot.subsystems.VisionTracker;
 import com.team4.robot.subsystems.WheelHandler;
+import com.team4.robot.subsystems.Conveyor.ConveyorState;
 
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot{
@@ -78,8 +78,8 @@ public class Robot extends TimedRobot{
                 mSubsystemManager.configEnabledLoop(mEnabledLooper);
                 mSubsystemManager.configDisabledLoops(mDisabledLooper);
         
-                // mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
-                // mDrive.setHeading(Rotation2d.identity());
+                mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
+                mDrive.setHeading(Rotation2d.identity());
         
                 mAutoSelector = new AutoModeSelector();
                 mAutoModeExecutor = new AutoModeExecutor();
@@ -107,7 +107,7 @@ public class Robot extends TimedRobot{
             mDisabledLooper.start();
       
 
-            mDrive.setBrakeMode(false);
+            // mDrive.setBrakeMode(false);
         } catch (Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -126,7 +126,7 @@ public class Robot extends TimedRobot{
       
             mAutoModeExecutor.start();
       
-            mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
+            // mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
 
             mEnabledLooper.start();
           } catch (Throwable t) {
@@ -146,18 +146,36 @@ public class Robot extends TimedRobot{
     
         mDisabledLooper.stop();
         
-      mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
+    //   mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
 
       mEnabledLooper.start();
     }
 
     @Override
     public void testInit() {
+        try {
+            CrashTracker.logTestInit();
+            System.out.println("Starting check systems.");
+
+            mDisabledLooper.stop();
+            mEnabledLooper.stop();
+
+            if (mSubsystemManager.checkSubsystems()) {
+                System.out.println("ALL SYSTEMS PASSED");
+            } else {
+                System.out.println("CHECK ABOVE OUTPUT SOME SYSTEMS FAILED!!!");
+            }
+        } catch (Throwable t) {
+            CrashTracker.logThrowableCrash(t);
+            throw t;
+        }
     }
 
     @Override
     public void robotPeriodic() {
         try {
+            mWheelHandler.readPeriodicInputs();
+            mWheelHandler.writePeriodicOutputs();
             mSubsystemManager.outputToSmartDashboard();
             mRobotState.outputToSmartDashboard();
         } catch (Throwable t) {
@@ -181,7 +199,7 @@ public class Robot extends TimedRobot{
                 // System.out.println("Set auto mode to: " + autoMode.get().getClass().toString());
                 mAutoModeExecutor.setAutoMode(autoMode.get());
             }
-            mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
+            // mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
         } catch (Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;
@@ -222,15 +240,15 @@ public class Robot extends TimedRobot{
 
 
         if(mControlBoard.getShoot()){
-            mShooter.setControlState(ShooterState.OPEN_LOOP);
+            mShooter.setOpenLoop(.8);
         }else{
-            mShooter.setControlState(ShooterState.IDLE); 
+            mShooter.setOpenLoop(0); 
         }
 
         if(mControlBoard.getMoveConveyor()){
-            mConveyor.setOpenLoop(.6);
+            mConveyor.setControlState(ConveyorState.FORWARD);
         }else{
-            mConveyor.setOpenLoop(0);
+            mConveyor.setControlState(ConveyorState.IDLE);
         }
 
 

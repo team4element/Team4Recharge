@@ -1,9 +1,7 @@
 package com.team4.lib.util;
 
-import java.util.Arrays;
-
 /**
- * General math equations we use 
+ * General math equations we use
  */
 
 public class ElementMath {
@@ -64,6 +62,10 @@ public class ElementMath {
 
 	public static double tickPer100msToRPM(double ticks, double ppr){
 		return ticksToRotations(ticks, ppr) * 600;
+	}
+
+	public static double tickPer100msToScaledRPM(double ticks, double ppr, double gearRatio){
+		return scaleRPM(ticksToRotations(ticks, ppr), gearRatio) * 600;
 	}
 
 	public static double rpmToTicksPer100ms(double rpm, double ppr){

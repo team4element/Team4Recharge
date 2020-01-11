@@ -161,9 +161,10 @@ public class CANSpeedControllerFactory {
         return createTalonFX(id, kDefaultConfiguration);
      }
 
-     public static TalonFX createPermanentSlaveTalonFX(int id, int master_id) {
+     public static TalonFX createPermanentSlaveTalonFX(int id, TalonFX master) {
         final TalonFX talon = createTalonFX(id, kSlaveConfiguration);
-        talon.set(TalonFXControlMode.Follower, master_id);
+        talon.follow(master);
+        // talon.set(TalonFXControlMode.Follower, master_id);
         return talon;
     }
 

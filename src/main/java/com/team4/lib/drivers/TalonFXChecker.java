@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.team4.lib.util.Subsystem;
 
 public class TalonFXChecker extends MotorChecker<TalonFX> {

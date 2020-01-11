@@ -37,6 +37,10 @@ public class CrashTracker {
         logMarker("disabled init");
     }
 
+    public static void logTestInit() {
+        logMarker("test init");
+    }
+
     public static void logThrowableCrash(Throwable throwable) {
         logMarker("Exception", throwable);
     }

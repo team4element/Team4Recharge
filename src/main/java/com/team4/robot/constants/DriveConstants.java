@@ -9,12 +9,12 @@ public class DriveConstants {
     public static final int kRightDriveSlaveBId = 5;
 
     // Wheels
-    public static final double kDriveWheelTrackWidthInches = 25.54;
+    public static final double kDriveWheelTrackWidthInches = 32;
     public static final double kDriveWheelDiameterInches = 6;
     public static final double kDriveWheelCircumferenceInches = Math.PI * kDriveWheelDiameterInches;
     public static final double kDriveWheelRadiusInches = kDriveWheelDiameterInches / 2.0;
     public static final double kTrackScrubFactor = 1.0;  // Tune me!    
-    public static final double kDriveGearRatio = .633;
+    public static final double kDriveGearRatio = .633; //On actual bot 12d / 48d, 7.71/1  1/7.71, .129701
 
     // Tuned dynamics
     public static final double kRobotLinearInertia = 60.0;  // kg TODO tune

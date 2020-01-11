@@ -24,9 +24,9 @@ public abstract class Subsystem {
     // Optional way to get velocity on a particular subsystem. Not used on all subsystems.
     public double getVelocity(){return Double.NaN;}
 
-    public void addLooper(ILooper mEnabledLooper) {}
-
     public void zeroSensors() {}
+    
+    public abstract void addLooper(ILooper mEnabledLooper);
 
     public abstract void stop();
 

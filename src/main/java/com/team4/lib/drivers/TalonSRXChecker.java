@@ -50,6 +50,6 @@ public class TalonSRXChecker extends MotorChecker<TalonSRX> {
 
     @Override
     protected double getMotorCurrent(TalonSRX motor) {
-        return motor.getOutputCurrent();
+        return motor.getStatorCurrent();
     }
 }

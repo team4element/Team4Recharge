@@ -25,7 +25,14 @@ public class TalonUtil {
         }
     }
 
-    public static void configureMasterTalonFX(TalonFX talon) {
+    /**
+     * Configure talon fx, used for subsystems that use talon FX
+     * 
+     * @param talon Talon FX to be configured
+     * @param master is the master talon
+     */
+
+    public static void configureTalonFX(TalonFX talon, boolean master) {
         talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5, 100);
         final ErrorCode sensorPresent = talon.configSelectedFeedbackSensor(TalonFXFeedbackDevice.
                 IntegratedSensor, 0, 100); //primary closed-loop, 100 ms timeout
@@ -33,23 +40,37 @@ public class TalonUtil {
             DriverStation.reportError("Could not detect " + ("Motor") + " encoder: " + sensorPresent, false);
         }
         talon.setSensorPhase(true);
-        talon.setInverted(true);
-        // talon.enableVoltageCompensation(true);
-        // talon.configVoltageCompSaturation(12.0, IOConstants.kLongCANTimeoutMs);
-        talon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_50Ms, Constants.kLongCANTimeoutMs);
-        talon.configVelocityMeasurementWindow(1, Constants.kLongCANTimeoutMs);
-        //Most likely same for all subsystems, so sticking to drive temporarily. 
-        talon.configClosedloopRamp(AutoConstants.kDriveVoltageRampRate, Constants.kLongCANTimeoutMs);
+        talon.setInverted(false);
+        if(master){
+            // talon.enableVoltageCompensation(true);
+            // talon.configVoltageCompSaturation(12.0, IOConstants.kLongCANTimeoutMs);
+            talon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_50Ms, Constants.kLongCANTimeoutMs);
+            talon.configVelocityMeasurementWindow(1, Constants.kLongCANTimeoutMs);
+            //Most likely same for all subsystems, so sticking to drive temporarily
+            talon.configClosedloopRamp(AutoConstants.kDriveVoltageRampRate, Constants.kLongCANTimeoutMs);
+        }
         talon.configNeutralDeadband(0.04, 0);
+            
     }
 
-    public static void configureMasterTalonSRX(TalonSRX talon, boolean left) {
-        talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5, 100);
+        /**
+     * Configure talon fx, used for subsystems that use talon FX
+     * 
+     * @param talon Talon FX to be configured
+     * @param master is the master talon
+     */
+
+    public static void configureTalonFX(TalonFX talon, boolean left, boolean master) {
         talon.setInverted(!left);
+        configureTalonFX(talon, master);
+    }
+
+    public static void configureTalonSRX(TalonSRX talon) {
+        talon.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0, 5, 100);
         final ErrorCode sensorPresent = talon.configSelectedFeedbackSensor(FeedbackDevice.
                 CTRE_MagEncoder_Relative, 0, 100); //primary closed-loop, 100 ms timeout
         if (sensorPresent != ErrorCode.OK) {
-            DriverStation.reportError("Could not detect " + (left ? "left" : "right") + " encoder: " + sensorPresent, false);
+            DriverStation.reportError("Could not detect " + " encoder: " + sensorPresent, false);
         }
         talon.setSensorPhase(true);
         // talon.enableVoltageCompensation(true);
@@ -58,5 +79,10 @@ public class TalonUtil {
         talon.configVelocityMeasurementWindow(1, Constants.kLongCANTimeoutMs);
         talon.configClosedloopRamp(AutoConstants.kDriveVoltageRampRate, Constants.kLongCANTimeoutMs);
         talon.configNeutralDeadband(0.04, 0);
+    }
+
+    public static void configureTalonSRX(TalonSRX talon, boolean left) {
+        talon.setInverted(!left);
+        configureTalonSRX(talon);
     }
 }

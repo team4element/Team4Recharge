@@ -12,17 +12,13 @@ public class CheesyDriveHelper {
     private static final double kWheelDeadband = 0.02;
 
     // These factor determine how fast the wheel traverses the "non linear" sine curve.
-    private static final double kHighWheelNonLinearity = 0.65;
     private static final double kLowWheelNonLinearity = 0.5;
-
-    private static final double kHighNegInertiaScalar = 4.0;
 
     private static final double kLowNegInertiaThreshold = 0.65;
     private static final double kLowNegInertiaTurnScalar = 3.5;
     private static final double kLowNegInertiaCloseScalar = 4.0;
     private static final double kLowNegInertiaFarScalar = 5.0;
 
-    private static final double kHighSensitivity = 0.65;
     private static final double kLowSensitiity = 0.65;
 
     private static final double kQuickStopDeadband = 0.5;
@@ -50,24 +46,21 @@ public class CheesyDriveHelper {
             wheel = Math.sin(Math.PI / 2.0 * wheelNonLinearity * wheel) / denominator;
 
         double leftPwm, rightPwm, overPower;
-        double sensitivity;
-
         double angularPower;
         double linearPower;
 
         // Negative inertia!
         double negInertiaScalar;
-            if (wheel * negInertia > 0) {
-                // If we are moving away from 0.0, aka, trying to get more wheel.
-                negInertiaScalar = kLowNegInertiaTurnScalar;
+        if (wheel * negInertia > 0) {
+            // If we are moving away from 0.0, aka, trying to get more wheel.
+            negInertiaScalar = kLowNegInertiaTurnScalar;
+        } else {
+            // Otherwise, we are attempting to go back to 0.0.
+            if (Math.abs(wheel) > kLowNegInertiaThreshold) {
+                negInertiaScalar = kLowNegInertiaFarScalar;
             } else {
-                // Otherwise, we are attempting to go back to 0.0.
-                if (Math.abs(wheel) > kLowNegInertiaThreshold) {
-                    negInertiaScalar = kLowNegInertiaFarScalar;
-                } else {
-                    negInertiaScalar = kLowNegInertiaCloseScalar;
-                }
-                sensitivity = kLowSensitiity;
+                negInertiaScalar = kLowNegInertiaCloseScalar;
+            }
             }
         double negInertiaPower = negInertia * negInertiaScalar;
         mNegInertiaAccumlator += negInertiaPower;

@@ -270,7 +270,7 @@ public class WheelHandler extends Subsystem{
         POSITION   
     }
 
-    public static class PeriodicIO{
+    protected static class PeriodicIO{
         public Color detected_color;
         public ColorMatchResult matched_color;
         public double ir;

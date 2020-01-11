@@ -11,6 +11,8 @@ import com.team4.robot.constants.ConveyorConstants;
 public class Conveyor extends Subsystem{
     private static Conveyor mInstance = null;
 
+    private ConveyorState mCurrentState = ConveyorState.IDLE;
+
     private VictorSPX mMotor;
 
     private PeriodicIO mPeriodicIO;
@@ -24,7 +26,19 @@ public class Conveyor extends Subsystem{
     
         @Override
         public void onLoop(double timestamp) {
-            
+            switch(mCurrentState){
+                case FORWARD:
+                    setOpenLoop(.6);
+                    break;
+                case REVERSE:
+                    setOpenLoop(-.6);
+                    break;
+                case IDLE:
+                    setOpenLoop(0);
+                    break;
+                default:
+                    break;
+            }
         }
 
         
@@ -57,6 +71,7 @@ public class Conveyor extends Subsystem{
 
     @Override
     public boolean checkSystem() {
+        //no talons currently to test
         return false;
     }
 
@@ -70,8 +85,12 @@ public class Conveyor extends Subsystem{
         mEnabledLooper.addLoop(mLoop);
     }
     
-    public void setOpenLoop(double pow){
+    private void setOpenLoop(double pow){
         mPeriodicIO.demand = pow;
+    }
+
+    public void setControlState(ConveyorState state){
+        mCurrentState = state;
     }
 
     @Override
@@ -79,7 +98,13 @@ public class Conveyor extends Subsystem{
         mPeriodicIO.demand = 0;
     }
 
-    private static class PeriodicIO{
+    public enum ConveyorState{
+        IDLE,
+        FORWARD,
+        REVERSE
+    }
+
+    protected static class PeriodicIO{
         public double demand;
     }
 }

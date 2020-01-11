@@ -2,9 +2,8 @@ package com.team4.robot.subsystems;
 
 import java.util.ArrayList;
 
-import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.DemandType;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.team254.lib.util.Units;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
@@ -15,7 +14,6 @@ import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.ElementMath;
 import com.team4.lib.util.Subsystem;
-import com.team4.robot.constants.AutoConstants;
 import com.team4.robot.constants.ShooterConstants;
 
 import edu.wpi.first.wpilibj.Timer;
@@ -31,7 +29,7 @@ public class Shooter extends Subsystem{
 
     private boolean mIsBrakeMode = false;
 
-    private ShooterState mControlState;
+    private ShooterState mControlState = ShooterState.IDLE;
 
     private final Loop mLoop = new Loop(){
         public void onStart(double timestamp){
@@ -40,13 +38,13 @@ public class Shooter extends Subsystem{
         public void onLoop(double timestamp){
             switch (mControlState){
                 case OPEN_LOOP:
-                    setOpenLoop(1);
+                    // setOpenLoop(1);
                     break;
                 case VELOCITY:
-                    handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
+                    // handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
                     break;
                 case IDLE:
-                    setOpenLoop(0);
+                    // setOpenLoop(0);
                 default:
                     break;
             }
@@ -69,17 +67,18 @@ public class Shooter extends Subsystem{
 
     private Shooter(){
         mMasterMotor = CANSpeedControllerFactory.createDefaultTalonFX(ShooterConstants.kMasterMotorId);
-        TalonUtil.configureMasterTalonFX(mMasterMotor);
+        TalonUtil.configureTalonFX(mMasterMotor, true);
 
-        mSlaveMotor = CANSpeedControllerFactory.createPermanentSlaveTalonFX(ShooterConstants.kSlaveMotorId, ShooterConstants.kMasterMotorId);
+        mSlaveMotor = CANSpeedControllerFactory.createPermanentSlaveTalonFX(ShooterConstants.kSlaveMotorId, mMasterMotor);
+        TalonUtil.configureTalonFX(mSlaveMotor, false);
 
-        mSlaveMotor.setInverted(true);
+        // mSlaveMotor.setInverted(false);
 
-        setBrakeMode(true);
+        setBrakeMode(false);
 
         mPeriodicIO = new PeriodicIO();
 
-        mControlState = ShooterState.OPEN_LOOP;
+        mControlState = ShooterState.IDLE;
 
     }
 
@@ -99,22 +98,25 @@ public class Shooter extends Subsystem{
     @Override
     public void readPeriodicInputs() {
         mPeriodicIO.timestamp = Timer.getFPGATimestamp();
-        double prevLeftTicks = mPeriodicIO.position_ticks;
         mPeriodicIO.position_ticks = mMasterMotor.getSelectedSensorPosition(0);
        
-        mPeriodicIO.velocity = ElementMath.tickPer100msToRPM(mMasterMotor.getSelectedSensorVelocity(0), ShooterConstants.kShooterEnconderPPR);
+        mPeriodicIO.velocity = ElementMath.tickPer100msToScaledRPM(mMasterMotor.getSelectedSensorVelocity(0), ShooterConstants.kShooterEnconderPPR, ShooterConstants.kShooterGearRatio);
 
     }
 
     @Override
     public void writePeriodicOutputs() {
         if(mControlState == ShooterState.OPEN_LOOP){
-            mMasterMotor.set(ControlMode.PercentOutput, mPeriodicIO.demand);
+            mMasterMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
+            mSlaveMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
         }else if (mControlState == ShooterState.VELOCITY){
-            mMasterMotor.set(ControlMode.Velocity, mPeriodicIO.demand, DemandType.ArbitraryFeedForward,
-            mPeriodicIO.feedforward + AutoConstants.kShooterKd * mPeriodicIO.accel / (ShooterConstants.kShooterEnconderPPR/4.0));
+            mMasterMotor.set(TalonFXControlMode.Velocity, mPeriodicIO.demand);
+            //TODO: test with ArbitraryFeedForward
+            // mMasterMotor.set(TalonFXControlMode.Velocity, mPeriodicIO.demand, DemandType.ArbitraryFeedForward,
+            // mPeriodicIO.feedforward + AutoConstants.kShooterKd * mPeriodicIO.accel / (ShooterConstants.kShooterEnconderPPR/4.0));
         }else{ //force default Open Loop
-            mMasterMotor.set(ControlMode.PercentOutput, mPeriodicIO.demand);
+            mMasterMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
+            mSlaveMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
         }
 
     }
@@ -181,7 +183,7 @@ public class Shooter extends Subsystem{
     }
 
     public void setOpenLoop(double pow){
-        if(mControlState != ShooterState.OPEN_LOOP){
+        if(mControlState != ShooterState.OPEN_LOOP || mControlState != ShooterState.IDLE){
             mControlState = ShooterState.OPEN_LOOP;
         }
         mPeriodicIO.demand = pow;
@@ -196,6 +198,17 @@ public class Shooter extends Subsystem{
 
         mPeriodicIO.demand = ElementMath.rpmToTicksPer100ms(demand, ShooterConstants.kShooterEnconderPPR);
         mPeriodicIO.feedforward = ff;
+    }
+
+    @Override
+    public void zeroSensors() {
+        resetEncoders();
+    }
+
+    public synchronized void resetEncoders() {
+        mMasterMotor.setSelectedSensorPosition(0, 0, 0);
+        mSlaveMotor.setSelectedSensorPosition(0, 0, 0);
+        mPeriodicIO = new PeriodicIO();
     }
 
     @Override
@@ -224,6 +237,7 @@ public class Shooter extends Subsystem{
     public void outputTelemetry() {
         // Nothing to output
         SmartDashboard.putString("Current Shooter Mode", mControlState.toString());
+        SmartDashboard.putNumber("Shooter Velocity in RPM", mPeriodicIO.velocity);
     }
 
     @Override
@@ -238,7 +252,7 @@ public class Shooter extends Subsystem{
     
     @Override
     public void stop() {
-        mMasterMotor.set(ControlMode.PercentOutput, 0);    
+        mMasterMotor.set(TalonFXControlMode.PercentOutput, 0);    
     }
 
     private void configureVelocityTalon(){
@@ -258,7 +272,7 @@ public class Shooter extends Subsystem{
         IDLE
     }
 
-    private static class PeriodicIO{
+    protected static class PeriodicIO{
         public double timestamp;
         public double demand;
         public double feedforward;

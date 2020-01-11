@@ -63,9 +63,6 @@ public class Drive extends Subsystem {
 
     private int mInitLeftPosition;
     private int mInitRightPosition;
-    private int mInitLeftPositionCorrection;
-    private int mInitRightPositionCorrection;
-    private int mInitTicksNeeded;  
 
     private final Loop mLoop = new Loop() {
         @Override
@@ -120,7 +117,7 @@ public class Drive extends Subsystem {
 
         // Start all Talons in open loop mode.
         mLeftMaster = CANSpeedControllerFactory.createDefaultTalonSRX(DriveConstants.kLeftDriveMasterId);
-        TalonUtil.configureMasterTalonSRX(mLeftMaster, true);
+        TalonUtil.configureTalonSRX(mLeftMaster, true);
 
         mLeftSlaveA = CANSpeedControllerFactory.createPermanentSlaveVictor(DriveConstants.kLeftDriveSlaveAId, mLeftMaster);
         mLeftSlaveA.setInverted(false);
@@ -129,7 +126,7 @@ public class Drive extends Subsystem {
         mLeftSlaveB.setInverted(false);
 
         mRightMaster = CANSpeedControllerFactory.createDefaultTalonSRX(DriveConstants.kRightDriveMasterId);
-        TalonUtil.configureMasterTalonSRX(mRightMaster, false);
+        TalonUtil.configureTalonSRX(mRightMaster, false);
 
         mRightSlaveA = CANSpeedControllerFactory.createPermanentSlaveVictor(DriveConstants.kRightDriveSlaveAId, mRightMaster);
         mRightSlaveA.setInverted(true);
@@ -159,16 +156,8 @@ public class Drive extends Subsystem {
         return rotations * (DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio);
     }
 
-    private static double rpmToInchesPerSecond(double rpm) {
-        return rotationsToInches(rpm) / 60;
-    }
-
     private static double inchesToRotations(double inches) {
         return inches / (DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio);
-    }
-
-    private static double inchesPerSecondToRpm(double inches_per_second) {
-        return inchesToRotations(inches_per_second) * 60;
     }
 
     private static double radiansPerSecondToTicksPer100ms(double rad_s) {
@@ -384,12 +373,9 @@ public synchronized void setPosition(DriveSignal signal) {
              final Rotation2d robot_to_target = field_to_robot.inverse().rotateBy(mTargetHeading);
  
              DriveSignal wheel_delta = Kinematics.inverseKinematics(new Twist2d(0, 0, robot_to_target.getRadians()));
- 
-             mInitTicksNeeded = (int)(inchesToRotations(wheel_delta.getRight()) *DRIVE_ENCODER_PPR) ;
- 
-             mInitLeftPositionCorrection = (int)(mInitLeftPosition - mInitTicksNeeded);
-             mInitRightPositionCorrection =  (int)(mInitRightPosition + mInitTicksNeeded);
-         }
+            setPositionMagic(wheel_delta);    
+        }
+         
      }
 
     public boolean isDoneWithTrajectory() {
@@ -840,7 +826,7 @@ public synchronized void setPosition(DriveSignal signal) {
         AUTO_SHIFT
     }
 
-    public static class PeriodicIO {
+    protected static class PeriodicIO {
         // INPUTS
         public int left_position_ticks;
         public int right_position_ticks;
