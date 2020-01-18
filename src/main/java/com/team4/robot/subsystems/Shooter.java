@@ -2,9 +2,7 @@ package com.team4.robot.subsystems;
 
 import java.util.ArrayList;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.can.BaseTalon;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.drivers.MotorChecker;
@@ -28,8 +26,6 @@ public class Shooter extends Subsystem{
     // private VictorSPX mSlaveMotor;
 
     private TalonFX mMasterMotor, mSlaveMotor;
-
-    private boolean mIsBrakeMode = false;
 
     private ShooterControlState mControlState = ShooterControlState.IDLE;
 

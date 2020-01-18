@@ -314,7 +314,6 @@ public synchronized void setPosition(DriveSignal signal) {
         if (mIsBrakeMode != on) {
             mIsBrakeMode = on;
             NeutralMode mode = on ? NeutralMode.Brake : NeutralMode.Coast;
-            mRightMaster.setNeutralMode(mode);
             mRightSlaveA.setNeutralMode(mode);
             mRightSlaveB.setNeutralMode(mode);
 
