@@ -7,11 +7,12 @@ import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
 import com.team4.robot.constants.ConveyorConstants;
+import com.team4.robot.subsystems.states.ConveyorControlState;
 
 public class Conveyor extends Subsystem{
     private static Conveyor mInstance = null;
 
-    private ConveyorState mCurrentState = ConveyorState.IDLE;
+    private ConveyorControlState mCurrentState = ConveyorControlState.IDLE;
 
     private VictorSPX mMotor;
 
@@ -89,19 +90,13 @@ public class Conveyor extends Subsystem{
         mPeriodicIO.demand = pow;
     }
 
-    public void setControlState(ConveyorState state){
+    public void setControlState(ConveyorControlState state){
         mCurrentState = state;
     }
 
     @Override
     public void stop() {
         mPeriodicIO.demand = 0;
-    }
-
-    public enum ConveyorState{
-        IDLE,
-        FORWARD,
-        REVERSE
     }
 
     protected static class PeriodicIO{

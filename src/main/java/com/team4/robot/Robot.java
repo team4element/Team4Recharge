@@ -27,10 +27,10 @@ import com.team4.robot.subsystems.Conveyor;
 import com.team4.robot.subsystems.Drive;
 import com.team4.robot.subsystems.RobotStateEstimator;
 import com.team4.robot.subsystems.Shooter;
-import com.team4.robot.subsystems.Shooter.ShooterState;
 import com.team4.robot.subsystems.VisionTracker;
 import com.team4.robot.subsystems.WheelHandler;
-import com.team4.robot.subsystems.Conveyor.ConveyorState;
+import com.team4.robot.subsystems.states.ConveyorControlState;
+import com.team4.robot.subsystems.states.ShooterControlState;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -230,25 +230,28 @@ public class Robot extends TimedRobot{
         if (mVisionTracker.isVisionEnabled() && mVisionTracker.isTargetFound()) {
     
             turn = Math.max(Math.min(VisionTracker.getInstance().getTargetHorizAngleDev() * 0.005, 0.1), -0.1);
-            mDrive.setOpenLoop(mCheesyDriveHelper.cheesyDrive(throttle, turn, true));
+            // mDrive.setOpenLoop(mCheesyDriveHelper.cheesyDrive(throttle, turn, true));
+            mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
             // mDrive.autoSteer(Util.limit(throttle, 0.3), drive_aim_params.get());
         }else{
             turn = ElementMath.handleDeadband(-mControlBoard.getTurn(), Constants.kJoystickThreshold);
-            mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, false));
+            mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
             
         }
 
 
         if(mControlBoard.getShoot()){
-            mShooter.setOpenLoop(.8);
+            mShooter.setControlState(ShooterControlState.VELOCITY);
+            // Use if above method doesn't work mShooter.setOpenLoop(.8);
         }else{
-            mShooter.setOpenLoop(0); 
+            mShooter.setControlState(ShooterControlState.IDLE); 
+            
         }
 
         if(mControlBoard.getMoveConveyor()){
-            mConveyor.setControlState(ConveyorState.FORWARD);
+            mConveyor.setControlState(ConveyorControlState.FORWARD);
         }else{
-            mConveyor.setControlState(ConveyorState.IDLE);
+            mConveyor.setControlState(ConveyorControlState.IDLE);
         }
 
 

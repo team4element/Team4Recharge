@@ -7,6 +7,8 @@ public class DriveConstants {
     public static final int kRightDriveMasterId = 4;
     public static final int kRightDriveSlaveAId = 3;
     public static final int kRightDriveSlaveBId = 5;
+    
+    public static final double kDriveEncoderPPR = 4096.0;
 
     // Wheels
     public static final double kDriveWheelTrackWidthInches = 32;

@@ -52,6 +52,10 @@ public class ElementMath {
 
 	}
 
+	public static double radiansPerSecondToTicksPer100ms(double rad_s, double encoderPPR) {
+        return rad_s / (Math.PI * 2.0) * encoderPPR / 10.0;
+    }
+
 	public static double rotationsToTicks(double rotations, double ppr){
 		return rotations * ppr;
 	}
@@ -65,11 +69,11 @@ public class ElementMath {
 	}
 
 	public static double tickPer100msToScaledRPM(double ticks, double ppr, double gearRatio){
-		return scaleRPM(ticksToRotations(ticks, ppr), gearRatio) * 600;
+		return scaleRPM(ticksToRotations(ticks * 600, ppr), gearRatio);
 	}
 
 	public static double rpmToTicksPer100ms(double rpm, double ppr){
-		return rotationsToTicks(rpm, ppr) / 600;
+		return rotationsToTicks(rpm / 600, ppr);
 	}
 
 	public static double scaleRPM(double initRPM, double gearRatio){
