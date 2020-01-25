@@ -22,7 +22,7 @@ public class TurnToHeadingAction implements Action {
 
     public TurnToHeadingAction(Rotation2d heading) {
         mTargetHeading = heading;
-        mDuration = 10.0;
+        mDuration = 2.0;
     }
 
     public TurnToHeadingAction(Rotation2d heading, double duration) {

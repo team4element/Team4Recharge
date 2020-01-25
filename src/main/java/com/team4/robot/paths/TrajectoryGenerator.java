@@ -13,6 +13,12 @@ import com.team254.lib.trajectory.TrajectoryUtil;
 import com.team254.lib.trajectory.timing.CentripetalAccelerationConstraint;
 import com.team254.lib.trajectory.timing.TimedState;
 import com.team254.lib.trajectory.timing.TimingConstraint;
+import com.team4.robot.paths.waypoints.LeftStartToRendPoints;
+import com.team4.robot.paths.waypoints.LeftStartToTrenchPoints;
+import com.team4.robot.paths.waypoints.MidStartToRendPoints;
+import com.team4.robot.paths.waypoints.MidStartToTrenchPoints;
+import com.team4.robot.paths.waypoints.RightStartToRendPoints;
+import com.team4.robot.paths.waypoints.RightStartToTrenchPoints;
 import com.team4.robot.planners.DriveMotionPlanner;
 
 public class TrajectoryGenerator {
@@ -77,8 +83,8 @@ public class TrajectoryGenerator {
     // +y is to the left.
     // ALL POSES DEFINED FOR THE CASE THAT ROBOT STARTS ON RIGHT! (mirrored about +x axis for LEFT)
 
-    public static final Pose2d kLevelOneStartPose = new Pose2d(new Translation2d(66.0, -50.0), Rotation2d.fromDegrees(180.0));
-    public static final Pose2d kOffHabPlatform = new Pose2d(new Translation2d(100.0, -50.0), Rotation2d.fromDegrees(180.0));
+    public static final Pose2d kLevelOneStartPose = new Pose2d(new Translation2d(40.0, -50.0), Rotation2d.fromDegrees(180.0));
+    public static final Pose2d kOffHabPlatform = new Pose2d(new Translation2d(80.0, -50.0), Rotation2d.fromDegrees(180.0));
 
     public static final Pose2d kLeavepoint1 = new Pose2d(new Translation2d(205.0, -10.0), Rotation2d.fromDegrees(0.0));
     public static final Pose2d kLeavePoint2 = new Pose2d(new Translation2d(165.0, -10.0), Rotation2d.fromDegrees(0.0));
@@ -110,25 +116,47 @@ public class TrajectoryGenerator {
             public final Trajectory<TimedState<Pose2dWithCurvature>> right;
         }
 
+        //All trajectories used when testing the bot
         public final MirroredTrajectory sideStartToNearScale;
         public final MirroredTrajectory returnToStart;
         public final MirroredTrajectory compPath;
         public final MirroredTrajectory retPath;
 
+        //All comp trajectories
+        public final MirroredTrajectory midStartToRendAndShoot;
+        public final MirroredTrajectory midStartToTrenchAndShoot;
+        public final MirroredTrajectory rightStartToRendAndShoot;
+        public final MirroredTrajectory rightStartToTrenchAndIntake;
+        public final MirroredTrajectory rightTrenchToTrenchAndShoot;
+        public final MirroredTrajectory leftStartToRendAndShoot;
+        public final MirroredTrajectory leftStartToTrenchAndIntake;
+        public final MirroredTrajectory leftTrenchToTrenchAndShoot;
 
+        //TODO: Rend paths need repair for comp bot, could mean having to make more paths
         private TrajectorySet() {
+            //creates all test trajectories
             sideStartToNearScale = new MirroredTrajectory(getSideStartToNearScale());
             returnToStart = new MirroredTrajectory(getReturnToStart());
             compPath = new MirroredTrajectory(getComplexTrajcetory());
             retPath = new MirroredTrajectory(getComplexReturnPath());
+
+            //create all comp trajectories
+            midStartToRendAndShoot = new MirroredTrajectory(getRendPath());
+            midStartToTrenchAndShoot = new MirroredTrajectory(getMidTrenchPath());
+            rightStartToRendAndShoot = new MirroredTrajectory(getRightRendPath());
+            rightStartToTrenchAndIntake = new MirroredTrajectory(getRightTrenchPath1());
+            rightTrenchToTrenchAndShoot = new MirroredTrajectory(getRightTrenchPath2());
+            leftStartToRendAndShoot = new MirroredTrajectory(getLeftRendPath());
+            leftStartToTrenchAndIntake = new MirroredTrajectory(getLeftTrenchPath1());
+            leftTrenchToTrenchAndShoot = new MirroredTrajectory(getLeftTrenchPath2());
         }
 
         private Trajectory<TimedState<Pose2dWithCurvature>> getSideStartToNearScale() {
             List<Pose2d> waypoints = new ArrayList<>();
             waypoints.add(kLevelOneStartPose);
             waypoints.add(kOffHabPlatform);
+            waypoints.add(new Pose2d(new Translation2d(105.0, -10.0), Rotation2d.fromDegrees(180.0)));
             waypoints.add(new Pose2d(new Translation2d(165.0, -10.0), Rotation2d.fromDegrees(180.0)));
-            waypoints.add(new Pose2d(new Translation2d(205.0, -10.0), Rotation2d.fromDegrees(180.0)));
 
             return generateTrajectory(true, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)), 0, 20.0,
             kMaxVelocity, kMaxAccel, kMaxVoltage);
@@ -165,5 +193,90 @@ public class TrajectoryGenerator {
             kMaxVelocity, kMaxAccel, kMaxVoltage);
         }
 
+        private Trajectory<TimedState<Pose2dWithCurvature>> getRendPath(){
+            List<Pose2d> waypoints = new ArrayList<>();
+            // waypoints.add(MidStartToRendPoints.startPose);
+            waypoints.add(MidStartToRendPoints.allignIntakePose);
+            waypoints.add(MidStartToRendPoints.beginIntakePose);
+            waypoints.add(MidStartToRendPoints.finishIntakePose);
+            // waypoints.add(MidStartToRendPoints.allignShootPose);
+            waypoints.add(MidStartToRendPoints.finalPose);
+            return generateTrajectory(true, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)),
+            kMaxVelocity, kMaxAccel, kMaxVoltage);
+        }
+        private Trajectory<TimedState<Pose2dWithCurvature>> getMidTrenchPath(){
+            List<Pose2d> waypoints = new ArrayList<>();
+            // waypoints.add(MidStartToTrenchPoints.startPose);
+            waypoints.add(MidStartToTrenchPoints.allignIntakePose);
+            waypoints.add(MidStartToTrenchPoints.startIntakePose);
+            
+            //Theoretically would shoot from this
+            waypoints.add(MidStartToTrenchPoints.finishIntakePose);
+            
+            // waypoints.add(MidStartToTrenchPoints.allignShootPose);
+            // waypoints.add(MidStartToTrenchPoints.finalPose);
+
+            return generateTrajectory(true, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)), 
+            kMaxVelocity, kMaxAccel, kMaxVoltage);
+        }
+
+        private Trajectory<TimedState<Pose2dWithCurvature>> getRightRendPath(){
+            List<Pose2d> waypoints = new ArrayList<>();
+            waypoints.add(RightStartToRendPoints.startPose);
+            waypoints.add(RightStartToRendPoints.startIntake1stPose);
+            waypoints.add(RightStartToRendPoints.startIntake2ndPose);
+            waypoints.add(RightStartToRendPoints.finishIntakePose);
+            waypoints.add(RightStartToRendPoints.finalPose);
+
+            return generateTrajectory(true, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)),
+             kMaxVelocity, kMaxAccel, kMaxVoltage);
+        }
+
+        private Trajectory<TimedState<Pose2dWithCurvature>> getRightTrenchPath1(){
+            List<Pose2d> waypoints = new ArrayList<>();
+            waypoints.add(RightStartToTrenchPoints.startPose1);
+            waypoints.add(RightStartToTrenchPoints.finishIntakePhase1);
+            waypoints.add(RightStartToTrenchPoints.finishPose1);
+            return generateTrajectory(true, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)),
+            kMaxVelocity, kMaxAccel, kMaxVoltage);
+        }
+
+        private Trajectory<TimedState<Pose2dWithCurvature>> getRightTrenchPath2(){
+            List<Pose2d> waypoints = new ArrayList<>();
+            waypoints.add(RightStartToTrenchPoints.startPose2);
+            waypoints.add(RightStartToTrenchPoints.allignShootPose);
+            waypoints.add(RightStartToTrenchPoints.finishPose2);
+            return generateTrajectory(false, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)),
+            kMaxVelocity, kMaxAccel, kMaxVoltage);
+        }
+
+        private Trajectory<TimedState<Pose2dWithCurvature>> getLeftRendPath(){
+            List<Pose2d> waypoints = new ArrayList<>();
+            waypoints.add(LeftStartToRendPoints.startPose);
+            waypoints.add(LeftStartToRendPoints.beginIntakePose);
+            waypoints.add(LeftStartToRendPoints.finishIntakePose);
+            waypoints.add(LeftStartToRendPoints.finalPose);
+            return generateTrajectory(true, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)),
+            kMaxVelocity, kMaxAccel, kMaxVoltage);
+        }
+
+        private Trajectory<TimedState<Pose2dWithCurvature>> getLeftTrenchPath1(){
+            List<Pose2d> waypoints = new ArrayList<>();
+            waypoints.add(LeftStartToTrenchPoints.startPose1);
+            waypoints.add(LeftStartToTrenchPoints.beginIntakePose);
+            waypoints.add(LeftStartToTrenchPoints.finishIntakePose);
+            waypoints.add(LeftStartToTrenchPoints.finalPose1);
+            return generateTrajectory(true, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)),
+            kMaxVelocity,kMaxAccel, kMaxVoltage);
+        }
+
+        private Trajectory<TimedState<Pose2dWithCurvature>> getLeftTrenchPath2(){
+            List<Pose2d> waypoints = new ArrayList<>();
+            waypoints.add(LeftStartToTrenchPoints.startPose2);
+            waypoints.add(LeftStartToTrenchPoints.allignPose);
+            waypoints.add(LeftStartToTrenchPoints.finalPose2);
+            return generateTrajectory(false, waypoints, Arrays.asList(new CentripetalAccelerationConstraint(kMaxCentripetalAccel)),
+            kMaxVelocity, kMaxAccel, kMaxVoltage);
+        }
     }
 }

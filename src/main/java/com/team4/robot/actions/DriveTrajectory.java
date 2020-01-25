@@ -5,6 +5,7 @@ import com.team254.lib.trajectory.TimedView;
 import com.team254.lib.trajectory.Trajectory;
 import com.team254.lib.trajectory.TrajectoryIterator;
 import com.team254.lib.trajectory.timing.TimedState;
+import com.team254.lib.util.DriveSignal;
 import com.team4.lib.actionbase.Action;
 import com.team4.robot.RobotState;
 import com.team4.robot.subsystems.Drive;
@@ -43,7 +44,8 @@ public class DriveTrajectory implements Action {
 
     @Override
     public void stop() {
-        mDrive.stop();
+        // mDrive.stop();
+        mDrive.setOpenLoop(DriveSignal.BRAKE);
     }
 
     @Override

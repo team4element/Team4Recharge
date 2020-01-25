@@ -1,7 +1,20 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+    }
+    dependencies {
+        classpath 'gov.nist.math:jama:1.0.3'
+        classpath 'com.bmuschko:gradle-tomcat-plugin:2.5'
+    }
+}
+
 plugins {
     id "java"
     id "edu.wpi.first.GradleRIO" version "2020.1.2"
 }
+
+apply plugin: 'com.bmuschko.tomcat'
 
 sourceCompatibility = JavaVersion.VERSION_11
 targetCompatibility = JavaVersion.VERSION_11
@@ -55,10 +68,35 @@ dependencies {
     compile "gov.nist.math:jama:1.0.3"
     testImplementation 'junit:junit:4.12'
 
+    def tomcatVersion = '9.0.17'
+    def tomcatLoggingVersion = '9.0.0.M6'
+    tomcat "org.apache.tomcat.embed:tomcat-embed-core:${tomcatVersion}",
+            "org.apache.tomcat.embed:tomcat-embed-logging-juli:${tomcatLoggingVersion}",
+    		"org.apache.tomcat.embed:tomcat-embed-jasper:${tomcatVersion}"
+
+	compile("org.springframework:spring-webmvc:5.1.6.RELEASE")
+    compile("javax.servlet:javax.servlet-api:4.0.1")
+    compile("javax.servlet:jstl:1.2") 
+
     // Enable simulation gui support. Must check the box in vscode to enable support
     // upon debugging
     simulation wpi.deps.sim.gui(wpi.platforms.desktop, false)
 }
+
+// context where tomcat is deployed, by default localhost:8080/
+tomcatRun.contextPath = '/'
+tomcatRunWar.contextPath = '/'
+
+
+tomcat {
+    httpProtocol = 'org.apache.coyote.http11.Http11Nio2Protocol'
+    ajpProtocol  = 'org.apache.coyote.ajp.AjpNio2Protocol'
+}
+
+war {
+	//entryCompression = ZipEntryCompression.STORED
+}
+
 
 // Setting up my Jar File. In this case, adding all libraries into the main jar ('fat jar')
 // in order to make them all available at runtime. Also adding the manifest so WPILib

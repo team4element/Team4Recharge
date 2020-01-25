@@ -29,7 +29,7 @@ public class Conveyor extends Subsystem{
         public void onLoop(double timestamp) {
             switch(mCurrentState){
                 case FORWARD:
-                    setOpenLoop(.6);
+                    setOpenLoop(.8);
                     break;
                 case REVERSE:
                     setOpenLoop(-.6);

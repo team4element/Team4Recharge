@@ -300,6 +300,8 @@ public class DriveMotionPlanner implements CSVWritable {
                 .left, dynamics.wheel_acceleration.right, feedforward_voltages.left, feedforward_voltages.right);
     }
 
+
+    //TODO: test with Pure Pursuit Controller
     public Output update(double timestamp, Pose2d current_state) {
         if (mCurrentTrajectory == null) return new Output();
 

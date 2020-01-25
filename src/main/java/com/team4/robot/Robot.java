@@ -11,26 +11,20 @@ import java.util.Optional;
 
 import com.team254.lib.geometry.Pose2d;
 import com.team254.lib.geometry.Rotation2d;
-import com.team254.lib.util.CheesyDriveHelper;
 import com.team254.lib.util.CrashTracker;
 import com.team4.lib.autobase.AutoModeBase;
 import com.team4.lib.autobase.AutoModeExecutor;
 import com.team4.lib.loops.Looper;
-import com.team4.lib.util.DriveHelper;
-import com.team4.lib.util.ElementMath;
 import com.team4.lib.util.SubsystemManager;
 import com.team4.lib.wpilib.TimedRobot;
-import com.team4.robot.constants.Constants;
-import com.team4.robot.controlboard.ControlBoard;
-import com.team4.robot.controlboard.IControlBoard;
+import com.team4.robot.paths.TrajectoryGenerator;
 import com.team4.robot.subsystems.Conveyor;
 import com.team4.robot.subsystems.Drive;
 import com.team4.robot.subsystems.RobotStateEstimator;
 import com.team4.robot.subsystems.Shooter;
+import com.team4.robot.subsystems.Superstructure;
 import com.team4.robot.subsystems.VisionTracker;
 import com.team4.robot.subsystems.WheelHandler;
-import com.team4.robot.subsystems.states.ConveyorControlState;
-import com.team4.robot.subsystems.states.ShooterControlState;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -46,6 +40,7 @@ public class Robot extends TimedRobot{
     private final Shooter mShooter = Shooter.getInstance();
     private final Conveyor mConveyor = Conveyor.getInstance();
     private final WheelHandler mWheelHandler = WheelHandler.getInstance();
+    private final Superstructure mSuperstructure = Superstructure.getInstance();
 
     //Robot State Initialization
     private final RobotState mRobotState = RobotState.getInstance();
@@ -53,11 +48,9 @@ public class Robot extends TimedRobot{
   
     private AutoModeSelector mAutoSelector;
     private AutoModeExecutor mAutoModeExecutor;
-  
-    private IControlBoard mControlBoard = ControlBoard.getInstance();
 
-    private DriveHelper mDriveHelper = DriveHelper.getInstance();
-    CheesyDriveHelper mCheesyDriveHelper = new CheesyDriveHelper();
+  
+    private TrajectoryGenerator mTrajectoryGenerator = TrajectoryGenerator.getInstance();
 
     public Robot(){
         CrashTracker.logRobotConstruction();
@@ -73,7 +66,8 @@ public class Robot extends TimedRobot{
                 mVisionTracker,
                 mShooter,
                 mConveyor,
-                mWheelHandler);
+                mSuperstructure/*,
+                mWheelHandler*/);
               
                 mSubsystemManager.configEnabledLoop(mEnabledLooper);
                 mSubsystemManager.configDisabledLoops(mDisabledLooper);
@@ -85,6 +79,9 @@ public class Robot extends TimedRobot{
                 mAutoModeExecutor = new AutoModeExecutor();
                 // mLLManager.setAllLeds(Limelight.LedMode.OFF);
         
+                mTrajectoryGenerator.generateTrajectories();
+
+
                 System.out.println("Finished robot init");
             } catch (Throwable t) {
               CrashTracker.logThrowableCrash(t);
@@ -106,6 +103,7 @@ public class Robot extends TimedRobot{
       
             mDisabledLooper.start();
       
+            HIDController.getInstance().stop();
 
             // mDrive.setBrakeMode(false);
         } catch (Throwable t) {
@@ -146,6 +144,8 @@ public class Robot extends TimedRobot{
     
         mDisabledLooper.stop();
         
+        HIDController.getInstance().start();
+
     //   mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
 
       mEnabledLooper.start();
@@ -191,14 +191,15 @@ public class Robot extends TimedRobot{
                 // mLLManager.triggerOutputs();
                 // mLLManager.writePeriodicOutputs();
   
+                mDrive.setBrakeMode(false);
         //   mDrive.zeroSensors();
           mAutoSelector.updateModeCreator();
-        //   Optional<AutoModeBase> autoMode = Optional.of(());
+        //   Optional<AutoModeBase> autoMode = Optional.of(new MidToRendAndShootMode());
             Optional<AutoModeBase> autoMode = mAutoSelector.getAutoMode();
             if (autoMode.isPresent() && autoMode.get() != mAutoModeExecutor.getAutoMode()) {
                 // System.out.println("Set auto mode to: " + autoMode.get().getClass().toString());
-                mAutoModeExecutor.setAutoMode(autoMode.get());
             }
+            mAutoModeExecutor.setAutoMode(autoMode.get());
             // mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
         } catch (Throwable t) {
             CrashTracker.logThrowableCrash(t);
@@ -213,48 +214,11 @@ public class Robot extends TimedRobot{
     @Override
     public void teleopPeriodic() {
         // mShooter.handleDistanceRPM(100);
-        manualControl();
     }
 
     @Override
     public void testPeriodic() {
     }
-
-    public void manualControl(){
-        double throttle = ElementMath.handleDeadband(mControlBoard.getThrottle(), Constants.kJoystickThreshold);
-        double turn;
-        boolean wants_auto_steer = mControlBoard.getVisionEnable();
- 
-        mVisionTracker.setVisionEnabled(wants_auto_steer);
-    
-        if (mVisionTracker.isVisionEnabled() && mVisionTracker.isTargetFound()) {
-    
-            turn = Math.max(Math.min(VisionTracker.getInstance().getTargetHorizAngleDev() * 0.005, 0.1), -0.1);
-            // mDrive.setOpenLoop(mCheesyDriveHelper.cheesyDrive(throttle, turn, true));
-            mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
-            // mDrive.autoSteer(Util.limit(throttle, 0.3), drive_aim_params.get());
-        }else{
-            turn = ElementMath.handleDeadband(-mControlBoard.getTurn(), Constants.kJoystickThreshold);
-            mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
-            
-        }
-
-
-        if(mControlBoard.getShoot()){
-            mShooter.setControlState(ShooterControlState.VELOCITY);
-            // Use if above method doesn't work mShooter.setOpenLoop(.8);
-        }else{
-            mShooter.setControlState(ShooterControlState.IDLE); 
-            
-        }
-
-        if(mControlBoard.getMoveConveyor()){
-            mConveyor.setControlState(ConveyorControlState.FORWARD);
-        }else{
-            mConveyor.setControlState(ConveyorControlState.IDLE);
-        }
-
-
-    }
+     
 
 }

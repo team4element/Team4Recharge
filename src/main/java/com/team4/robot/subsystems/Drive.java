@@ -84,14 +84,6 @@ public class Drive extends Subsystem {
                     case OPEN_LOOP:
                         break;
                     case PATH_FOLLOWING:
-                        /**
-                         * TODO: test if it works
-                         *
-                         * if(mMotionPlanner.hasTrajectory())
-                         * {
-                            updatePathFollower();
-                         * }
-                         */
                         updatePathFollower();
                         break;
                     case TURN_TO_HEADING:
@@ -344,18 +336,23 @@ public synchronized void setPosition(DriveSignal signal) {
 
     @Override
     public void outputTelemetry() {
-        SmartDashboard.putNumber("Right Drive Distance", mPeriodicIO.right_distance);
-        SmartDashboard.putNumber("Right Drive Ticks", mPeriodicIO.right_position_ticks);
-        SmartDashboard.putNumber("Left Drive Ticks", mPeriodicIO.left_position_ticks);
-        SmartDashboard.putNumber("Left Drive Distance", mPeriodicIO.left_distance);
-        SmartDashboard.putNumber("Right Linear Velocity", getRightLinearVelocity());
-        SmartDashboard.putNumber("Left Linear Velocity", getLeftLinearVelocity());
+        // SmartDashboard.putNumber("Right Drive Distance", mPeriodicIO.right_distance);
+        // SmartDashboard.putNumber("Right Drive Ticks", mPeriodicIO.right_position_ticks);
+        // SmartDashboard.putNumber("Left Drive Ticks", mPeriodicIO.left_position_ticks);
+        // SmartDashboard.putNumber("Left Drive Distance", mPeriodicIO.left_distance);
+        // SmartDashboard.putNumber("Right Linear Velocity", getRightLinearVelocity());
+        // SmartDashboard.putNumber("Left Linear Velocity", getLeftLinearVelocity());
 
-        SmartDashboard.putNumber("x err", mPeriodicIO.error.getTranslation().x());
-        SmartDashboard.putNumber("y err", mPeriodicIO.error.getTranslation().y());
-        SmartDashboard.putNumber("theta err", mPeriodicIO.error.getRotation().getDegrees());
+        SmartDashboard.putNumber("Left Drive Demand", mPeriodicIO.left_demand);
+        SmartDashboard.putNumber("Right Drive Demand", mPeriodicIO.right_demand);
+
+        SmartDashboard.putNumber("Left Velocity", mPeriodicIO.left_velocity_ticks_per_100ms);
+        SmartDashboard.putNumber("Right Velocity", mPeriodicIO.right_velocity_ticks_per_100ms);
+        // SmartDashboard.putNumber("x err", mPeriodicIO.error.getTranslation().x());
+        // SmartDashboard.putNumber("y err", mPeriodicIO.error.getTranslation().y());
+        // SmartDashboard.putNumber("theta err", mPeriodicIO.error.getRotation().getDegrees());
         if (getHeading() != null) {
-            SmartDashboard.putNumber("Gyro Heading", getHeading().getDegrees());
+            // SmartDashboard.putNumber("Gyro Heading", getHeading().getDegrees());
         }
         if (mCSVWriter != null) {
             mCSVWriter.write();
@@ -565,7 +562,7 @@ public synchronized void setPosition(DriveSignal signal) {
     // System.out.println("Left Demand: " + mPeriodicIO.left_demand + "Left Arbitrary: " + mPeriodicIO.left_feedforward);
     //   if (mDriveControlState == DriveControlState.OPEN_LOOP) {
         if (mTalonControlState == TalonControlState.OPEN) {
-            mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand*.65);
+            mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
             // mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand, DemandType.ArbitraryFeedForward, 0.0);
             // mRightMaster.set(ControlMode.PercentOutput, mPeriodicIO.right_demand, DemandType.ArbitraryFeedForward, 0.0);

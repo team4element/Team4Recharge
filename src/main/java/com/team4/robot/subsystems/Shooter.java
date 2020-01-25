@@ -2,9 +2,8 @@ package com.team4.robot.subsystems;
 
 import java.util.ArrayList;
 
-import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
-import com.ctre.phoenix.motorcontrol.can.BaseTalon;
+import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.drivers.MotorChecker;
@@ -19,7 +18,6 @@ import com.team4.robot.constants.ShooterConstants;
 import com.team4.robot.subsystems.states.ShooterControlState;
 
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shooter extends Subsystem{
     private static Shooter mInstance = null;
@@ -28,8 +26,6 @@ public class Shooter extends Subsystem{
     // private VictorSPX mSlaveMotor;
 
     private TalonFX mMasterMotor, mSlaveMotor;
-
-    private boolean mIsBrakeMode = false;
 
     private ShooterControlState mControlState = ShooterControlState.IDLE;
 
@@ -43,9 +39,11 @@ public class Shooter extends Subsystem{
                     setOpenLoop(.375);
                     break;
                 case VELOCITY:
-                // setVelocity(1600, 0);
-                    setVelocity(ElementMath.scaleRPM(3600, ShooterConstants.kShooterGearRatio), 0);
-                    // handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
+                // setVelocity(2150, 0);
+                    // setVelocity(ElementMath.scaleRPM(4050, ShooterConstants.kShooterGearRatio), 0);
+                    handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
+                    // handleRPM(VisionTracker.getInstance().getTargetDistance());
+                    // handleDistanceRPM(253);
                     break;
                 case IDLE:
                     setOpenLoop(0);
@@ -77,6 +75,8 @@ public class Shooter extends Subsystem{
         mSlaveMotor = CANSpeedControllerFactory.createPermanentSlaveTalonFX(ShooterConstants.kSlaveMotorId, mMasterMotor);
         TalonUtil.configureTalonFX(mSlaveMotor, false);
 
+        mMasterMotor.setInverted(TalonFXInvertType.Clockwise);
+        mSlaveMotor.setInverted(TalonFXInvertType.Clockwise);
 
         setBrakeMode(false);
 
@@ -87,10 +87,12 @@ public class Shooter extends Subsystem{
         reloadGains();
     }
 
+    
+
     public synchronized void setBrakeMode(boolean on) {
             TalonUtil.setBrakeMode(mMasterMotor, on);
             TalonUtil.setBrakeMode(mSlaveMotor, on);
-    }
+        }
 
     public void setControlState(ShooterControlState state){
         mControlState = state;
@@ -114,7 +116,6 @@ public class Shooter extends Subsystem{
         }else if (mControlState == ShooterControlState.VELOCITY){
             mMasterMotor.set(TalonFXControlMode.Velocity, mPeriodicIO.demand);
             mSlaveMotor.set(TalonFXControlMode.Velocity, mPeriodicIO.demand);
-            //TODO: test with ArbitraryFeedForward
         }else{ //force default Open Loop
             mMasterMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
             mSlaveMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
@@ -122,7 +123,18 @@ public class Shooter extends Subsystem{
 
     }
 
+    public double getVelocitySetpoint(){
+        if(mControlState == ShooterControlState.VELOCITY){
+            return mPeriodicIO.demand;
+        }else{
+            System.out.println("not in velocity ControlMode");
+            return Double.NaN;
+        }
+    }
+
     public void handleDistanceRPM(double distance){
+
+        double mFlyWheelDistance = (distance);
 
         // double distanceInMeters = Units.inches_to_meters(distance); 
         // boolean isFirstCorrectVel = true; 
@@ -136,7 +148,7 @@ public class Shooter extends Subsystem{
 
         //             double x = (ShooterConstants.kMass / ShooterConstants.kDrag) * 
         //             i * Math.cos(ShooterConstants.kShooterAngle) * 
-        //             (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass)));
+            //             (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass)));
 
         //             double y = ((-(ShooterConstants.kMass*ShooterConstants.kGravityConstant) * t)/ 
         //             ShooterConstants.kDrag) + (ShooterConstants.kMass/ShooterConstants.kDrag) *
@@ -161,7 +173,7 @@ public class Shooter extends Subsystem{
 
 
         //     }
-        // }
+        // }    
         // double low_speed = firstCorrectVel;
         // double high_speed = mPrevVel;  
         
@@ -174,15 +186,69 @@ public class Shooter extends Subsystem{
 
         double rpm = 0;
 
-        if(distance > 11.5 && distance < 24.5){
-            rpm = ((0.013533 * Math.pow(distance, 2)) + (1.0528 * distance) + 3153.6707); 
+        if(mFlyWheelDistance > 11.5 * 12 && mFlyWheelDistance < 23 * 12){
+            rpm = ((0.013533 * Math.pow(mFlyWheelDistance, 2)) + (1.0628 * mFlyWheelDistance) + 3225.6707); 
+            // rpm = (0.0035*Math.pow(mFlyWheelDistance, 3)) - (1.7421 * Math.pow(mFlyWheelDistance, 2)) + (244.28 * mFlyWheelDistance) - 2250;
         }
 
+        // System.out.println("Actual RPM: " + rpm);
         rpm = ElementMath.scaleRPM(rpm, ShooterConstants.kShooterGearRatio);
         // mPeriodicIO.demand = rpm;
-        // setVelocity(rpm, 0);
-        System.out.println(rpm);
+        setVelocity(rpm, 0);
     }
+
+    // private synchronized void handleRPM(double distance){
+    //             double distanceInMeters = Units.inches_to_meters(distance - 8); 
+    //     boolean isFirstCorrectVel = true; 
+
+    //     double firstCorrectVel = 0;
+    //     double mPrevVel = 0;
+
+    //     for(double i=4; i <=ShooterConstants.kShooterMaxSpeed; i = i + .05 ){
+    //         for(double j = 0; j <= 6; j = j + .05){
+    //                 double t = j;
+
+    //                 double x = (ShooterConstants.kMass / ShooterConstants.kDrag) * 
+    //                 i * Math.cos(ShooterConstants.kShooterAngle) * 
+    //                 (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass)));
+
+    //                 double y = ((-(ShooterConstants.kMass*ShooterConstants.kGravityConstant) * t)/ 
+    //                 ShooterConstants.kDrag) + (ShooterConstants.kMass/ShooterConstants.kDrag) *
+    //                 (i*Math.sin(ShooterConstants.kShooterAngle)+(ShooterConstants.kMass*ShooterConstants.kGravityConstant)/ShooterConstants.kDrag) * 
+    //                 (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass))) + ShooterConstants.kShooterHeight;
+
+    //                 if (y < 0){
+    //                     break;
+    //                 }
+
+    //                 if(Math.abs(x - distanceInMeters) < .2 && Math.abs(y - ShooterConstants.kTargetInMeters) < .2){
+    //                     if(isFirstCorrectVel){
+    //                         firstCorrectVel = i;
+    //                         isFirstCorrectVel = false;
+    //                         // System.out.println("x: " + x + "y: " + y + "velocity: " + firstCorrectVel);
+    //                     }
+    //                     if(mPrevVel <= i){
+    //                         // System.out.println("x: " + x + "y: " + y + "velocity: " + i);
+    //                         mPrevVel = i;
+    //                     }        
+    //                 }
+
+
+    //         }
+    //     }
+    //     double low_speed = firstCorrectVel;
+    //     double high_speed = mPrevVel;  
+        
+
+    //     double low_speed_rpm = findRPM(low_speed);
+    //     double high_speed_rpm = findRPM(high_speed);
+
+    //     double rpm = Math.abs(low_speed_rpm + high_speed_rpm)/2;
+
+    //     rpm *= 2;
+
+    //     System.out.println("Theoretical RPM: " + rpm);
+    // }
 
     public double findRPM(double mps){
         double t_speed = 2 * mps;
@@ -199,7 +265,6 @@ public class Shooter extends Subsystem{
             configureVelocityTalon();
             mControlState = ShooterControlState.VELOCITY;
         }
-
 
 
 
@@ -243,9 +308,9 @@ public class Shooter extends Subsystem{
     @Override
     public void outputTelemetry() {
         // Nothing to output
-        SmartDashboard.putString("Current Shooter Mode", mControlState.toString());
-        SmartDashboard.putNumber("Shooter Velocity in RPM", mPeriodicIO.velocity);
-        SmartDashboard.putNumber("TalonFX RPM - Shooter", mPeriodicIO.demand);
+        // SmartDashboard.putString("Current Shooter Mode", mControlState.toString());
+        // SmartDashboard.putNumber("Shooter Velocity in RPM", mPeriodicIO.velocity);
+        // SmartDashboard.putNumber("TalonFX RPM - Shooter", mPeriodicIO.demand);
         // SmartDashboard.putNumber("Get talon error ", mMasterMotor.getClosedLoopError());
     }
 

@@ -9,7 +9,8 @@ public class TargetingConstants {
       public static final double kImageCaptureLatency = 11.0 / 1000.0; // seconds
   
       public static final double kFloorToLens = 26.5;
-      public static final double kFloorToLensAngle = 20.2;
+      // public static final double kFloorToLensAngle = 14.45;
+      public static final double kFloorToLensAngle = 13.431;
       //6'9" 1/4 + (1'5")/2       81.25+(17/2) 81.25+8.5
       public static final double kFloorToTarget = 89.75;
 
@@ -24,7 +25,5 @@ public class TargetingConstants {
       public static final double kCameraFrameRate = 90.0;
       public static final double kMinStability = 0.5;
 
-      public static final double kLimelightKp = 1;
-      public static final double kLimelightki = .0;
-      public static final double kLimelightkd = 0;
 }
+
