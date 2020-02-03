@@ -50,7 +50,7 @@ public class Robot extends TimedRobot{
     private AutoModeExecutor mAutoModeExecutor;
 
   
-    private TrajectoryGenerator mTrajectoryGenerator = TrajectoryGenerator.getInstance();
+    public TrajectoryGenerator mTrajectoryGenerator = TrajectoryGenerator.getInstance();
 
     public Robot(){
         CrashTracker.logRobotConstruction();
@@ -70,7 +70,7 @@ public class Robot extends TimedRobot{
                 mWheelHandler*/);
               
                 mSubsystemManager.configEnabledLoop(mEnabledLooper);
-                mSubsystemManager.configDisabledLoops(mDisabledLooper);
+                mSubsystemManager.configDisabledLoop(mDisabledLooper);
         
                 mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
                 mDrive.setHeading(Rotation2d.identity());
@@ -122,6 +122,8 @@ public class Robot extends TimedRobot{
             mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
             mDrive.setHeading(Rotation2d.identity());
       
+            mShooter.setBrakeMode(true);
+
             mAutoModeExecutor.start();
       
             // mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
@@ -144,6 +146,9 @@ public class Robot extends TimedRobot{
     
         mDisabledLooper.stop();
         
+        mDrive.setBrakeMode(false);
+        mShooter.setBrakeMode(false);
+
         HIDController.getInstance().start();
 
     //   mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
@@ -191,10 +196,10 @@ public class Robot extends TimedRobot{
                 // mLLManager.triggerOutputs();
                 // mLLManager.writePeriodicOutputs();
   
+                mShooter.setBrakeMode(false);
                 mDrive.setBrakeMode(false);
         //   mDrive.zeroSensors();
           mAutoSelector.updateModeCreator();
-        //   Optional<AutoModeBase> autoMode = Optional.of(new MidToRendAndShootMode());
             Optional<AutoModeBase> autoMode = mAutoSelector.getAutoMode();
             if (autoMode.isPresent() && autoMode.get() != mAutoModeExecutor.getAutoMode()) {
                 // System.out.println("Set auto mode to: " + autoMode.get().getClass().toString());
@@ -213,7 +218,6 @@ public class Robot extends TimedRobot{
 
     @Override
     public void teleopPeriodic() {
-        // mShooter.handleDistanceRPM(100);
     }
 
     @Override

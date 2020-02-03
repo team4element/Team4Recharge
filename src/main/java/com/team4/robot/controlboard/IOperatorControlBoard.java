@@ -9,4 +9,5 @@ public interface IOperatorControlBoard{
 
     boolean getReadyToManipulateControlPanel();
 
+    boolean getKillCommand();
 }

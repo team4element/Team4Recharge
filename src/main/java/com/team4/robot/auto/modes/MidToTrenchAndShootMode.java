@@ -20,9 +20,13 @@ public class MidToTrenchAndShootMode extends AutoModeBase{
         double startTime =Timer.getFPGATimestamp();
 
         runAction(new ResetPoseAction(MidStartToTrenchPoints.startPose));
-        runAction(new DriveTrajectory(TrajectoryGenerator.getInstance().getTrajectorySet().midStartToTrenchAndShoot.get(false), false));
-        runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(0)));
-        runAction(new AutoSteerAndDistanceAction(245, 10));
+        runAction(new AutoSteerAndDistanceAction(160, 1.5));
+        // runAction(new ShootAction(2));
+        runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(180)));
+        runAction(new DriveTrajectory(TrajectoryGenerator.getInstance().getTrajectorySet().midStartToTrenchAndIntake.get(false), false));
+        runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(0), 2));
+        runAction(new DriveTrajectory(TrajectoryGenerator.getInstance().getTrajectorySet().midTrenchToTrenchAndShoot.get(false), false));
+        runAction(new AutoSteerAndDistanceAction(200, 1.5)); // 245 for comp
         runAction(new ShootAction(3));
 
         System.out.println(Timer.getFPGATimestamp()- startTime);

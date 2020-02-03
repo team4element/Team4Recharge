@@ -9,11 +9,11 @@ public class RightStartToTrenchPoints {
 
     //Trajectory 1:
     public static final Pose2d startPose1 = new Pose2d(new Translation2d(105, 145), Rotation2d.fromDegrees(180));
-    public static final Pose2d finishIntakePhase1 = new Pose2d(new Translation2d(345, 145), Rotation2d.fromDegrees(180));
-    public static final Pose2d finishPose1 = new Pose2d(new Translation2d(395, 140), Rotation2d.fromDegrees(180));
+    public static final Pose2d finishIntakePhase1 = new Pose2d(new Translation2d(220, 145), Rotation2d.fromDegrees(180));
+    public static final Pose2d finishPose1 = new Pose2d(new Translation2d(270, 135), Rotation2d.fromDegrees(180));
 
     //Trajectory 2:
-    public static final Pose2d startPose2 = new Pose2d(new Translation2d(395, 140), Rotation2d.fromDegrees(0));
-    public static final Pose2d allignShootPose = new Pose2d(new Translation2d(350, 145), Rotation2d.fromDegrees(0));
-    public static final Pose2d finishPose2 = new Pose2d(new Translation2d(225, 145), Rotation2d.fromDegrees(0+15));
+    public static final Pose2d startPose2 = new Pose2d(new Translation2d(270, 135), Rotation2d.fromDegrees(0));
+    public static final Pose2d allignShootPose = new Pose2d(new Translation2d(220, 145), Rotation2d.fromDegrees(0));
+    public static final Pose2d finishPose2 = new Pose2d(new Translation2d(140, 145), Rotation2d.fromDegrees(0-15));
 }

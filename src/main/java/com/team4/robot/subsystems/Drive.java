@@ -262,10 +262,10 @@ public synchronized void setPosition(DriveSignal signal) {
          mInitLeftPosition = mPeriodicIO.left_position_ticks;
          mInitRightPosition = mPeriodicIO.right_position_ticks;
          // setPositionMagic(new DriveSignal(mInitLeftPosition, mInitRightPosition));
-         setPosition(new DriveSignal(mInitLeftPosition, mInitRightPosition));
+         setPositionMagic(new DriveSignal(mInitLeftPosition, mInitRightPosition));
  
  
-         if (Math.abs(heading.inverse().rotateBy(mTargetHeading).getDegrees()) > 1E-3) {
+        //  if (Math.abs(heading.inverse().rotateBy(mTargetHeading).getDegrees()) > 1E-3) {
              mTargetHeading = heading;
              mIsOnTarget = false;
  
@@ -274,7 +274,7 @@ public synchronized void setPosition(DriveSignal signal) {
  
              DriveSignal wheel_delta = Kinematics.inverseKinematics(new Twist2d(0, 0, robot_to_target.getRadians()));
             setPositionMagic(wheel_delta);    
-        }
+        // }
          
      }
 
@@ -460,8 +460,8 @@ public synchronized void setPosition(DriveSignal signal) {
         
 
         // Check if we are on target
-        final double kGoalPosTolerance = 2.0; // degrees
-        final double kGoalVelTolerance = 5.0; // inches per second
+        final double kGoalPosTolerance = 0.1; // degrees
+        final double kGoalVelTolerance = 16.0; // inches per second
         if (Math.abs(robot_to_target.getDegrees()) < kGoalPosTolerance && Math.abs(getLeftLinearVelocity()) < kGoalVelTolerance && Math.abs(getRightLinearVelocity()) < kGoalVelTolerance) {
             // if (Math.abs(robot_to_target.getDegrees()) < kGoalPosTolerance) {
 
@@ -637,8 +637,8 @@ public synchronized void setPosition(DriveSignal signal) {
   private void configureVelocityTalon(){
 
     setBrakeMode(true);
-    mLeftMaster.selectProfileSlot(kLowGearVelocityControlSlot, 0);
-    mRightMaster.selectProfileSlot(kLowGearVelocityControlSlot, 0);
+    mLeftMaster.selectProfileSlot(kHighGearVelocityControlSlot, 0);
+    mRightMaster.selectProfileSlot(kHighGearVelocityControlSlot, 0);
 
     mLeftMaster.configClosedloopRamp(0);
     mRightMaster.configClosedloopRamp(0);

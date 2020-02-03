@@ -1,4 +1,4 @@
-package com.team4.robot.subsystems.states;
+package com.team4.robot.subsystems.states.superstructure;
 
 public enum SuperstructureState{
     Intake,

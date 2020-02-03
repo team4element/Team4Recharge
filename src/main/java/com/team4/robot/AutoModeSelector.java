@@ -11,6 +11,7 @@ import com.team4.robot.auto.modes.MidToRendAndShootMode;
 import com.team4.robot.auto.modes.MidToTrenchAndShootMode;
 import com.team4.robot.auto.modes.RightToRendAndShootMode;
 import com.team4.robot.auto.modes.RightToTrenchAndShootMode;
+import com.team4.robot.auto.modes.TestMode;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -28,6 +29,7 @@ public class AutoModeSelector {
     enum DesiredMode {
         DO_NOTHING,
         CHARACTERIZE_DRIVE_BASE,
+        TEST,
         RENDEVOUS,
         TRENCH
     }
@@ -51,6 +53,8 @@ public class AutoModeSelector {
         mModeChooser.setDefaultOption("Do Nothing", DesiredMode.DO_NOTHING);
         mModeChooser.addOption("Drive Characterization", DesiredMode.CHARACTERIZE_DRIVE_BASE);
         mModeChooser.addOption("Rendevous", DesiredMode.RENDEVOUS);
+        mModeChooser.addOption("Trench", DesiredMode.TRENCH);
+        mModeChooser.addOption("Test", DesiredMode.TEST);
         SmartDashboard.putData("Auto mode", mModeChooser);
     }
 
@@ -93,6 +97,8 @@ public class AutoModeSelector {
                     case LEFT:
                         return Optional.of(new LeftToTrenchAndShootMode());
                 }
+            case TEST:
+                return Optional.of(new TestMode());
             default:
                 break;
         }

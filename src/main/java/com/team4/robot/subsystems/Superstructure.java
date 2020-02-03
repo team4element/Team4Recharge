@@ -5,7 +5,7 @@ import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
 import com.team4.robot.subsystems.states.ConveyorControlState;
 import com.team4.robot.subsystems.states.ShooterControlState;
-import com.team4.robot.subsystems.states.SuperstructureState;
+import com.team4.robot.subsystems.states.superstructure.SuperstructureState;
 
 import edu.wpi.first.wpilibj.DriverStation;
 
@@ -19,6 +19,10 @@ import edu.wpi.first.wpilibj.DriverStation;
 
 public class Superstructure extends Subsystem{
     private static Superstructure instance = null;
+
+    private boolean mShooterDip = true;
+
+    private int mShootCount = 0;
 
     public static Superstructure getInstance(){
         if(instance == null){
@@ -41,6 +45,10 @@ public class Superstructure extends Subsystem{
                     case IDLE:
                         mShooter.setControlState(ShooterControlState.IDLE);
                         mConveyor.setControlState(ConveyorControlState.IDLE);
+                        if(mShootCount != 0){
+                            resetCount();
+                        }
+
                         break;
                     case Convey_Shoot:
                         handleConveyAndShoot();
@@ -68,10 +76,33 @@ public class Superstructure extends Subsystem{
     public synchronized void handleConveyAndShoot(){
         mShooter.setControlState(ShooterControlState.VELOCITY);
         if(mShooter.getVelocity() >= mShooter.getVelocitySetpoint()){
+            countShooterVelocity();
             mConveyor.setControlState(ConveyorControlState.FORWARD);
         }else{
             mConveyor.setControlState(ConveyorControlState.IDLE);
         }
+    }
+
+    public synchronized void countShooterVelocity(){
+        if(!mShooterDip){
+            if(mShooter.getVelocity() <= mShooter.getVelocitySetpoint()){
+                mShooterDip = true;
+                mShootCount += 1;
+            }
+        }else{
+            if(mShooter.getVelocity() >= mShooter.getVelocitySetpoint()){
+                mShooterDip = false;
+            }
+        }
+    }
+
+    public synchronized void resetCount(){
+        mShootCount = 0;
+        mShooterDip = false;
+    }
+
+    public synchronized int getShooterCount(){
+        return mShootCount;
     }
 
     public synchronized void setControlState(SuperstructureState state){
@@ -87,6 +118,7 @@ public class Superstructure extends Subsystem{
 
     @Override
     public void stop() {
+        resetCount();
         mShooter.stop();
         mConveyor.stop();
     }

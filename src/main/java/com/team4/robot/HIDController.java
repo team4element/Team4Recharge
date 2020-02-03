@@ -12,12 +12,14 @@ import com.team4.robot.controlboard.IControlBoard;
 import com.team4.robot.subsystems.Drive;
 import com.team4.robot.subsystems.Superstructure;
 import com.team4.robot.subsystems.VisionTracker;
-import com.team4.robot.subsystems.states.SuperstructureState;
+import com.team4.robot.subsystems.states.superstructure.SuperstructureState;
 
 import edu.wpi.first.wpilibj.Notifier;
 
 public class HIDController{
     private static HIDController instance = null;
+
+    private boolean startShoot = false;
 
     public static HIDController getInstance(){
         if(instance == null){
@@ -29,7 +31,6 @@ public class HIDController{
     private final Drive mDrive = Drive.getInstance();
     private final VisionTracker mVisionTracker = VisionTracker.getInstance();
     private final Superstructure mSuperstructure = Superstructure.getInstance();
-
 
     private double kPeriod = .01; 
     private Notifier mNotifier;
@@ -71,7 +72,7 @@ public class HIDController{
                         turn = autoSteerPID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev());
                     // turn = 0d;
                     // turn = Math.max(Math.min(VisionTracker.getInstance().getTargetHorizAngleDev() * 0.01, 0.1), -0.1);
-                    mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn * .4, mControlBoard.getQuickTurn()));
+                    mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn * .7, mControlBoard.getQuickTurn()));
                 }else{
                     turn = ElementMath.handleDeadband(-mControlBoard.getTurn(), Constants.kJoystickThreshold);                
                     mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
@@ -79,13 +80,23 @@ public class HIDController{
     
     
                 if(mControlBoard.getShoot()){
+                    if(!startShoot){
+                        mSuperstructure.resetCount();
+                        startShoot = true;
+                    }
                     mSuperstructure.setControlState(SuperstructureState.Convey_Shoot);
-                    // mShooter.setControlState(ShooterControlState.VELOCITY);
-                    // Use if above method doesn't work mShooter.setOpenLoop(.8);
+                    if(mSuperstructure.getShooterCount() >= 1){
+                        System.out.println("Counted Correctly: " + mSuperstructure.getShooterCount());
+                        // mSuperstructure.setControlState(SuperstructureState.IDLE);
+                    }
                 }else{
-                    // mShooter.setControlState(ShooterControlState.IDLE); 
+                    startShoot = false;
                     mSuperstructure.setControlState(SuperstructureState.IDLE);
                 }
+
+                if(mControlBoard.getKillCommand()){
+                }
+                
     
                 if(mControlBoard.getMoveConveyor()){
                     // mConveyor.setControlState(ConveyorControlState.FORWARD);
@@ -101,6 +112,7 @@ public class HIDController{
     public void start(){
         running_ = true;
         mNotifier.startPeriodic(kPeriod);
+        mSuperstructure.resetCount();
     }
     public void stop(){
         if(running_){   

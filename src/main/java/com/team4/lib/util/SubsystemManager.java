@@ -91,7 +91,7 @@ public class SubsystemManager implements ILooper {
         enabledLooper.addLoop(new EnabledLoop());
     }
 
-    public void configDisabledLoops(Looper disabledLooper) {
+    public void configDisabledLoop(Looper disabledLooper) {
         disabledLooper.addLoop(new DisabledLoop());
     }
 

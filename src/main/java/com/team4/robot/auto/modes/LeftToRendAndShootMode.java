@@ -16,7 +16,7 @@ public class LeftToRendAndShootMode extends AutoModeBase{
         double startTime =Timer.getFPGATimestamp();
 
         runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(0)));
-        runAction(new AutoSteerAndDistanceAction(245, 10));
+        runAction(new AutoSteerAndDistanceAction(180, 10));
         runAction(new ShootAction(3));
 
         System.out.println(Timer.getFPGATimestamp()- startTime);

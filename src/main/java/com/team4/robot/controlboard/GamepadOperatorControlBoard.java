@@ -37,5 +37,10 @@ public class GamepadOperatorControlBoard implements IOperatorControlBoard{
     public boolean getReadyToManipulateControlPanel() {
         return mController.getButton(Button.X);
     }
+
+    @Override
+    public boolean getKillCommand() {
+        return mController.getButton(Button.A);
+    }
     
 }
