@@ -57,4 +57,9 @@ public class ControlBoard implements IControlBoard{
     public boolean getUpdateControlPanelMode() {
         return mOperatorControlBoard.getUpdateControlPanelMode();
     }
+
+    @Override
+    public boolean getKillCommand() {
+        return mOperatorControlBoard.getKillCommand();
+    }
 }

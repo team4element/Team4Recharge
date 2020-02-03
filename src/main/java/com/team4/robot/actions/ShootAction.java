@@ -4,7 +4,7 @@ import com.team4.lib.actionbase.Action;
 import com.team4.robot.subsystems.Drive;
 import com.team4.robot.subsystems.Superstructure;
 import com.team4.robot.subsystems.VisionTracker;
-import com.team4.robot.subsystems.states.SuperstructureState;
+import com.team4.robot.subsystems.states.superstructure.SuperstructureState;
 
 import edu.wpi.first.wpilibj.Timer;
 
@@ -13,6 +13,7 @@ public class ShootAction implements Action{
     private double mDuration, mStartTime;
 
     private final Superstructure mSuperstructure = Superstructure.getInstance();
+
 
     public ShootAction(double duration){
         mDuration = duration;
@@ -27,13 +28,13 @@ public class ShootAction implements Action{
     
     @Override
     public void update() {
-        
+        // mSuperstructure.countShooterVelocity(); 
     }
 
     @Override
     public boolean isFinished() {
         return Timer.getFPGATimestamp() - mStartTime >= mDuration;
-    }
+    } 
 
     @Override
     public void stop() {

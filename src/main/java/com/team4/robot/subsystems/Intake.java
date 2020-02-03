@@ -3,12 +3,15 @@ package com.team4.robot.subsystems;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
-import com.team4.robot.subsystems.signals.IntakeSignal;
+import com.team4.robot.subsystems.states.IntakeState;
 
 public class Intake extends Subsystem{
     private static Intake mInstance = null;
 
     private IntakeState mCurrentState = IntakeState.IDLE;
+
+
+    
 
     private PeriodicIO mPeriodicIO;
 
@@ -29,7 +32,11 @@ public class Intake extends Subsystem{
       }  
       public void onLoop(double timestamp){
         switch(mCurrentState){
+            case OPEN_LOOP:
+                setOpenLoop(.6);
+                break;
             case IDLE:
+                setOpenLoop(0);
                 break;
             default:
                 break;
@@ -55,13 +62,12 @@ public class Intake extends Subsystem{
         //add motor outputs
     }
 
-    public void setOpenLoop(IntakeSignal signal){
+    public void setOpenLoop(double signal){
         if(mCurrentState != IntakeState.OPEN_LOOP || mCurrentState != IntakeState.IDLE){
             mCurrentState = IntakeState.OPEN_LOOP;
         }
 
-        mPeriodicIO.left_demand = signal.getLeft();
-        mPeriodicIO.right_demand = signal.getRight();
+        mPeriodicIO.demand = signal;
     }
 
     @Override
@@ -79,14 +85,10 @@ public class Intake extends Subsystem{
         
     }
 
-    public enum IntakeState{
-        OPEN_LOOP,
-        IDLE
-    } 
+
 
     protected static class PeriodicIO{
-        public double left_demand;
-        public double right_demand;
+        public double demand;
     }
 
 }

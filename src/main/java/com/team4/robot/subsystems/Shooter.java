@@ -78,7 +78,7 @@ public class Shooter extends Subsystem{
         mMasterMotor.setInverted(TalonFXInvertType.Clockwise);
         mSlaveMotor.setInverted(TalonFXInvertType.Clockwise);
 
-        setBrakeMode(false);
+        setBrakeMode(true);
 
         mPeriodicIO = new PeriodicIO();
 
@@ -187,8 +187,13 @@ public class Shooter extends Subsystem{
         double rpm = 0;
 
         if(mFlyWheelDistance > 11.5 * 12 && mFlyWheelDistance < 23 * 12){
-            rpm = ((0.013533 * Math.pow(mFlyWheelDistance, 2)) + (1.0628 * mFlyWheelDistance) + 3225.6707); 
-            // rpm = (0.0035*Math.pow(mFlyWheelDistance, 3)) - (1.7421 * Math.pow(mFlyWheelDistance, 2)) + (244.28 * mFlyWheelDistance) - 2250;
+            // if(mFlyWheelDistance >= 12*12 && mFlyWheelDistance <= 13.2*12){
+                // rpm = 3750;
+            // }else{
+                rpm = ((0.013533 * Math.pow(mFlyWheelDistance, 2)) + (1.0528 * mFlyWheelDistance) + 3155.6707); 
+                // rpm *= .9;
+                // rpm = (0.0035*Math.pow(mFlyWheelDistance, 3)) - (1.7421 * Math.pow(mFlyWheelDistance, 2)) + (244.28 * mFlyWheelDistance) - 2250;
+            // }
         }
 
         // System.out.println("Actual RPM: " + rpm);
@@ -338,7 +343,8 @@ public class Shooter extends Subsystem{
     
     @Override
     public void stop() {
-        mMasterMotor.set(TalonFXControlMode.PercentOutput, 0);    
+        mMasterMotor.set(TalonFXControlMode.PercentOutput, 0);
+        mSlaveMotor.set(TalonFXControlMode.PercentOutput, 0);    
     }
 
     private void configureVelocityTalon(){
