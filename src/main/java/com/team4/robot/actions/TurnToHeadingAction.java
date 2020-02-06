@@ -19,15 +19,18 @@ public class TurnToHeadingAction implements Action {
 
     private double mStartTime;
     private final double mDuration;
+    private boolean mReset;
 
     public TurnToHeadingAction(Rotation2d heading) {
         mTargetHeading = heading;
         mDuration = 1.5;
+        mReset = false;
     }
 
-    public TurnToHeadingAction(Rotation2d heading, double duration) {
+    public TurnToHeadingAction(Rotation2d heading, double duration, boolean reset) {
         mDuration = duration;
         mTargetHeading = heading;
+        mReset = reset;
     }
 
     @Override
@@ -48,7 +51,9 @@ public class TurnToHeadingAction implements Action {
 
     @Override
     public void start() {
-        // mDrive.setHeading(Rotation2d.identity());
+        if(mReset){
+            mDrive.setHeading(Rotation2d.identity());
+        }
         System.out.println("Starting TurnToHeading");
         mDrive.setWantTurnToHeading(mTargetHeading);
         mStartTime = Timer.getFPGATimestamp();

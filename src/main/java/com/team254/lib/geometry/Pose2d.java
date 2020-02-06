@@ -10,7 +10,7 @@ import com.team254.lib.util.Util;
 public class Pose2d implements IPose2d<Pose2d> {
     protected static final Pose2d kIdentity = new Pose2d();
 
-    public static final Pose2d identity() {
+    public static Pose2d identity() {
         return kIdentity;
     }
 
@@ -199,7 +199,10 @@ public class Pose2d implements IPose2d<Pose2d> {
 
     @Override
     public boolean equals(final Object other) {
-        if (other == null || !(other instanceof Pose2d)) return false;
+        if (!(other instanceof Pose2d)) {
+            return false;
+        }
+
         return epsilonEquals((Pose2d) other, Util.kEpsilon);
     }
 

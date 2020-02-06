@@ -6,15 +6,14 @@ import java.util.ArrayList;
  * Helper class for storing and calculating a moving average
  */
 public class MovingAverage {
-
     ArrayList<Double> numbers = new ArrayList<Double>();
-    int maxSize;
+    private int maxSize;
 
     public MovingAverage(int maxSize) {
         this.maxSize = maxSize;
     }
 
-    public void addNumber(double newNumber) {
+    public void add(double newNumber) {
         numbers.add(newNumber);
         if (numbers.size() > maxSize) {
             numbers.remove(0);

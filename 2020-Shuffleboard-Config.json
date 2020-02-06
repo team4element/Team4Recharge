@@ -10,7 +10,7 @@
         "hgap": 16.0,
         "vgap": 16.0,
         "tiles": {
-          "5,1": {
+          "9,4": {
             "size": [
               1,
               1
@@ -21,7 +21,7 @@
               "_title": "Valid Target Value"
             }
           },
-          "5,2": {
+          "11,4": {
             "size": [
               1,
               1
@@ -32,7 +32,7 @@
               "_title": "Distance"
             }
           },
-          "6,2": {
+          "10,4": {
             "size": [
               1,
               1
@@ -62,10 +62,10 @@
               "imageHeight": -1
             }
           },
-          "6,1": {
+          "5,0": {
             "size": [
-              1,
-              1
+              2,
+              2
             ],
             "content": {
               "_type": "Boolean Box",
@@ -75,18 +75,7 @@
               "Colors/Color when false": "#8B0000FF"
             }
           },
-          "6,0": {
-            "size": [
-              1,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/limelight_PipelineName",
-              "_title": "limelight_PipelineName"
-            }
-          },
-          "5,0": {
+          "7,4": {
             "size": [
               1,
               1
@@ -97,9 +86,9 @@
               "_title": "limelight_Stream"
             }
           },
-          "0,0": {
+          "0,4": {
             "size": [
-              1,
+              3,
               1
             ],
             "content": {
@@ -108,9 +97,9 @@
               "_title": "Auto mode"
             }
           },
-          "1,0": {
+          "0,5": {
             "size": [
-              1,
+              3,
               1
             ],
             "content": {
@@ -119,7 +108,7 @@
               "_title": "Starting Position"
             }
           },
-          "2,0": {
+          "8,4": {
             "size": [
               1,
               1
@@ -130,7 +119,7 @@
               "_title": "Camera A1"
             }
           },
-          "3,0": {
+          "7,5": {
             "size": [
               1,
               1
@@ -139,17 +128,6 @@
               "_type": "Text View",
               "_source0": "network_table:///SmartDashboard/limelight_Interface",
               "_title": "limelight_Interface"
-            }
-          },
-          "4,0": {
-            "size": [
-              1,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Left Velocity",
-              "_title": "Left Velocity"
             }
           },
           "0,1": {
@@ -183,6 +161,74 @@
               "_type": "Text View",
               "_source0": "network_table:///SmartDashboard/Right Drive Demand",
               "_title": "Right Drive Demand"
+            }
+          },
+          "2,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Pose Theta",
+              "_title": "Robot Pose Theta"
+            }
+          },
+          "1,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Pose Y",
+              "_title": "Robot Pose Y"
+            }
+          },
+          "0,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Robot Pose X",
+              "_title": "Robot Pose X"
+            }
+          },
+          "3,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/limelight_PipelineName",
+              "_title": "limelight_PipelineName"
+            }
+          },
+          "4,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Drive brake mode",
+              "_title": "Drive brake mode",
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
+          },
+          "3,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Gyro Heading",
+              "_title": "Gyro Heading"
             }
           }
         }

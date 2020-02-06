@@ -32,7 +32,10 @@ public class Displacement1d implements State<Displacement1d> {
 
     @Override
     public boolean equals(final Object other) {
-        if (other == null || !(other instanceof Displacement1d)) return false;
+        if (!(other instanceof Displacement1d)) {
+            return false;
+        }
+
         return Util.epsilonEquals(x(), ((Displacement1d) other).x());
     }
 

@@ -13,7 +13,7 @@ import java.text.DecimalFormat;
 public class Twist2d {
     protected static final Twist2d kIdentity = new Twist2d(0.0, 0.0, 0.0);
 
-    public static final Twist2d identity() {
+    public static Twist2d identity() {
         return kIdentity;
     }
 

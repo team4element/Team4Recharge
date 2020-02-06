@@ -7,21 +7,26 @@ import com.team254.lib.physics.DriveCharacterization;
 import com.team4.lib.actionbase.WaitAction;
 import com.team4.lib.autobase.AutoModeBase;
 import com.team4.lib.autobase.AutoModeEndedException;
-import com.team4.robot.actions.CollectAccelerationData;
-import com.team4.robot.actions.CollectVelocityData;
+import com.team4.robot.actions.CollectAccelerationDataAction;
+import com.team4.robot.actions.CollectVelocityDataAction;
 
 public class CharacterizeHighGearStraight extends AutoModeBase {
+    private final boolean reverse;
+    private final boolean turn;
+
+    public CharacterizeHighGearStraight() {
+        reverse = false;
+        turn = false;
+    }
+
     @Override
     protected void routine() throws AutoModeEndedException {
-        List<DriveCharacterization.VelocityDataPoint> velocityData = new ArrayList<>();
-        List<DriveCharacterization.AccelerationDataPoint> accelerationData = new ArrayList<>();
+        List<DriveCharacterization.DataPoint> velocityData = new ArrayList<>();
+        List<DriveCharacterization.DataPoint> accelerationData = new ArrayList<>();
 
-        // runAction(new ShiftHighGearAction(false));
-        // runAction(new WaitAction(10));
-
-        runAction(new CollectVelocityData(velocityData, false, false));
+        runAction(new CollectVelocityDataAction(velocityData, reverse, turn));
         runAction(new WaitAction(10));
-        runAction(new CollectAccelerationData(accelerationData, true, false));
+        runAction(new CollectAccelerationDataAction(accelerationData, reverse, turn));
 
         DriveCharacterization.CharacterizationConstants constants = DriveCharacterization.characterizeDrive(velocityData, accelerationData);
 

@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentLinkedDeque;
  * Writes data to a CSV file
  */
 public class ReflectingCSVWriter<T> {
-    ConcurrentLinkedDeque<String> mLinesToWrite = new ConcurrentLinkedDeque<>();
-    PrintWriter mOutput = null;
-    Field[] mFields;
+    private ConcurrentLinkedDeque<String> mLinesToWrite = new ConcurrentLinkedDeque<>();
+    private PrintWriter mOutput = null;
+    private Field[] mFields;
 
     public ReflectingCSVWriter(String fileName, Class<T> typeClass) {
         mFields = typeClass.getFields();
@@ -21,7 +21,7 @@ public class ReflectingCSVWriter<T> {
             e.printStackTrace();
         }
         // Write field names.
-        StringBuffer line = new StringBuffer();
+        StringBuilder line = new StringBuilder();
         for (Field field : mFields) {
             if (line.length() != 0) {
                 line.append(", ");
@@ -32,7 +32,7 @@ public class ReflectingCSVWriter<T> {
     }
 
     public void add(T value) {
-        StringBuffer line = new StringBuffer();
+        StringBuilder line = new StringBuilder();
         for (Field field : mFields) {
             if (line.length() != 0) {
                 line.append(", ");
@@ -43,9 +43,7 @@ public class ReflectingCSVWriter<T> {
                 } else {
                     line.append(field.get(value).toString());
                 }
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-            } catch (IllegalAccessException e) {
+            } catch (IllegalArgumentException | IllegalAccessException e) {
                 e.printStackTrace();
             }
         }
