@@ -10,6 +10,7 @@ import com.team4.lib.autobase.AutoModeEndedException;
 import com.team4.lib.path.PathContainer;
 import com.team4.robot.actions.AutoSteerAndDistanceAction;
 import com.team4.robot.actions.DrivePathAction;
+import com.team4.robot.actions.DropIntakeAction;
 import com.team4.robot.actions.IntakeThroughPathAction;
 import com.team4.robot.actions.ResetPoseFromPathAction;
 import com.team4.robot.actions.ShootAction;
@@ -36,15 +37,17 @@ public class LeftToRendAndShootMode extends AutoModeBase{
 
         runAction(new ResetPoseFromPathAction(path1));
         runAction(new AutoSteerAndDistanceAction(180, 1.5));
-        runAction(new ShootAction(2.5));
+        runAction(new WaitAction(3));
+        // runAction(new ShootAction(3));
         runAction(new ParallelAction(Arrays.asList(new DrivePathAction(path1),
                     new SeriesAction(Arrays.asList(new WaitForPathMarkerAction("Begin Intake"), 
-                    new IntakeThroughPathAction())))));
-        runAction(new WaitAction(1));
+                    new IntakeThroughPathAction(false))))));
+        runAction(new WaitAction(.25));
         runAction(new DrivePathAction(path2));
-        runAction(new WaitAction(.5));
+        runAction(new WaitAction(.25));
         runAction(new AutoSteerAndDistanceAction(180, 10));
-        runAction(new ShootAction(2.5));
+        runAction(new WaitAction(3));
+        // runAction(new ShootAction(3));
 
         System.out.println(Timer.getFPGATimestamp()- startTime);
     }

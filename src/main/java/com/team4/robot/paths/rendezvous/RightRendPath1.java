@@ -15,10 +15,10 @@ public class RightRendPath1 implements PathContainer{
     public Path buildPath() {
         List<Waypoint> sWaypoints = new ArrayList<>();
         sWaypoints.add(new Waypoint(105, 145, 0, 0));
-        sWaypoints.add(new Waypoint(160, 145, 15, 50));
+        sWaypoints.add(new Waypoint(160, 145, 15, 50, "Start Intake"));
         sWaypoints.add(new Waypoint(250, 50, 5, 70));
-        sWaypoints.add(new Waypoint(225, 20, 5, 70));
-        sWaypoints.add(new Waypoint(240, -15, 0, 70));
+        sWaypoints.add(new Waypoint(220, 20, 5, 70));
+        sWaypoints.add(new Waypoint(240, -35, 0, 70));
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 

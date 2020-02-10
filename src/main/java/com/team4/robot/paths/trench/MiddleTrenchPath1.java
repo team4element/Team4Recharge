@@ -15,9 +15,9 @@ public class MiddleTrenchPath1 implements PathContainer{
     public Path buildPath() {
         List<Waypoint> sWaypoints = new ArrayList<>();
         sWaypoints.add(new Waypoint(105, 75, 0, 0));
-        sWaypoints.add(new Waypoint(205, 75, 10, 50, "Begin Intake"));
-        sWaypoints.add(new Waypoint(230, 145, 5, 70));
-        sWaypoints.add(new Waypoint(300, 155, 0, 70));
+        sWaypoints.add(new Waypoint(170, 75, 10, 70, "Start Intake"));
+        sWaypoints.add(new Waypoint(230, 115, 5, 70));
+        sWaypoints.add(new Waypoint(300, 140, 0, 80));
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 

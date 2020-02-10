@@ -15,9 +15,9 @@ public class RightTrenchPath2 implements PathContainer{
     public Path buildPath() {
         List<Waypoint> sWaypoints = new ArrayList<>();
         sWaypoints.add(new Waypoint(270, 135, 0, 0)); //Change X to 395
-        sWaypoints.add(new Waypoint(245, 140, 5, 50)); // Change X to 370
-        sWaypoints.add(new Waypoint(220, 145, 5, 70)); // Change X to 345
-        sWaypoints.add(new Waypoint(140, 145, 0, 70)); //Change X to 220
+        sWaypoints.add(new Waypoint(245, 140, 5, 80)); // Change X to 370
+        sWaypoints.add(new Waypoint(220, 145, 5, 100)); // Change X to 345
+        sWaypoints.add(new Waypoint(140, 145, 0, 100)); //Change X to 220
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 

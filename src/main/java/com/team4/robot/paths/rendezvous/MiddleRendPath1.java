@@ -23,9 +23,10 @@ public class MiddleRendPath1 implements PathContainer {
         // sWaypoints.add(new Waypoint(100,60,15, 60));
         // sWaypoints.add(new Waypoint(100,80,0,60));
         sWaypoints.add(new Waypoint(105, 75, 0, 0));
-        sWaypoints.add(new Waypoint(175, 25, 15, 50, "Begin Intake"));
-        sWaypoints.add(new Waypoint(225, 20, 15, 70));
-        sWaypoints.add(new Waypoint(240 , -15, 0, 70, "Finish Intake"));
+        sWaypoints.add(new Waypoint(120, 75, 5, 60));
+        sWaypoints.add(new Waypoint(155, 45, 15, 60, "Start Intake"));
+        sWaypoints.add(new Waypoint(205, 20, 10, 70));
+        sWaypoints.add(new Waypoint(220 , -25, 0, 80, "Finish Intake"));
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 

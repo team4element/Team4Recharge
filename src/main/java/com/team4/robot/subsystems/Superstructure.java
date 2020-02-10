@@ -4,6 +4,7 @@ import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
 import com.team4.robot.subsystems.states.ConveyorControlState;
+import com.team4.robot.subsystems.states.IntakeState;
 import com.team4.robot.subsystems.states.ShooterControlState;
 import com.team4.robot.subsystems.states.superstructure.SuperstructureState;
 
@@ -45,13 +46,13 @@ public class Superstructure extends Subsystem{
                     case IDLE:
                         mShooter.setControlState(ShooterControlState.IDLE);
                         mConveyor.setControlState(ConveyorControlState.IDLE);
-                        if(mShootCount != 0){
-                            resetCount();
-                        }
-
+                        mIntake.setControlState(IntakeState.IDLE);
                         break;
                     case Convey_Shoot:
                         handleConveyAndShoot();
+                        break;
+                    case Intake_Convey:
+                        handleIntakeAndConvey();
                         break;
                     default:
                         DriverStation.reportError("In an Invalid Superstructure State", false);
@@ -66,18 +67,37 @@ public class Superstructure extends Subsystem{
 
     private final Shooter mShooter = Shooter.getInstance();
     private final Conveyor mConveyor = Conveyor.getInstance();
+    private final Intake mIntake = Intake.getInstance();
 
     private Superstructure(){
         
     }
 
+    public synchronized void handleConveyAndConvey(){
+        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
+    }
 
+
+    public synchronized void handleIntakeAndConvey(){
+        if(mIntake.getIsDown()){
+            mIntake.setControlState(IntakeState.OPEN_LOOP);
+        }else{
+            mIntake.setControlState(IntakeState.IDLE);
+        }
+
+        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
+        
+        if(VisionTracker.getInstance().getTargetDistance() <= 250){
+            mConveyor.setFinalStage(.1);
+        }
+    }
 
     public synchronized void handleConveyAndShoot(){
+        mIntake.setControlState(IntakeState.IDLE);
         mShooter.setControlState(ShooterControlState.VELOCITY);
-        if(mShooter.getVelocity() >= mShooter.getVelocitySetpoint()){
+        if(mShooter.getVelocity() >= mShooter.getVelocitySetpoint() && mShooter.getVelocitySetpoint() != 0d){
             countShooterVelocity();
-            mConveyor.setControlState(ConveyorControlState.FORWARD);
+            mConveyor.setControlState(ConveyorControlState.MOVE_ALL_STAGES);
         }else{
             mConveyor.setControlState(ConveyorControlState.IDLE);
         }

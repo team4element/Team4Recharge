@@ -19,6 +19,7 @@ import com.team4.lib.util.SubsystemManager;
 import com.team4.lib.wpilib.TimedRobot;
 import com.team4.robot.subsystems.Conveyor;
 import com.team4.robot.subsystems.Drive;
+import com.team4.robot.subsystems.Intake;
 import com.team4.robot.subsystems.RobotStateEstimator;
 import com.team4.robot.subsystems.Shooter;
 import com.team4.robot.subsystems.Superstructure;
@@ -38,6 +39,7 @@ public class Robot extends TimedRobot{
     private final VisionTracker mVisionTracker = VisionTracker.getInstance();
     private final Shooter mShooter = Shooter.getInstance();
     private final Conveyor mConveyor = Conveyor.getInstance();
+    private final Intake mIntake = Intake.getInstance();
     private final WheelHandler mWheelHandler = WheelHandler.getInstance();
     private final Superstructure mSuperstructure = Superstructure.getInstance();
 
@@ -62,6 +64,7 @@ public class Robot extends TimedRobot{
                 mDrive,
                 mVisionTracker,
                 mShooter,
+                mIntake,
                 mConveyor,
                 mSuperstructure/*,
                 mWheelHandler*/);

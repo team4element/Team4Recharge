@@ -34,21 +34,19 @@ public class Shooter extends Subsystem{
             stop();
         }
         public void onLoop(double timestamp){
-            switch (mControlState){
-                case OPEN_LOOP:
-                    setOpenLoop(.375);
-                    break;
-                case VELOCITY:
-                // setVelocity(2150, 0);
-                    // setVelocity(ElementMath.scaleRPM(4050, ShooterConstants.kShooterGearRatio), 0);
-                    handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
-                    // handleRPM(VisionTracker.getInstance().getTargetDistance());
-                    // handleDistanceRPM(253);
-                    break;
-                case IDLE:
-                    setOpenLoop(0);
-                default:
-                    break;
+            synchronized(this){
+                switch (mControlState){
+                    case OPEN_LOOP:
+                        setOpenLoop(.375);
+                        break;
+                    case VELOCITY:
+                        handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
+                        break;
+                    case IDLE:
+                        setOpenLoop(0);
+                    default:
+                        break;
+                }
             }
         }
         public void onStop(double timestamp){
@@ -116,6 +114,7 @@ public class Shooter extends Subsystem{
         }else if (mControlState == ShooterControlState.VELOCITY){
             mMasterMotor.set(TalonFXControlMode.Velocity, mPeriodicIO.demand);
             mSlaveMotor.set(TalonFXControlMode.Velocity, mPeriodicIO.demand);
+            
         }else{ //force default Open Loop
             mMasterMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
             mSlaveMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
@@ -190,7 +189,7 @@ public class Shooter extends Subsystem{
             // if(mFlyWheelDistance >= 12*12 && mFlyWheelDistance <= 13.2*12){
                 // rpm = 3750;
             // }else{
-                rpm = ((0.013533 * Math.pow(mFlyWheelDistance, 2)) + (1.0528 * mFlyWheelDistance) + 3155.6707); 
+                rpm = ((0.015533 * Math.pow(mFlyWheelDistance, 2)) + (1.0628 * mFlyWheelDistance) + 3380.6707); 
                 // rpm *= .9;
                 // rpm = (0.0035*Math.pow(mFlyWheelDistance, 3)) - (1.7421 * Math.pow(mFlyWheelDistance, 2)) + (244.28 * mFlyWheelDistance) - 2250;
             // }

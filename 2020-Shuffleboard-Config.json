@@ -86,7 +86,7 @@
               "_title": "limelight_Stream"
             }
           },
-          "0,4": {
+          "0,3": {
             "size": [
               3,
               1
@@ -97,7 +97,7 @@
               "_title": "Auto mode"
             }
           },
-          "0,5": {
+          "0,4": {
             "size": [
               3,
               1
@@ -229,6 +229,30 @@
               "_type": "Text View",
               "_source0": "network_table:///SmartDashboard/Gyro Heading",
               "_title": "Gyro Heading"
+            }
+          },
+          "4,1": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Boolean Box",
+              "_source0": "network_table:///SmartDashboard/Is Intake Down",
+              "_title": "Is Intake Down",
+              "Colors/Color when true": "#7CFC00FF",
+              "Colors/Color when false": "#8B0000FF"
+            }
+          },
+          "0,2": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Moving Average Distance",
+              "_title": "Moving Average Distance"
             }
           }
         }

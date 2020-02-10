@@ -52,9 +52,9 @@ public class AutoConstants{
     public static final int kShooterIZone = 0;
     public static final double kShooterRampRate = 0.0;
 
-    public static final double kLimelightAngleKp = .05;
+    public static final double kLimelightAngleKp = .04;
     public static final double kLimelightAngleKi = .0;
-    public static final double kLimelightAngleKd = .0;
+    public static final double kLimelightAngleKd = 0.0;
 
     public static final double kLimelightDistanceKp = .02;
     public static final double kLimelightDistanceKi = .0;

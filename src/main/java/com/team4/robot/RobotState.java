@@ -154,6 +154,8 @@ public class RobotState {
         return Pose2d.identity();
     }
 
+    
+
     public synchronized void outputToSmartDashboard() {
         Pose2d odometry = getLatestFieldToVehicle().getValue();
         SmartDashboard.putNumber("Robot Pose X", odometry.getTranslation().x());

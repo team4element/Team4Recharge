@@ -16,9 +16,10 @@ public class LeftRendPath2 implements PathContainer{
     public Path buildPath() {
         List<Waypoint> sWaypoints = new ArrayList<>();
         sWaypoints.add(new Waypoint(240 , -15, 0, 0));
-        // sWaypoints.add(new Waypoint(190, -15, 15, 45));
-        sWaypoints.add(new Waypoint(155, 75, 15, 70));
-        sWaypoints.add(new Waypoint(130, 75, 0, 70));
+        sWaypoints.add(new Waypoint(190, -15, 5, 80));
+        sWaypoints.add(new Waypoint(190, 25, 15, 80));
+        sWaypoints.add(new Waypoint(175, 65, 5, 100));
+        sWaypoints.add(new Waypoint(130, 65, 0, 100));        
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 

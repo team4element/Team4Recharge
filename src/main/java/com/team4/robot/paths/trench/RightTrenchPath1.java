@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.team254.lib.control.Path;
 import com.team254.lib.geometry.Pose2d;
+import com.team254.lib.geometry.Rotation2d;
 import com.team4.lib.path.PathBuilder.Waypoint;
 import com.team4.lib.path.PathBuilder;
 import com.team4.lib.path.PathContainer;
@@ -23,7 +24,7 @@ public class RightTrenchPath1 implements PathContainer{
 
     @Override
     public Pose2d getStartPose() {
-        return null;
+        return new Pose2d(105, 145, Rotation2d.fromDegrees(180.0));
     }
 
     @Override

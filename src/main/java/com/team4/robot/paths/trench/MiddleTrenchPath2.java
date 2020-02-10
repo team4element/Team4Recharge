@@ -14,9 +14,9 @@ public class MiddleTrenchPath2 implements PathContainer {
     @Override
     public Path buildPath() {
         List<Waypoint> sWaypoints = new ArrayList<>();
-        sWaypoints.add(new Waypoint(300, 145, 0, 0));
-        sWaypoints.add(new Waypoint(230, 145, 30, 50));
-        sWaypoints.add(new Waypoint(160, 130, 0, 70));
+        sWaypoints.add(new Waypoint(300, 140, 0, 0));
+        sWaypoints.add(new Waypoint(230, 140, 30, 80));
+        sWaypoints.add(new Waypoint(160, 130, 0, 100));
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 
