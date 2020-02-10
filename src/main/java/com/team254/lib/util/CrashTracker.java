@@ -13,10 +13,6 @@ public class CrashTracker {
 
     private static final UUID RUN_INSTANCE_UUID = UUID.randomUUID();
 
-    public static void logRobotStartup() {
-        logMarker("robot startup");
-    }
-
     public static void logRobotConstruction() {
         logMarker("robot startup");
     }

@@ -18,6 +18,8 @@ public class VisionTracker extends Subsystem {
 	private static VisionTracker mInstance = new VisionTracker();
 	private PeriodicIO mPeriodicIO = new PeriodicIO();
 
+	private double prevDistance = 0;
+	private double prevVertDev = 0;
 	// private double linearDistance, exponDistance, powDistance, quadDistance;
 
 	private boolean mVisionEnabled = false;
@@ -119,9 +121,24 @@ public class VisionTracker extends Subsystem {
 				mPeriodicIO.targetSkew = mCurrentTargetingLimelightNT.getEntry("ts").getDouble(0);
 				mPeriodicIO.targetLatency = mCurrentTargetingLimelightNT.getEntry("tl").getDouble(0);
 				mPeriodicIO.getPipelineValue = mCurrentTargetingLimelightNT.getEntry("getpipe").getDouble(0);
-				mPeriodicIO.cameraA1 = Math.toDegrees(Math.atan((TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens)/220 /*240 inches to find what A1 is */))-mPeriodicIO.targetVerticalDeviation;
+				mPeriodicIO.cameraA1 = Math.toDegrees(Math.atan((TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens)/(240-20) /*240 inches to find what A1 is */))-mPeriodicIO.targetVerticalDeviation;
 
 				try {
+				
+					mPeriodicIO.targetDistance =
+					(TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens) /
+					/*	Math.toDegrees(*/Math.tan(Math.toRadians(TargetingConstants.kFloorToLensAngle + mPeriodicIO.targetVerticalDeviation))/*)*/;
+					mPeriodicIO.targetDistance += 20;
+					
+					if(mPeriodicIO.targetDistance > 0 && mPeriodicIO.targetDistance != prevDistance){
+								mPeriodicIO.calculatedDistanceAverage.add(mPeriodicIO.targetDistance);
+								prevDistance = mPeriodicIO.targetDistance;
+					}else if(mPeriodicIO.targetDistance == prevDistance){
+					
+					}else{
+						mPeriodicIO.calculatedDistanceAverage.clear();
+					}
+				
 					double xArr[] = mCurrentTargetingLimelightNT.getEntry("tcornx").getDoubleArray(new double[]{0});
 					double yArr[] = mCurrentTargetingLimelightNT.getEntry("tcorny").getDoubleArray(new double[]{0});
 
@@ -138,21 +155,17 @@ public class VisionTracker extends Subsystem {
 
 						double upperLineSlope = Math.abs((upperRightPoint.y() - upperLeftPoint.y()) / (upperRightPoint.x() - upperLeftPoint.x()));
 						double lowerLineSlope = (lowerRightPoint.y() - lowerLeftPoint.y()) / (lowerRightPoint.x() - lowerLeftPoint.x());
-						mPeriodicIO.calculatedSkewFactor.addNumber(Math.toDegrees(Math.atan((upperLineSlope + Math.abs(lowerLineSlope)) / 2.0)) * Math.signum(lowerLineSlope));
-					
+						mPeriodicIO.calculatedSkewFactor.add(Math.toDegrees(Math.atan((upperLineSlope + Math.abs(lowerLineSlope)) / 2.0)) * Math.signum(lowerLineSlope));
+						
+
+						
 					} else {
 						mPeriodicIO.calculatedSkewFactor.clear();
 					}
 				} catch (Exception ex) {
 					CrashTracker.logThrowableCrash(ex);
 				}
-
-				mPeriodicIO.targetDistance =
-//						(TargetingConstants.kRocketBallTargetHeight - TargetingConstants.kLimelightFrontMountedHeightToFloor) /
-//								Math.atan(TargetingConstants.kLimelightFrontMountedAngleWrtFloor + mPeriodicIO.targetVerticalDeviation) :
-						(TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens) /
-							/*	Math.toDegrees(*/Math.tan(Math.toRadians(TargetingConstants.kFloorToLensAngle + mPeriodicIO.targetVerticalDeviation))/*)*/;
-				mPeriodicIO.targetDistance += 20;
+				
 				// linearDistance = (1.1751* mPeriodicIO.targetDistance) - 13;
 				// exponDistance = 71.737 * Math.pow(Math.E, (.0056*mPeriodicIO.targetDistance));
 				// powDistance = .77 * Math.pow(mPeriodicIO.targetDistance, 1.0688);
@@ -168,6 +181,7 @@ public class VisionTracker extends Subsystem {
 				mPeriodicIO.getPipelineValue = 0;
 				mPeriodicIO.targetDistance = 0;
 				mPeriodicIO.cameraA1 = 0;
+				mPeriodicIO.calculatedDistanceAverage.clear();
 				mPeriodicIO.calculatedSkewFactor.clear();
 			}
 		}
@@ -201,6 +215,7 @@ public class VisionTracker extends Subsystem {
 	public void outputTelemetry() {
 		SmartDashboard.putNumber("Valid Target Value", mPeriodicIO.targetValid);
 		SmartDashboard.putNumber("Distance", mPeriodicIO.targetDistance);
+		SmartDashboard.putNumber("Moving Average Distance", mPeriodicIO.calculatedDistanceAverage.getAverage());
 		// SmartDashboard.putNumber("Linear Distance", linearDistance);
 		// SmartDashboard.putNumber("Exponential Distance", exponDistance);
 		// SmartDashboard.putNumber("Power Distance", powDistance);
@@ -235,6 +250,7 @@ public class VisionTracker extends Subsystem {
 		public double targetDistance;
 		public double cameraA1;
 		public double getPipelineValue;
+		public MovingAverage calculatedDistanceAverage = new MovingAverage(50);
 		public MovingAverage calculatedSkewFactor = new MovingAverage(10);
 
 		public ArrayList<Translation2d> pointArray = new ArrayList<>();

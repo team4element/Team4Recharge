@@ -2,6 +2,7 @@ package com.team4.robot.actions;
 
 import com.team4.lib.actionbase.Action;
 import com.team4.robot.subsystems.Drive;
+import com.team4.robot.subsystems.Shooter;
 import com.team4.robot.subsystems.Superstructure;
 import com.team4.robot.subsystems.VisionTracker;
 import com.team4.robot.subsystems.states.superstructure.SuperstructureState;
@@ -41,5 +42,6 @@ public class ShootAction implements Action{
         VisionTracker.getInstance().setVisionEnabled(false);
         Drive.getInstance().setBrakeMode(false);
         mSuperstructure.setControlState(SuperstructureState.IDLE);
+        Shooter.getInstance().setBrakeMode(false);
     }
 }

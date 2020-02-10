@@ -172,7 +172,7 @@ public class PolynomialRegression {
                 s.append(String.format("%.2f x^%d + ", beta(j), j));
             j--;
         }
-        s = s.append("  (R^2 = " + String.format("%.3f", R2()) + ")");
+        s.append("  (R^2 = " + String.format("%.3f", R2()) + ")");
         return s.toString();
     }
 }

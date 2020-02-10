@@ -3,7 +3,7 @@ package com.team4.robot.controlboard;
 public interface IOperatorControlBoard{
     boolean getShoot();
 
-    boolean getMoveConveyor();
+    boolean getIntake();
 
     boolean getUpdateControlPanelMode();
 

@@ -19,8 +19,6 @@ import edu.wpi.first.wpilibj.Notifier;
 public class HIDController{
     private static HIDController instance = null;
 
-    private boolean startShoot = false;
-
     public static HIDController getInstance(){
         if(instance == null){
             instance = new HIDController();
@@ -68,43 +66,23 @@ public class HIDController{
                 // mVisionTracker.setVisionEnabled(true);     
     
                 if (mVisionTracker.isVisionEnabled() && mVisionTracker.isTargetFound()) {
-        
                         turn = autoSteerPID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev());
                     // turn = 0d;
                     // turn = Math.max(Math.min(VisionTracker.getInstance().getTargetHorizAngleDev() * 0.01, 0.1), -0.1);
-                    mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn * .7, mControlBoard.getQuickTurn()));
+                    mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
                 }else{
                     turn = ElementMath.handleDeadband(-mControlBoard.getTurn(), Constants.kJoystickThreshold);                
                     mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
                 }
-    
-    
+                
+            
                 if(mControlBoard.getShoot()){
-                    if(!startShoot){
-                        mSuperstructure.resetCount();
-                        startShoot = true;
-                    }
                     mSuperstructure.setControlState(SuperstructureState.Convey_Shoot);
-                    if(mSuperstructure.getShooterCount() >= 1){
-                        System.out.println("Counted Correctly: " + mSuperstructure.getShooterCount());
-                        // mSuperstructure.setControlState(SuperstructureState.IDLE);
-                    }
+                }else if(mControlBoard.getIntake()){
+                    mSuperstructure.setControlState(SuperstructureState.Intake_Convey);
                 }else{
-                    startShoot = false;
                     mSuperstructure.setControlState(SuperstructureState.IDLE);
                 }
-
-                if(mControlBoard.getKillCommand()){
-                }
-                
-    
-                if(mControlBoard.getMoveConveyor()){
-                    // mConveyor.setControlState(ConveyorControlState.FORWARD);
-                }else{
-                    // mConveyor.setControlState(ConveyorControlState.IDLE);
-                }
-    
-    
             }   
         }
     };

@@ -24,7 +24,7 @@ public class GamepadOperatorControlBoard implements IOperatorControlBoard{
         return mController.getButton(Button.LB);
     }
     @Override
-    public boolean getMoveConveyor() {
+    public boolean getIntake() {
         return mController.getButton(Button.RB);
     }
 

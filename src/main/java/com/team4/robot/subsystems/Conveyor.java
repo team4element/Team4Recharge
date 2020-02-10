@@ -6,15 +6,15 @@ import com.team4.lib.drivers.LazyVictorSPX;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
-import com.team4.robot.constants.ConveyorConstants;
 import com.team4.robot.subsystems.states.ConveyorControlState;
+import com.team4.robot.constants.ConveyorConstants;
 
 public class Conveyor extends Subsystem{
     private static Conveyor mInstance = null;
 
     private ConveyorControlState mCurrentState = ConveyorControlState.IDLE;
 
-    private VictorSPX mMotor;
+    private VictorSPX mFirstStageRightMotor, mFirstStageLeftMotor, mHopperMotor, mFinalStageTopMotor, mFinalStageBottomMotor;
 
     private PeriodicIO mPeriodicIO;
 
@@ -28,14 +28,29 @@ public class Conveyor extends Subsystem{
         @Override
         public void onLoop(double timestamp) {
             switch(mCurrentState){
-                case FORWARD:
-                    setOpenLoop(.6);
+                case MOVE_FINAL_STAGE:
+                    setFinalStageOnly(.6);
                     break;
-                case REVERSE:
-                    setOpenLoop(-.6);
+                case MOVE_FIRST_STAGE:
+                    setFirstStageOnly(.6);
+                    break;
+                case MOVE_FINAL_UNJAM:
+                    setFinalStage(.6);
+                    setHopper(.6);
+                    // setFirstStage(0);
+                    break;
+                case MOVE_FIRST_UNJAM:
+                    setFirstStage(.6);
+                    setHopper(.6);
+                    // setFinalStage(0);
+                    break;
+                case MOVE_ALL_STAGES:
+                    setFirstStage(.6);
+                    setHopper(.6);
+                    setFinalStage(.6);
                     break;
                 case IDLE:
-                    setOpenLoop(0);
+                    setFinalStageOnly(0);
                     break;
                 default:
                     break;
@@ -60,14 +75,27 @@ public class Conveyor extends Subsystem{
     
 
     private Conveyor(){
-        mMotor = new LazyVictorSPX(ConveyorConstants.kMotorId);
-    
+        mFinalStageBottomMotor = new LazyVictorSPX(ConveyorConstants.kFinalStageBottomMotor);
+        // mFinalStageTopMotor = new LazyVictorSPX(ConveyorConstants.kFinalStageTopMotor);
+
+        // mHopperMotor = new LazyVictorSPX(ConveyorConstants.kHopperMotor);
+
+        // mFirstStageLeftMotor = new LazyVictorSPX(ConveyorConstants.kFirstStageLeftMotor);
+        // mFirstStageRightMotor = new LazyVictorSPX(ConveyorConstants.kFirstStageRightMotor);
+
+        // mFirstStageRightMotor.follow(mFirstStageLeftMotor);
+        // mFirstStageRightMotor.setInverted(false);
+        
+        // mFinalStageTopMotor.follow(mFinalStageBottomMotor);
+
         mPeriodicIO = new PeriodicIO();
     }
 
     @Override
     public void writePeriodicOutputs() {
-        mMotor.set(ControlMode.PercentOutput, mPeriodicIO.demand);
+        // mFirstStageLeftMotor.set(ControlMode.PercentOutput, mPeriodicIO.first_demand);
+        // mHopperMotor.set(ControlMode.PercentOutput, mPeriodicIO.unjam_demand);
+        mFinalStageBottomMotor.set(ControlMode.PercentOutput, mPeriodicIO.final_demand);
     }
 
     @Override
@@ -86,8 +114,34 @@ public class Conveyor extends Subsystem{
         mEnabledLooper.addLoop(mLoop);
     }
     
-    private void setOpenLoop(double pow){
-        mPeriodicIO.demand = pow;
+    public void setFinalStage(double pow){
+        mPeriodicIO.final_demand = pow;
+    }
+
+    private void setFinalStageOnly(double pow){
+        mPeriodicIO.first_demand = 0;
+        mPeriodicIO.unjam_demand = 0;
+        setFinalStage(pow);
+    }
+
+    private void setFirstStage(double pow){
+        mPeriodicIO.first_demand = pow;
+    }
+
+    private void setHopper(double pow){
+        mPeriodicIO.unjam_demand = pow;
+    }
+
+    public void setHopperOnly(double pow){
+        mPeriodicIO.first_demand = 0;
+        mPeriodicIO.final_demand = 0;
+        setHopper(pow);
+    }
+
+    public void setFirstStageOnly(double pow){
+        mPeriodicIO.unjam_demand = 0;
+        mPeriodicIO.final_demand = 0;
+        setFirstStage(pow);
     }
 
     public void setControlState(ConveyorControlState state){
@@ -96,10 +150,14 @@ public class Conveyor extends Subsystem{
 
     @Override
     public void stop() {
-        mPeriodicIO.demand = 0;
+        mPeriodicIO.first_demand = 0;
+        mPeriodicIO.final_demand = 0;
+        mPeriodicIO.unjam_demand = 0;
     }
 
     protected static class PeriodicIO{
-        public double demand;
+        public double final_demand;
+        public double first_demand;
+        public double unjam_demand;
     }
 }

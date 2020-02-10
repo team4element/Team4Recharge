@@ -30,6 +30,21 @@ public class AutoConstants{
     public static final double kDeltaLookAhead = kMaxLookAhead - kMinLookAhead;
     public static final double kDeltaLookAheadSpeed = kMaxLookAheadSpeed - kMinLookAheadSpeed;
 
+    public static final double kInertiaSteeringGain = 0.0; // angular velocity command is multiplied by this gain *
+                                                     // our speed
+                                                     // in inches per sec
+    public static final double kPathFollowingMaxAccel = 12.0 * 12.0;  // inches per second ^ 2
+    public static final double kPathFollowingMaxVel = 16.0 * 12.0; // inches per second
+    public static final double kPathFollowingProfileKp = 0.3 / 12.0;  // % throttle per inch of error
+    public static final double kPathFollowingProfileKi = 0.0;
+    public static final double kPathFollowingProfileKv = 0.01 / 12.0;  // % throttle per inch/s of error
+    public static final double kPathFollowingProfileKffv = 0.003889;  // % throttle per inch/s
+    public static final double kPathFollowingProfileKffa = 0.001415;  // % throttle per inch/s^2
+    public static final double kPathFollowingProfileKs = 0.1801 / 12.0;  // % throttle
+    public static final double kPathFollowingGoalPosTolerance = 3.0;
+    public static final double kPathFollowingGoalVelTolerance = 12.0;
+    public static final double kPathStopSteeringDistance = 12.0;
+
     public static final double kShooterKp = 1.1;
     public static final double kShooterKi = 0.0;
     public static final double kShooterKd = 1.25;
@@ -37,9 +52,9 @@ public class AutoConstants{
     public static final int kShooterIZone = 0;
     public static final double kShooterRampRate = 0.0;
 
-    public static final double kLimelightAngleKp = .05;
+    public static final double kLimelightAngleKp = .04;
     public static final double kLimelightAngleKi = .0;
-    public static final double kLimelightAngleKd = .0;
+    public static final double kLimelightAngleKd = 0.0;
 
     public static final double kLimelightDistanceKp = .02;
     public static final double kLimelightDistanceKi = .0;

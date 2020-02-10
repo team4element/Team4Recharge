@@ -16,7 +16,7 @@ public class AutoSteerAndDistanceAction implements Action{
     private final VisionTracker mTracker = VisionTracker.getInstance();
 
     private final double distanceTolerance = 1;
-    private final double angleTolerance = 1;
+    private final double angleTolerance = .02;
 
     private SynchronousPIDF distancePID, anglePID;
 
@@ -48,8 +48,8 @@ public class AutoSteerAndDistanceAction implements Action{
     @Override
     public void update() {
         
-        double output = distancePID.calculate(mTracker.getTargetDistance()) * .6;
-        double turn = anglePID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev()) * .7;
+        double output = distancePID.calculate(mTracker.getTargetDistance()) * .7;
+        double turn = anglePID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev());
 
             // DriveSignal setpoint = Kinematics.inverseKinematics(new Twist2d(-output, 0, -turn));
             DriveSignal setpoint = DriveHelper.getInstance().elementDrive(output, turn, false);

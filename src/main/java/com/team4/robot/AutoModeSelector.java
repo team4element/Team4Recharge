@@ -11,6 +11,7 @@ import com.team4.robot.auto.modes.MidToRendAndShootMode;
 import com.team4.robot.auto.modes.MidToTrenchAndShootMode;
 import com.team4.robot.auto.modes.RightToRendAndShootMode;
 import com.team4.robot.auto.modes.RightToTrenchAndShootMode;
+import com.team4.robot.auto.modes.SteerAndShootAction;
 import com.team4.robot.auto.modes.TestMode;
 
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -20,7 +21,7 @@ public class AutoModeSelector {
 
     //TODO: add automodes and starting positions
 
-    enum StartingPosition {
+    public enum StartingPosition {
         LEFT,
         RIGHT,
         MID
@@ -30,8 +31,9 @@ public class AutoModeSelector {
         DO_NOTHING,
         CHARACTERIZE_DRIVE_BASE,
         TEST,
-        RENDEVOUS,
-        TRENCH
+        RENDEZVOUS,
+        TRENCH,
+        SHOOT
     }
 
     private DesiredMode mCachedDesiredMode = null;
@@ -52,9 +54,10 @@ public class AutoModeSelector {
         mModeChooser = new SendableChooser<>();
         mModeChooser.setDefaultOption("Do Nothing", DesiredMode.DO_NOTHING);
         mModeChooser.addOption("Drive Characterization", DesiredMode.CHARACTERIZE_DRIVE_BASE);
-        mModeChooser.addOption("Rendevous", DesiredMode.RENDEVOUS);
+        mModeChooser.addOption("Rendezvous", DesiredMode.RENDEZVOUS);
         mModeChooser.addOption("Trench", DesiredMode.TRENCH);
         mModeChooser.addOption("Test", DesiredMode.TEST);
+        mModeChooser.addOption("Shoot Mode", DesiredMode.SHOOT);
         SmartDashboard.putData("Auto mode", mModeChooser);
     }
 
@@ -76,7 +79,7 @@ public class AutoModeSelector {
                 return Optional.of(new DoNothingMode());
             case CHARACTERIZE_DRIVE_BASE:
                 return Optional.of(new CharacterizeHighGearStraight());
-            case RENDEVOUS:
+            case RENDEZVOUS:
                 switch (position){
                     case MID:
                         return Optional.of(new MidToRendAndShootMode());
@@ -97,6 +100,8 @@ public class AutoModeSelector {
                     case LEFT:
                         return Optional.of(new LeftToTrenchAndShootMode());
                 }
+            case SHOOT:
+                return Optional.of(new SteerAndShootAction(position));
             case TEST:
                 return Optional.of(new TestMode());
             default:

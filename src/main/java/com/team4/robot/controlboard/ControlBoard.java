@@ -19,8 +19,8 @@ public class ControlBoard implements IControlBoard{
     }
 
     @Override
-    public boolean getMoveConveyor() {
-        return mOperatorControlBoard.getMoveConveyor();
+    public boolean getIntake() {
+        return mOperatorControlBoard.getIntake();
     }
 
     @Override
