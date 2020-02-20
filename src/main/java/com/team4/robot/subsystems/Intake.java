@@ -1,8 +1,8 @@
 package com.team4.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
-import com.team4.lib.drivers.LazyVictorSPX;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
@@ -17,9 +17,9 @@ public class Intake extends Subsystem{
 
     private IntakeState mCurrentState = IntakeState.IDLE;
 
-    private VictorSPX mMotor;
+    private TalonSRX mMotor;
     
-    private boolean mIsDown = false;
+    private boolean mIsDown = true;
     
     private Solenoid mLeftPiston, mRightPiston;
 
@@ -34,7 +34,7 @@ public class Intake extends Subsystem{
 
     private Intake(){
    
-        mMotor = new LazyVictorSPX(IntakeConstants.kIntakeMotor);
+        mMotor = CANSpeedControllerFactory.createDefaultTalonSRX(IntakeConstants.kIntakeMotor);
         mMotor.setInverted(true);
 
         mLeftPiston = new Solenoid(IntakeConstants.kLeftSolenoidId);
@@ -90,11 +90,11 @@ public class Intake extends Subsystem{
             mCurrentState = IntakeState.OPEN_LOOP;
         }
 
-        if(mIsDown && signal != 0){
+        // if(mIsDown && signal != 0){
             mPeriodicIO.demand = signal;
-        }else{
-            mPeriodicIO.demand = 0;
-        }
+        // }else{
+            // mPeriodicIO.demand = 0;
+        // }
     }
 
     public void setControlState(IntakeState state){

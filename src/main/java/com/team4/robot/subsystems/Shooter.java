@@ -37,7 +37,7 @@ public class Shooter extends Subsystem{
             synchronized(this){
                 switch (mControlState){
                     case OPEN_LOOP:
-                        setOpenLoop(.375);
+                        setOpenLoop(-.30);
                         break;
                     case VELOCITY:
                         handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());

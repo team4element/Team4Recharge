@@ -1,7 +1,9 @@
 package com.team4.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.team4.lib.drivers.LazyTalonSRX;
 import com.team4.lib.drivers.LazyVictorSPX;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
@@ -14,7 +16,8 @@ public class Conveyor extends Subsystem{
 
     private ConveyorControlState mCurrentState = ConveyorControlState.IDLE;
 
-    private VictorSPX mFirstStageRightMotor, mFirstStageLeftMotor, mHopperMotor, mFinalStageTopMotor, mFinalStageBottomMotor;
+    private VictorSPX mFirstStageRightMotor, mHopperMotor, mFinalStageTopMotor;
+    private TalonSRX mFirstStageLeftMotor, mFinalStageBottomMotor;
 
     private PeriodicIO mPeriodicIO;
 
@@ -29,25 +32,25 @@ public class Conveyor extends Subsystem{
         public void onLoop(double timestamp) {
             switch(mCurrentState){
                 case MOVE_FINAL_STAGE:
-                    setFinalStageOnly(.6);
+                    setFinalStageOnly(1);
                     break;
                 case MOVE_FIRST_STAGE:
-                    setFirstStageOnly(.6);
+                    setFirstStageOnly(1);
                     break;
                 case MOVE_FINAL_UNJAM:
-                    setFinalStage(.6);
-                    setHopper(.6);
+                    setFinalStage(-1);
+                    setHopper(1);
                     // setFirstStage(0);
                     break;
                 case MOVE_FIRST_UNJAM:
-                    setFirstStage(.6);
-                    setHopper(.6);
+                    setFirstStage(1);
+                    setHopper(1);
                     // setFinalStage(0);
                     break;
                 case MOVE_ALL_STAGES:
-                    setFirstStage(.6);
-                    setHopper(.6);
-                    setFinalStage(.6);
+                    setFirstStage(1);
+                    setHopper(1);
+                    setFinalStage(1);
                     break;
                 case IDLE:
                     setFinalStageOnly(0);
@@ -75,27 +78,25 @@ public class Conveyor extends Subsystem{
     
 
     private Conveyor(){
-        mFinalStageBottomMotor = new LazyVictorSPX(ConveyorConstants.kFinalStageBottomMotor);
-        // mFinalStageTopMotor = new LazyVictorSPX(ConveyorConstants.kFinalStageTopMotor);
+        mFinalStageBottomMotor = new LazyTalonSRX(ConveyorConstants.kFinalStageBottomMotor);
+        mFinalStageTopMotor = new LazyVictorSPX(ConveyorConstants.kFinalStageTopMotor);
 
-        // mHopperMotor = new LazyVictorSPX(ConveyorConstants.kHopperMotor);
+        mHopperMotor = new LazyVictorSPX(ConveyorConstants.kHopperMotor);
 
-        // mFirstStageLeftMotor = new LazyVictorSPX(ConveyorConstants.kFirstStageLeftMotor);
-        // mFirstStageRightMotor = new LazyVictorSPX(ConveyorConstants.kFirstStageRightMotor);
+        mFirstStageLeftMotor = new LazyTalonSRX(ConveyorConstants.kFirstStageLeftMotor);
+        mFirstStageRightMotor = new LazyVictorSPX(ConveyorConstants.kFirstStageRightMotor);
 
-        // mFirstStageRightMotor.follow(mFirstStageLeftMotor);
-        // mFirstStageRightMotor.setInverted(false);
-        
-        // mFinalStageTopMotor.follow(mFinalStageBottomMotor);
-
+        mFirstStageRightMotor.follow(mFirstStageLeftMotor);
+        mFirstStageRightMotor.setInverted(false);
         mPeriodicIO = new PeriodicIO();
     }
 
     @Override
     public void writePeriodicOutputs() {
-        // mFirstStageLeftMotor.set(ControlMode.PercentOutput, mPeriodicIO.first_demand);
-        // mHopperMotor.set(ControlMode.PercentOutput, mPeriodicIO.unjam_demand);
+        mFirstStageLeftMotor.set(ControlMode.PercentOutput, mPeriodicIO.first_demand);
+        mHopperMotor.set(ControlMode.PercentOutput, mPeriodicIO.unjam_demand);
         mFinalStageBottomMotor.set(ControlMode.PercentOutput, mPeriodicIO.final_demand);
+        mFinalStageTopMotor.set(ControlMode.PercentOutput, mPeriodicIO.final_demand);
     }
 
     @Override

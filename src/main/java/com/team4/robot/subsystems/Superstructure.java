@@ -85,11 +85,11 @@ public class Superstructure extends Subsystem{
 
 
     public synchronized void handleIntakeAndConvey(){
-        if(mIntake.getIsDown()){
+        // if(mIntake.getIsDown()){
             mIntake.setControlState(IntakeState.OPEN_LOOP);
-        }else{
-            mIntake.setControlState(IntakeState.IDLE);
-        }
+        // }else{
+            // mIntake.setControlState(IntakeState.IDLE);
+        // }
 
         mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
         
@@ -100,13 +100,14 @@ public class Superstructure extends Subsystem{
 
     public synchronized void handleConveyAndShoot(){
         mIntake.setControlState(IntakeState.IDLE);
-        mShooter.setControlState(ShooterControlState.VELOCITY);
-        if(mShooter.getVelocity() >= mShooter.getVelocitySetpoint() && mShooter.getVelocitySetpoint() != 0d){
-            countShooterVelocity();
-            mConveyor.setControlState(ConveyorControlState.MOVE_ALL_STAGES);
-        }else{
-            mConveyor.setControlState(ConveyorControlState.IDLE);
-        }
+        // mShooter.setControlState(ShooterControlState.VELOCITY);
+        mShooter.setControlState(ShooterControlState.OPEN_LOOP);
+        // if(mShooter.getVelocity() >= mShooter.getVelocitySetpoint() && mShooter.getVelocitySetpoint() != 0d){
+            // countShooterVelocity();
+            mConveyor.setControlState(ConveyorControlState.MOVE_FINAL_UNJAM);
+        // }else{
+            // mConveyor.setControlState(ConveyorControlState.IDLE);
+        // }
     }
 
     public synchronized void handleWheelRotation(){

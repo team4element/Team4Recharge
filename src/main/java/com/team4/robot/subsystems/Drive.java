@@ -119,16 +119,16 @@ public class Drive extends Subsystem {
 
         // Start all Talons in open loop mode.
         mLeftMaster = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kLeftDriveMasterId);
-        TalonUtil.configureTalonFX(mLeftMaster, true);
+        TalonUtil.configureTalonFX(mLeftMaster, true, true);
 
-        mLeftSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kLeftDriveSlaveAId, mLeftMaster);
+        mLeftSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kLeftDriveSlaveId, mLeftMaster);
         TalonUtil.configureTalonFX(mLeftSlave, true, false);
 
         mRightMaster = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kRightDriveMasterId);
-        TalonUtil.configureTalonFX(mRightMaster, false);
+        TalonUtil.configureTalonFX(mRightMaster, false, true);
 
-        mRightSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kRightDriveSlaveAId, mRightMaster);
-        TalonUtil.configureTalonFX(mRightSlave, false);
+        mRightSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kRightDriveSlaveId, mRightMaster);
+        TalonUtil.configureTalonFX(mRightSlave, false, false);
 
         mNavX = new NavX();
         mLeftSlave.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer.value, 10, 10);

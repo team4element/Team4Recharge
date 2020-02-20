@@ -2,9 +2,9 @@ package com.team4.robot.constants;
 
 public class DriveConstants {
     public static final int kLeftDriveMasterId = 1;
-    public static final int kLeftDriveSlaveAId = 0;
-    public static final int kRightDriveMasterId = 4;
-    public static final int kRightDriveSlaveAId = 3;
+    public static final int kLeftDriveSlaveId = 2;
+    public static final int kRightDriveMasterId = 3;
+    public static final int kRightDriveSlaveId = 4;
     
     public static final double kDriveEncoderPPR = 4096.0;
 

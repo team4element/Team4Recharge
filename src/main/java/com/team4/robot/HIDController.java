@@ -150,7 +150,7 @@ public class HIDController{
                     songJustChange = false;
                 }
 
-                OrchestraUtil.playSong(mSongChooser.getSelectedSong());
+                // OrchestraUtil.playSong(mSongChooser.getSelectedSong());
 
             }   
         }

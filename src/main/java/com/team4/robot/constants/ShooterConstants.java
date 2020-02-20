@@ -3,8 +3,8 @@ package com.team4.robot.constants;
 import com.team254.lib.util.Units;
 
 public class ShooterConstants {
-    public static final int kMasterMotorId = 6;
-    public static final int kSlaveMotorId = 7;
+    public static final int kMasterMotorId = 5;
+    public static final int kSlaveMotorId = 6;
     
     public static final double kShooterHeight = Units.inches_to_meters(25);
     public static final double kShooterAngle = Math.PI/4;

@@ -67,7 +67,7 @@ public class TalonUtil {
     public static void configureTalonFX(TalonFX talon, boolean left, boolean master) {
         // talon.setInverted(!left);
         talon.setInverted(left ? TalonFXInvertType.CounterClockwise : TalonFXInvertType.Clockwise);
-        configureTalonFX(talon, master, false);
+        configureTalonFX(talon, master);
     }
 
     public static void configureTalonSRX(TalonSRX talon) {
