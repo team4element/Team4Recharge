@@ -38,7 +38,7 @@ public class MidToRendAndShootMode extends AutoModeBase{
         
         final double startTime = Timer.getFPGATimestamp();
         runAction(new ResetPoseFromPathAction(path1));
-        runAction(new AutoSteerAndDistanceAction(160, 1.5));
+        runAction(new AutoSteerAndDistanceAction(155, 1.5));
         runAction(new WaitAction(3));
         // runAction(new ShootAction(3));
         // runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(180)));

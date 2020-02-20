@@ -18,10 +18,6 @@ public class VisionTracker extends Subsystem {
 	private static VisionTracker mInstance = new VisionTracker();
 	private PeriodicIO mPeriodicIO = new PeriodicIO();
 
-	private double prevDistance = 0;
-	private double prevVertDev = 0;
-	// private double linearDistance, exponDistance, powDistance, quadDistance;
-
 	private boolean mVisionEnabled = false;
 
 	private NetworkTable mCurrentTargetingLimelightNT;
@@ -122,23 +118,14 @@ public class VisionTracker extends Subsystem {
 				mPeriodicIO.targetLatency = mCurrentTargetingLimelightNT.getEntry("tl").getDouble(0);
 				mPeriodicIO.getPipelineValue = mCurrentTargetingLimelightNT.getEntry("getpipe").getDouble(0);
 				mPeriodicIO.cameraA1 = Math.toDegrees(Math.atan((TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens)/(240-20) /*240 inches to find what A1 is */))-mPeriodicIO.targetVerticalDeviation;
-
+	
+				mPeriodicIO.targetDistance =
+				(TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens) /
+				/*	Math.toDegrees(*/Math.tan(Math.toRadians(TargetingConstants.kFloorToLensAngle + mPeriodicIO.targetVerticalDeviation))/*)*/;
+				mPeriodicIO.targetDistance += 20;
+		
 				try {
-				
-					mPeriodicIO.targetDistance =
-					(TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens) /
-					/*	Math.toDegrees(*/Math.tan(Math.toRadians(TargetingConstants.kFloorToLensAngle + mPeriodicIO.targetVerticalDeviation))/*)*/;
-					mPeriodicIO.targetDistance += 20;
 					
-					if(mPeriodicIO.targetDistance > 0 && mPeriodicIO.targetDistance != prevDistance){
-								mPeriodicIO.calculatedDistanceAverage.add(mPeriodicIO.targetDistance);
-								prevDistance = mPeriodicIO.targetDistance;
-					}else if(mPeriodicIO.targetDistance == prevDistance){
-					
-					}else{
-						mPeriodicIO.calculatedDistanceAverage.clear();
-					}
-				
 					double xArr[] = mCurrentTargetingLimelightNT.getEntry("tcornx").getDoubleArray(new double[]{0});
 					double yArr[] = mCurrentTargetingLimelightNT.getEntry("tcorny").getDoubleArray(new double[]{0});
 
@@ -181,7 +168,6 @@ public class VisionTracker extends Subsystem {
 				mPeriodicIO.getPipelineValue = 0;
 				mPeriodicIO.targetDistance = 0;
 				mPeriodicIO.cameraA1 = 0;
-				mPeriodicIO.calculatedDistanceAverage.clear();
 				mPeriodicIO.calculatedSkewFactor.clear();
 			}
 		}
@@ -202,7 +188,7 @@ public class VisionTracker extends Subsystem {
 
 //		NetworkTableEntry ledMode = mCurrentTargetingLimelightNT.getValue().getEntry("ledMode");
 //		NetworkTableEntry camMode = mCurrentTargetingLimelightNT.getValue().getEntry("camMode");
-//		NetworkTableEntry stream = mCurrentTargetingLimelightNT.getValue().getEntry("stream");
+//		NetworkTsableEntry stream = mCurrentTargetingLimelightNT.getValue().getEntry("stream");
 //		NetworkTableEntry snapshot = mCurrentTargetingLimelightNT.getValue().getEntry("snapshot");
 	}
 
@@ -213,15 +199,8 @@ public class VisionTracker extends Subsystem {
 
 	@Override
 	public void outputTelemetry() {
-		SmartDashboard.putNumber("Valid Target Value", mPeriodicIO.targetValid);
 		SmartDashboard.putNumber("Distance", mPeriodicIO.targetDistance);
-		SmartDashboard.putNumber("Moving Average Distance", mPeriodicIO.calculatedDistanceAverage.getAverage());
-		// SmartDashboard.putNumber("Linear Distance", linearDistance);
-		// SmartDashboard.putNumber("Exponential Distance", exponDistance);
-		// SmartDashboard.putNumber("Power Distance", powDistance);
-		// SmartDashboard.putNumber("Quadratic Distance", quadDistance);
 		SmartDashboard.putNumber("Camera A1", mPeriodicIO.cameraA1);
-		SmartDashboard.putNumber("Vertical Deviation", mPeriodicIO.targetVerticalDeviation);
 	}
 
 	public void setLEDMode(LedMode mode){
@@ -250,7 +229,6 @@ public class VisionTracker extends Subsystem {
 		public double targetDistance;
 		public double cameraA1;
 		public double getPipelineValue;
-		public MovingAverage calculatedDistanceAverage = new MovingAverage(50);
 		public MovingAverage calculatedSkewFactor = new MovingAverage(10);
 
 		public ArrayList<Translation2d> pointArray = new ArrayList<>();

@@ -19,7 +19,7 @@ public class Intake extends Subsystem{
 
     private VictorSPX mMotor;
     
-    private boolean mIsDown = true;
+    private boolean mIsDown = false;
     
     private Solenoid mLeftPiston, mRightPiston;
 
@@ -106,6 +106,13 @@ public class Intake extends Subsystem{
     @Override
     public void outputTelemetry() {
         SmartDashboard.putBoolean("Is Intake Down", mIsDown);
+    }
+
+    public void reset(){
+        mLeftPiston.set(false);
+        mRightPiston.set(false);
+
+        mIsDown = false;
     }
 
     @Override

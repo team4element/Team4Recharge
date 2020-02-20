@@ -1,9 +1,12 @@
 package com.team4.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
 import com.revrobotics.ColorSensorV3;
 import com.team254.lib.util.CrashTracker;
+import com.team4.lib.drivers.CANSpeedControllerFactory;
+import com.team4.lib.drivers.TalonUtil;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
@@ -21,7 +24,7 @@ public class WheelHandler extends Subsystem{
 
     private final ColorMatch mColorMatch = new ColorMatch();
 
-    private ColorSensorV3 colorSensor;
+    private ColorSensorV3 mColorSensor;
 
     private PeriodicIO mPeriodicIO;
 
@@ -34,8 +37,11 @@ public class WheelHandler extends Subsystem{
     private double mSeenColorSetAmountOfTime = 0;
 
     private Color mPrevSeenColor = null;
+    private Color mFirstSeenColor = null;
 
     private boolean mFirstTime = true;
+
+    private TalonSRX mMotor;
 
     private final Loop mLoop = new Loop(){
         public void onStart(double timestamp){
@@ -52,6 +58,9 @@ public class WheelHandler extends Subsystem{
                     if(mIsReadyToControl){
                         handlePositionControl();
                     }     
+                    break;
+                case IDLE:
+                    mPeriodicIO.demand = 0;
                     break;
                 default:
                     break;       
@@ -70,8 +79,12 @@ public class WheelHandler extends Subsystem{
     }
 
     private WheelHandler(){
-        colorSensor = new ColorSensorV3(I2C.Port.kOnboard);
         mPeriodicIO = new PeriodicIO();
+        mColorSensor = new ColorSensorV3(I2C.Port.kOnboard);
+
+        mMotor = CANSpeedControllerFactory.createDefaultTalonSRX(WheelHandlerConstants.kWheelHandlerMotorID);
+        mMotor.configNeutralDeadband(0.04, 0);
+        TalonUtil.setBrakeMode(mMotor, true);
 
         mColorMatch.addColorMatch(WheelHandlerConstants.kBlueTarget);
         mColorMatch.addColorMatch(WheelHandlerConstants.kGreenTarget);
@@ -86,9 +99,9 @@ public class WheelHandler extends Subsystem{
     @Override
     public void readPeriodicInputs() {
         try{
-            mPeriodicIO.detected_color = colorSensor.getColor();        
-            mPeriodicIO.ir = colorSensor.getIR();
-            mPeriodicIO.proximity = colorSensor.getProximity();
+            mPeriodicIO.detected_color = mColorSensor.getColor();        
+            mPeriodicIO.ir = mColorSensor.getIR();
+            mPeriodicIO.proximity = mColorSensor.getProximity();
             mPeriodicIO.matched_color = mColorMatch.matchClosestColor(mPeriodicIO.detected_color);
 
         }catch(Throwable t){
@@ -102,8 +115,30 @@ public class WheelHandler extends Subsystem{
     }
 
     public void handleRotationControl(){
+        if(mFirstTime){
+            resetColorDetection();
+            logFirstColor();
+            mFirstTime = false;
+        }
 
+        if(mPrevSeenColor != mFirstSeenColor && mPeriodicIO.matched_color.color == mFirstSeenColor){
+            mSeenColorSetAmountOfTime += 1;
+        }
+        
+        if(mSeenColorSetAmountOfTime >= 7){
+            mPeriodicIO.demand = 0.0;
+            mWheelMode = CurrentWheelMode.IDLE;
+        }else{
+            mPeriodicIO.demand = 0.5;
+        }
+        
+        mPrevSeenColor = mPeriodicIO.matched_color.color;
     }
+
+    public void logFirstColor(){
+        mFirstSeenColor = mPeriodicIO.matched_color.color;
+    }
+
     public void handlePositionControl(){
         if(mFirstTime){
             resetColorDetection();
@@ -115,92 +150,51 @@ public class WheelHandler extends Subsystem{
             {
                 switch (mFMSSentString.charAt(0))
                 {
-              
                     case 'B' :
-                        if(mPrevSeenColor != mPeriodicIO.matched_color.color){
-                            if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                                mSeenColorSetAmountOfTime += 1;
-                                mPrevSeenColor = mPeriodicIO.matched_color.color;
-                            }
-                        }
-                        if(mSeenColorSetAmountOfTime < 1){
-                            //add rotate code to rotate until sees color
-                        }else if(mSeenColorSetAmountOfTime > 1){
-                            //this case should never be seen, report this error
-                        }else if(mSeenColorSetAmountOfTime == 1){
-                            //on works if on color initially, rotate one more time
-                        }else{
-                            //this case should never be possible, report if this condition is reached
-                        }
+                        if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
+                            mPeriodicIO.demand = -.4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
+                            mPeriodicIO.demand = .7;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
+                            mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
+                            mPeriodicIO.demand = 0;
+                        }       
                         break;
                     case 'G' :
-                        if(mPrevSeenColor != mPeriodicIO.matched_color.color){
-                            if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                                mSeenColorSetAmountOfTime += 1;
-                                mPrevSeenColor = mPeriodicIO.matched_color.color;
-                            }
-                        }
-                        if(mPrevSeenColor != mPeriodicIO.matched_color.color){
-                            if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                                mSeenColorSetAmountOfTime += 1;
-                                mPrevSeenColor = mPeriodicIO.matched_color.color;
-                            }
-                        }
-                        if(mSeenColorSetAmountOfTime < 1){
-                            //add rotate code to rotate until sees color
-                        }else if(mSeenColorSetAmountOfTime > 1){
-                            //this case should never be seen, report this error
-                        }else if(mSeenColorSetAmountOfTime == 1){
-                            //on works if on color initially, rotate one more time
-                        }else{
-                            //this case should never be possible, report if this condition is reached
+                        if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
+                            mPeriodicIO.demand = -.4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
+                            mPeriodicIO.demand = .7;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
+                            mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
+                            mPeriodicIO.demand = 0;
                         }
                         break;
                     case 'R' :
-                        if(mPrevSeenColor != mPeriodicIO.matched_color.color){
-                            if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                                mSeenColorSetAmountOfTime += 1;
-                                mPrevSeenColor = mPeriodicIO.matched_color.color;
-                            }
+                        if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
+                            mPeriodicIO.demand = -.4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
+                            mPeriodicIO.demand = .7;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
+                            mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
+                            mPeriodicIO.demand = 0;
                         }
-                        if(mPrevSeenColor != mPeriodicIO.matched_color.color){
-                            if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                                mSeenColorSetAmountOfTime += 1;
-                                mPrevSeenColor = mPeriodicIO.matched_color.color;
-                            }
-                        }
-                        if(mSeenColorSetAmountOfTime < 1){
-                            //add rotate code to rotate until sees color
-                        }else if(mSeenColorSetAmountOfTime > 1){
-                            //this case should never be seen, report this error
-                        }else if(mSeenColorSetAmountOfTime == 1){
-                            //on works if on color initially, rotate one more time
-                        }else{
-                            //this case should never be possible, report if this condition is reached
-                        }  
+
                         break;
                     case 'Y' :
-                        if(mPrevSeenColor != mPeriodicIO.matched_color.color){
-                            if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                                mSeenColorSetAmountOfTime += 1;
-                                mPrevSeenColor = mPeriodicIO.matched_color.color;
-                            }
+                        if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
+                            mPeriodicIO.demand = -.4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
+                            mPeriodicIO.demand = .7;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
+                            mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
+                            mPeriodicIO.demand = 0;
                         }
-                        if(mPrevSeenColor != mPeriodicIO.matched_color.color){
-                            if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                                mSeenColorSetAmountOfTime += 1;
-                                mPrevSeenColor = mPeriodicIO.matched_color.color;
-                            }
-                        }
-                        if(mSeenColorSetAmountOfTime < 1){
-                            //add rotate code to rotate until sees color
-                        }else if(mSeenColorSetAmountOfTime > 1){
-                            //this case should never be seen, report this error
-                        }else if(mSeenColorSetAmountOfTime == 1){
-                            //on works if on color initially, rotate one more time
-                        }else{
-                            //this case should never be possible, report if this condition is reached
-                        }
+                    
                         break;
                     default :
                         DriverStation.reportError("Sent data is corrupt", false);
@@ -265,9 +259,16 @@ public class WheelHandler extends Subsystem{
         mSeenColorSetAmountOfTime = 0;
     }
 
+    public void setWheelControlState(CurrentWheelMode mode){
+        if(mWheelMode != mode){
+            mWheelMode = mode;
+        }
+    }
+
     public enum CurrentWheelMode{
         ROTATION,
-        POSITION   
+        POSITION,   
+        IDLE
     }
 
     protected static class PeriodicIO{
@@ -275,6 +276,8 @@ public class WheelHandler extends Subsystem{
         public ColorMatchResult matched_color;
         public double ir;
         public int proximity;
+
+        public double demand;
     }
 
 }

@@ -5,8 +5,7 @@ import java.util.ArrayList;
 import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
-import com.ctre.phoenix.motorcontrol.can.VictorSPX;
+import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.team254.lib.control.Lookahead;
 import com.team254.lib.control.Path;
 import com.team254.lib.control.PathFollower;
@@ -18,7 +17,7 @@ import com.team254.lib.util.ReflectingCSVWriter;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.drivers.MotorChecker;
 import com.team4.lib.drivers.NavX;
-import com.team4.lib.drivers.TalonSRXChecker;
+import com.team4.lib.drivers.TalonFXChecker;
 import com.team4.lib.drivers.TalonUtil;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
@@ -40,8 +39,7 @@ public class Drive extends Subsystem {
     private static final int kHighGearVelocityControlSlot = 1;
     private static Drive mInstance = new Drive();
     // Hardware
-    private final TalonSRX mLeftMaster, mRightMaster;
-    private final VictorSPX mLeftSlaveA, mLeftSlaveB, mRightSlaveA, mRightSlaveB;
+    private final TalonFX mLeftMaster, mLeftSlave, mRightMaster, mRightSlave;
     
     //Path Following
     private PathFollower mPathFollower;
@@ -120,26 +118,20 @@ public class Drive extends Subsystem {
         mPeriodicIO = new PeriodicIO();
 
         // Start all Talons in open loop mode.
-        mLeftMaster = CANSpeedControllerFactory.createDefaultTalonSRX(DriveConstants.kLeftDriveMasterId);
-        TalonUtil.configureTalonSRX(mLeftMaster, true);
+        mLeftMaster = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kLeftDriveMasterId);
+        TalonUtil.configureTalonFX(mLeftMaster, true);
 
-        mLeftSlaveA = CANSpeedControllerFactory.createPermanentSlaveVictor(DriveConstants.kLeftDriveSlaveAId, mLeftMaster);
-        mLeftSlaveA.setInverted(false);
+        mLeftSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kLeftDriveSlaveAId, mLeftMaster);
+        TalonUtil.configureTalonFX(mLeftSlave, true, false);
 
-        mLeftSlaveB = CANSpeedControllerFactory.createPermanentSlaveVictor(DriveConstants.kLeftDriveSlaveBId, mLeftMaster);
-        mLeftSlaveB.setInverted(false);
+        mRightMaster = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kRightDriveMasterId);
+        TalonUtil.configureTalonFX(mRightMaster, false);
 
-        mRightMaster = CANSpeedControllerFactory.createDefaultTalonSRX(DriveConstants.kRightDriveMasterId);
-        TalonUtil.configureTalonSRX(mRightMaster, false);
-
-        mRightSlaveA = CANSpeedControllerFactory.createPermanentSlaveVictor(DriveConstants.kRightDriveSlaveAId, mRightMaster);
-        mRightSlaveA.setInverted(true);
-
-        mRightSlaveB = CANSpeedControllerFactory.createPermanentSlaveVictor(DriveConstants.kRightDriveSlaveBId, mRightMaster);
-        mRightSlaveB.setInverted(true);
+        mRightSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kRightDriveSlaveAId, mRightMaster);
+        TalonUtil.configureTalonFX(mRightSlave, false);
 
         mNavX = new NavX();
-        mLeftSlaveB.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer.value, 10, 10);
+        mLeftSlave.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer.value, 10, 10);
 
 
         reloadGains();
@@ -332,15 +324,11 @@ public class Drive extends Subsystem {
             mIsBrakeMode = shouldEnable;
             
             TalonUtil.setBrakeMode(mLeftMaster, shouldEnable);
+            TalonUtil.setBrakeMode(mLeftSlave, shouldEnable);
             TalonUtil.setBrakeMode(mRightMaster, shouldEnable);
-            
-            NeutralMode mode = shouldEnable ? NeutralMode.Brake : NeutralMode.Coast;
-            
-            mRightSlaveA.setNeutralMode(mode);
-            mRightSlaveB.setNeutralMode(mode);
+            TalonUtil.setBrakeMode(mRightSlave, shouldEnable);
 
-            mLeftSlaveA.setNeutralMode(mode);
-            mLeftSlaveB.setNeutralMode(mode);
+            NeutralMode mode = shouldEnable ? NeutralMode.Brake : NeutralMode.Coast;
         }
     }
 
@@ -693,16 +681,33 @@ public class Drive extends Subsystem {
         setOpenLoop(DriveSignal.NEUTRAL);
     }
 
+    public TalonFX getLeftMaster(){
+        return mLeftMaster;
+    }
+
+    public TalonFX getLeftSlave(){
+        return mLeftSlave;
+    }
+
+    public TalonFX getRightMaster(){
+        return mRightMaster;
+    }
+
+    public TalonFX getRightSlave(){
+        return mRightSlave;
+    }
+
     @Override
     public boolean checkSystem() {
         setBrakeMode(false);
 
-        boolean leftSide = TalonSRXChecker.checkMotors(this,
-            new ArrayList<MotorChecker.MotorConfig<TalonSRX>>() {
+        boolean leftSide = TalonFXChecker.checkMotors(this,
+            new ArrayList<MotorChecker.MotorConfig<TalonFX>>() {
                 private static final long serialVersionUID = 3643247888353037677L;
 
                 {
                     add(new MotorChecker.MotorConfig<>("left_master", mLeftMaster));
+                    add(new MotorChecker.MotorConfig<>("left_slave", mLeftSlave));
                 }
             }, new MotorChecker.CheckerConfig() {
                 {
@@ -713,12 +718,13 @@ public class Drive extends Subsystem {
                     mRPMSupplier = () -> mLeftMaster.getSelectedSensorVelocity(0);
                }
             });
-        boolean rightSide = TalonSRXChecker.checkMotors(this,
-            new ArrayList<MotorChecker.MotorConfig<TalonSRX>>() {
+        boolean rightSide = TalonFXChecker.checkMotors(this,
+            new ArrayList<MotorChecker.MotorConfig<TalonFX>>() {
                 private static final long serialVersionUID = -1212959188716158751L;
 
                 {
                     add(new MotorChecker.MotorConfig<>("right_master", mRightMaster));
+                    add(new MotorChecker.MotorConfig<>("right_slave", mRightSlave));
                 }
             }, new MotorChecker.CheckerConfig() {
                 {
@@ -735,7 +741,6 @@ public class Drive extends Subsystem {
 
     @Override
     public void outputTelemetry() {
-        SmartDashboard.putBoolean("Drive brake mode", mIsBrakeMode);
         // SmartDashboard.putNumber("Right Drive Distance", mPeriodicIO.right_distance);
         // SmartDashboard.putNumber("Right Drive Ticks", mPeriodicIO.right_position_ticks);
         // SmartDashboard.putNumber("Left Drive Ticks", mPeriodicIO.left_position_ticks);

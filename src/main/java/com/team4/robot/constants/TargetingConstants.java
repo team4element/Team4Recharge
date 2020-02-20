@@ -8,11 +8,10 @@ public class TargetingConstants {
       public static final double kVPH = 2.0 * Math.tan(Math.toRadians(kVerticalFOV / 2.0));
       public static final double kImageCaptureLatency = 11.0 / 1000.0; // seconds
   
-      public static final double kFloorToLens = 24;
-      // public static final double kFloorToLensAngle = 14.45;
-      public static final double kFloorToLensAngle = 13.91;
+      public static final double kFloorToLens = 26.25;
+      public static final double kFloorToLensAngle = 14.01; //20 - 25 comp bot
       //6'9" 1/4 + (1'5")/2       81.25+(17/2) 81.25+8.5
-      public static final double kFloorToTarget = 89.75;
+      public static final double kFloorToTarget = 83 + (30/4); //89.75
 
       public static final double kMaxTrackerDistance = 9.0;
       public static final double kMaxGoalTrackAge = 2.5;

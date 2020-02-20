@@ -66,8 +66,8 @@ public class Robot extends TimedRobot{
                 mShooter,
                 mIntake,
                 mConveyor,
-                mSuperstructure/*,
-                mWheelHandler*/);
+                mSuperstructure,
+                mWheelHandler);
               
                 mSubsystemManager.configEnabledLoop(mEnabledLooper);
                 mSubsystemManager.configDisabledLoop(mDisabledLooper);
@@ -75,10 +75,11 @@ public class Robot extends TimedRobot{
                 mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
                 mDrive.setHeading(Rotation2d.identity());
         
+                mIntake.reset();
+
                 mAutoSelector = new AutoModeSelector();
                 mAutoModeExecutor = new AutoModeExecutor();
-                // mLLManager.setAllLeds(Limelight.LedMode.OFF);
-
+                
                 System.out.println("Finished robot init");
             } catch (Throwable t) {
               CrashTracker.logThrowableCrash(t);

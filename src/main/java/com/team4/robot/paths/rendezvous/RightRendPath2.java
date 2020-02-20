@@ -14,10 +14,9 @@ public class RightRendPath2 implements PathContainer{
     public Path buildPath() {
         ArrayList<Waypoint> sWaypoints = new ArrayList<Waypoint>();
         sWaypoints.add(new Waypoint(240 , -15, 0, 0));
-        sWaypoints.add(new Waypoint(190, -15, 5, 80));
-        sWaypoints.add(new Waypoint(190, 25, 15, 80));
-        sWaypoints.add(new Waypoint(175, 55, 5, 100));
-        sWaypoints.add(new Waypoint(130, 55, 0, 80));
+        sWaypoints.add(new Waypoint(205, -10, 5, 100));
+        sWaypoints.add(new Waypoint(175, 50, 5, 100));
+        sWaypoints.add(new Waypoint(130, 50, 0, 100));
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 

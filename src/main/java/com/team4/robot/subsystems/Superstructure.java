@@ -3,6 +3,7 @@ package com.team4.robot.subsystems;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
+import com.team4.robot.subsystems.WheelHandler.CurrentWheelMode;
 import com.team4.robot.subsystems.states.ConveyorControlState;
 import com.team4.robot.subsystems.states.IntakeState;
 import com.team4.robot.subsystems.states.ShooterControlState;
@@ -47,6 +48,8 @@ public class Superstructure extends Subsystem{
                         mShooter.setControlState(ShooterControlState.IDLE);
                         mConveyor.setControlState(ConveyorControlState.IDLE);
                         mIntake.setControlState(IntakeState.IDLE);
+                        mWheelHandler.setWheelControlState(CurrentWheelMode.IDLE);
+                        mWheelHandler.setReadyToGo(false);
                         break;
                     case Convey_Shoot:
                         handleConveyAndShoot();
@@ -54,6 +57,8 @@ public class Superstructure extends Subsystem{
                     case Intake_Convey:
                         handleIntakeAndConvey();
                         break;
+                    case Enable_Wheel_Rotation:
+                        handleWheelRotation();
                     default:
                         DriverStation.reportError("In an Invalid Superstructure State", false);
                 }
@@ -68,6 +73,7 @@ public class Superstructure extends Subsystem{
     private final Shooter mShooter = Shooter.getInstance();
     private final Conveyor mConveyor = Conveyor.getInstance();
     private final Intake mIntake = Intake.getInstance();
+    private final WheelHandler mWheelHandler = WheelHandler.getInstance();
 
     private Superstructure(){
         
@@ -101,6 +107,16 @@ public class Superstructure extends Subsystem{
         }else{
             mConveyor.setControlState(ConveyorControlState.IDLE);
         }
+    }
+
+    public synchronized void handleWheelRotation(){
+        mWheelHandler.setWheelControlState(CurrentWheelMode.ROTATION);
+        mWheelHandler.setReadyToGo(true);
+    }
+
+    public synchronized void handleWheelPosition(){
+        mWheelHandler.setWheelControlState(CurrentWheelMode.POSITION);
+        mWheelHandler.setReadyToGo(true);
     }
 
     public synchronized void countShooterVelocity(){

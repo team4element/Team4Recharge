@@ -7,6 +7,7 @@ public enum SuperstructureState{
     Convey_Convey,
     Prepare_Climb,
     Climb,
-    Enable_Wheel,
+    Enable_Wheel_Rotation,
+    Enable_Wheel_Position,
     IDLE
 }

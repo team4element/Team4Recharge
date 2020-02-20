@@ -62,4 +62,24 @@ public class ControlBoard implements IControlBoard{
     public boolean getKillCommand() {
         return mOperatorControlBoard.getKillCommand();
     }
+
+    @Override
+    public boolean getPauseSong() {
+        return mOperatorControlBoard.getPauseSong();
+    }
+
+    @Override
+    public boolean getStopSong() {
+        return mOperatorControlBoard.getStopSong();
+    }
+
+    @Override
+    public boolean getPrevSong() {
+        return mOperatorControlBoard.getPrevSong();
+    }
+
+    @Override
+    public boolean getNextSong() {
+        return mOperatorControlBoard.getNextSong();
+    }
 }

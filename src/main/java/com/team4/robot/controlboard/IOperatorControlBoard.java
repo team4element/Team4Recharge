@@ -10,4 +10,12 @@ public interface IOperatorControlBoard{
     boolean getReadyToManipulateControlPanel();
 
     boolean getKillCommand();
+
+    boolean getPauseSong();
+
+    boolean getStopSong();
+
+    boolean getPrevSong();
+
+    boolean getNextSong();
 }

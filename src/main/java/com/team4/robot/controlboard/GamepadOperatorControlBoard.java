@@ -42,5 +42,25 @@ public class GamepadOperatorControlBoard implements IOperatorControlBoard{
     public boolean getKillCommand() {
         return mController.getButton(Button.A);
     }
+
+    @Override
+    public boolean getPauseSong() {
+        return mController.getButton(Button.START);
+    }
+
+    @Override
+    public boolean getStopSong() {
+        return mController.getButton(Button.B);
+    }
+
+    @Override
+    public boolean getPrevSong() {
+        return mController.getDPad() == 270;
+    }
+
+    @Override
+    public boolean getNextSong() {
+        return mController.getDPad() == 90;
+    }
     
 }

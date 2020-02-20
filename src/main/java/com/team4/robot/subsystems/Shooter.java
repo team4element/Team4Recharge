@@ -189,7 +189,7 @@ public class Shooter extends Subsystem{
             // if(mFlyWheelDistance >= 12*12 && mFlyWheelDistance <= 13.2*12){
                 // rpm = 3750;
             // }else{
-                rpm = ((0.015533 * Math.pow(mFlyWheelDistance, 2)) + (1.0628 * mFlyWheelDistance) + 3380.6707); 
+                rpm = ((0.015533 * Math.pow(mFlyWheelDistance, 2)) + (1.0528 * mFlyWheelDistance) + 3205.6707); 
                 // rpm *= .9;
                 // rpm = (0.0035*Math.pow(mFlyWheelDistance, 3)) - (1.7421 * Math.pow(mFlyWheelDistance, 2)) + (244.28 * mFlyWheelDistance) - 2250;
             // }
@@ -200,59 +200,6 @@ public class Shooter extends Subsystem{
         // mPeriodicIO.demand = rpm;
         setVelocity(rpm, 0);
     }
-
-    // private synchronized void handleRPM(double distance){
-    //             double distanceInMeters = Units.inches_to_meters(distance - 8); 
-    //     boolean isFirstCorrectVel = true; 
-
-    //     double firstCorrectVel = 0;
-    //     double mPrevVel = 0;
-
-    //     for(double i=4; i <=ShooterConstants.kShooterMaxSpeed; i = i + .05 ){
-    //         for(double j = 0; j <= 6; j = j + .05){
-    //                 double t = j;
-
-    //                 double x = (ShooterConstants.kMass / ShooterConstants.kDrag) * 
-    //                 i * Math.cos(ShooterConstants.kShooterAngle) * 
-    //                 (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass)));
-
-    //                 double y = ((-(ShooterConstants.kMass*ShooterConstants.kGravityConstant) * t)/ 
-    //                 ShooterConstants.kDrag) + (ShooterConstants.kMass/ShooterConstants.kDrag) *
-    //                 (i*Math.sin(ShooterConstants.kShooterAngle)+(ShooterConstants.kMass*ShooterConstants.kGravityConstant)/ShooterConstants.kDrag) * 
-    //                 (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass))) + ShooterConstants.kShooterHeight;
-
-    //                 if (y < 0){
-    //                     break;
-    //                 }
-
-    //                 if(Math.abs(x - distanceInMeters) < .2 && Math.abs(y - ShooterConstants.kTargetInMeters) < .2){
-    //                     if(isFirstCorrectVel){
-    //                         firstCorrectVel = i;
-    //                         isFirstCorrectVel = false;
-    //                         // System.out.println("x: " + x + "y: " + y + "velocity: " + firstCorrectVel);
-    //                     }
-    //                     if(mPrevVel <= i){
-    //                         // System.out.println("x: " + x + "y: " + y + "velocity: " + i);
-    //                         mPrevVel = i;
-    //                     }        
-    //                 }
-
-
-    //         }
-    //     }
-    //     double low_speed = firstCorrectVel;
-    //     double high_speed = mPrevVel;  
-        
-
-    //     double low_speed_rpm = findRPM(low_speed);
-    //     double high_speed_rpm = findRPM(high_speed);
-
-    //     double rpm = Math.abs(low_speed_rpm + high_speed_rpm)/2;
-
-    //     rpm *= 2;
-
-    //     System.out.println("Theoretical RPM: " + rpm);
-    // }
 
     public double findRPM(double mps){
         double t_speed = 2 * mps;
@@ -285,6 +232,14 @@ public class Shooter extends Subsystem{
         mMasterMotor.setSelectedSensorPosition(0, 0, 0);
         mSlaveMotor.setSelectedSensorPosition(0, 0, 0);
         mPeriodicIO = new PeriodicIO();
+    }
+
+    public TalonFX getMasterTalon(){
+        return mMasterMotor;
+    }
+
+    public TalonFX getSlaveTalon(){
+        return mSlaveMotor;
     }
 
     @Override

@@ -21,7 +21,7 @@ import edu.wpi.first.wpilibj.RobotController;
  * <p>periodic() functions from the base class are called on an interval by a Notifier instance.
  */
 public class TimedRobot extends IterativeRobotBase {
-    public static final double kDefaultPeriod = 0.02;
+    public static final double kDefaultPeriod = 0.01; //TODO: test with 0.01;
 
     // The C pointer to the notifier object. We don't use it directly, it is
     // just passed to the JNI bindings.
