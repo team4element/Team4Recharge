@@ -57,6 +57,9 @@ public class Superstructure extends Subsystem{
                     case Intake_Convey:
                         handleIntakeAndConvey();
                         break;
+                    case Convey_Convey:
+                        handleConveyAndConvey();
+                        break;
                     case Enable_Wheel_Rotation:
                         handleWheelRotation();
                     default:
@@ -81,33 +84,29 @@ public class Superstructure extends Subsystem{
 
     public synchronized void handleConveyAndConvey(){
         mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
+        mConveyor.setFinalStage(.8);
     }
 
 
     public synchronized void handleIntakeAndConvey(){
-        // if(mIntake.getIsDown()){
+        if(mIntake.getIsDown()){
             mIntake.setControlState(IntakeState.OPEN_LOOP);
-        // }else{
-            // mIntake.setControlState(IntakeState.IDLE);
-        // }
-
-        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
-        
-        if(VisionTracker.getInstance().getTargetDistance() <= 250){
-            mConveyor.setFinalStage(.1);
+        }else{
+            mIntake.setControlState(IntakeState.IDLE);
         }
+
+        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_STAGE);
+        
     }
 
     public synchronized void handleConveyAndShoot(){
         mIntake.setControlState(IntakeState.IDLE);
-        // mShooter.setControlState(ShooterControlState.VELOCITY);
-        mShooter.setControlState(ShooterControlState.OPEN_LOOP);
-        // if(mShooter.getVelocity() >= mShooter.getVelocitySetpoint() && mShooter.getVelocitySetpoint() != 0d){
-            // countShooterVelocity();
+        mShooter.setControlState(ShooterControlState.VELOCITY);
+        if(mShooter.getVelocity() >= mShooter.getVelocitySetpoint() && mShooter.getVelocitySetpoint() != 0d){
             mConveyor.setControlState(ConveyorControlState.MOVE_FINAL_UNJAM);
-        // }else{
-            // mConveyor.setControlState(ConveyorControlState.IDLE);
-        // }
+        }else{
+            mConveyor.setControlState(ConveyorControlState.IDLE);
+        }
     }
 
     public synchronized void handleWheelRotation(){

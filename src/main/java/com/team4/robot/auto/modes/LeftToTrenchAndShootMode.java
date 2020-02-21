@@ -32,16 +32,13 @@ public class LeftToTrenchAndShootMode extends AutoModeBase{
         runAction(new ResetPoseFromPathAction(path1));
         runAction(new DropIntakeAction());
         runAction(new AutoSteerAndDistanceAction(180, 10));
-        runAction(new WaitAction(3));
-        // runAction(new ShootAction(3));
+        runAction(new ShootAction(3));
         runAction(new DrivePathAction(path1));
         runAction(new WaitAction(.25));
         runAction(new DrivePathAction(path2));
         runAction(new WaitAction(.25));
-        // runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(0)));
         runAction(new AutoSteerAndDistanceAction(245, 10));
-        runAction(new WaitAction(3));
-        // runAction(new ShootAction(3));
+        runAction(new ShootAction(3));
 
         System.out.println(Timer.getFPGATimestamp()- startTime);
     }

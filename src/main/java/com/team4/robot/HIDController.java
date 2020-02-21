@@ -163,6 +163,7 @@ public class HIDController{
         mNotifier.startPeriodic(kPeriod);
     }
     public void stop(){
+        OrchestraUtil.stop();
         if(running_){   
            running_ = false;
         }

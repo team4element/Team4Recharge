@@ -89,10 +89,10 @@ public class OrchestraUtil {
         if (mOrchestra.isPlaying()) {
             mOrchestra.stop();
             System.out.println("Song stopped.");
-        }  else {
-            mOrchestra.play();
-            System.out.println("Playing song...");
-        }
+        }//  else {
+        //    mOrchestra.play();
+        //    System.out.println("Playing song...");
+        //}
     }
 
     

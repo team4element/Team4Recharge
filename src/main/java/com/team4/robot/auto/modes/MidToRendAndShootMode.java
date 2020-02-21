@@ -10,7 +10,6 @@ import com.team4.lib.autobase.AutoModeEndedException;
 import com.team4.lib.path.PathContainer;
 import com.team4.robot.actions.AutoSteerAndDistanceAction;
 import com.team4.robot.actions.DrivePathAction;
-import com.team4.robot.actions.DropIntakeAction;
 import com.team4.robot.actions.IntakeThroughPathAction;
 import com.team4.robot.actions.ResetPoseFromPathAction;
 import com.team4.robot.actions.ShootAction;
@@ -39,26 +38,23 @@ public class MidToRendAndShootMode extends AutoModeBase{
         final double startTime = Timer.getFPGATimestamp();
         runAction(new ResetPoseFromPathAction(path1));
         runAction(new AutoSteerAndDistanceAction(155, 1.5));
-        runAction(new WaitAction(3));
-        // runAction(new ShootAction(3));
-        // runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(180)));
+        runAction(new ShootAction(3));
         runAction(new ParallelAction(Arrays.asList(new DrivePathAction(path1), 
         new SeriesAction(Arrays.asList(new WaitForPathMarkerAction("Start Intake"),
         new IntakeThroughPathAction(false))))));
 
         runAction(new WaitAction(.25));
         Superstructure.getInstance().setControlState(SuperstructureState.IDLE);
-        // Intake.getInstance().setControlState(IntakeState.IDLE);
         runAction(new DrivePathAction(path2));
         runAction(new WaitAction(.25));
-        // runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(60), 1, true));
         runAction(new AutoSteerAndDistanceAction(160, 2.0)); //if follows path two make it 180
-        runAction(new WaitAction(3));
-        // runAction(new ShootAction(3));
+        runAction(new ShootAction(3));
 
         System.out.println(Timer.getFPGATimestamp() - startTime);
 
         /**
+         * TODO: test if necessary or if causes locking on teleop
+         * 
          * To prevent any unknown movement robot waits for 15 seconds after auto mode is complete during the auto period
          * and will not carry over to tele-op {@see Robot}
          */

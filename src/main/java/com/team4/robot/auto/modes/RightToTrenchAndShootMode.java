@@ -11,9 +11,9 @@ import com.team4.lib.autobase.AutoModeEndedException;
 import com.team4.lib.path.PathContainer;
 import com.team4.robot.actions.AutoSteerAndDistanceAction;
 import com.team4.robot.actions.DrivePathAction;
-import com.team4.robot.actions.DropIntakeAction;
 import com.team4.robot.actions.IntakeThroughPathAction;
 import com.team4.robot.actions.ResetPoseFromPathAction;
+import com.team4.robot.actions.ShootAction;
 import com.team4.robot.actions.TurnToHeadingAction;
 import com.team4.robot.actions.WaitForPathMarkerAction;
 import com.team4.robot.paths.trench.RightTrenchPath1;
@@ -41,8 +41,7 @@ public class RightToTrenchAndShootMode extends AutoModeBase{
         runAction(new ResetPoseFromPathAction(path1));
         runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(180-45.0), .5  , false));
         runAction(new AutoSteerAndDistanceAction(170, .5));
-        runAction(new WaitAction(3));
-        // runAction(new ShootAction(3));
+        runAction(new ShootAction(3));
         runAction(new ParallelAction(Arrays.asList(new DrivePathAction(path1),
                     new SeriesAction(new WaitForPathMarkerAction("Start Intake"),
                     new IntakeThroughPathAction(false)))));
@@ -50,10 +49,8 @@ public class RightToTrenchAndShootMode extends AutoModeBase{
             Superstructure.getInstance().setControlState(SuperstructureState.IDLE);
         runAction(new DrivePathAction(path2));
         runAction(new WaitAction(.25));
-        // runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(0)));
         runAction(new AutoSteerAndDistanceAction(170, 1));//220 for comp
-        runAction(new WaitAction(3));
-        // runAction(new ShootAction(3));
+        runAction(new ShootAction(3));
 
         System.out.println(Timer.getFPGATimestamp()- startTime);
     }

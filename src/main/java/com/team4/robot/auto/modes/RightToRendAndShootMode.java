@@ -42,8 +42,7 @@ public class RightToRendAndShootMode extends AutoModeBase {
         runAction(new ResetPoseFromPathAction(path1));
         runAction(new TurnToHeadingAction(Rotation2d.fromDegrees(180-45.0), .5  , false));
         runAction(new AutoSteerAndDistanceAction(160, .5));
-        runAction(new WaitAction(3));
-        // runAction(new ShootAction(3));
+        runAction(new ShootAction(3));
         runAction(new ParallelAction(Arrays.asList(new DrivePathAction(path1), 
                     new SeriesAction(Arrays.asList(new WaitForPathMarkerAction("Start Intake"), 
                     new IntakeThroughPathAction(false))))));
@@ -57,8 +56,7 @@ public class RightToRendAndShootMode extends AutoModeBase {
         runAction(new WaitAction(.25));
 
         runAction(new AutoSteerAndDistanceAction(160, 1.2));
-        runAction(new WaitAction(3));
-        // runAction(new ShootAction(3));
+        runAction(new ShootAction(3));
 
         System.out.println(Timer.getFPGATimestamp()- startTime);
     }
