@@ -32,7 +32,7 @@ public class Conveyor extends Subsystem{
         public void onLoop(double timestamp) {
             switch(mCurrentState){
                 case MOVE_FINAL_STAGE:
-                    setFinalStageOnly(1);
+                    setFinalStageOnly(-1);
                     break;
                 case MOVE_FIRST_STAGE:
                     setFirstStageOnly(1);
@@ -50,7 +50,7 @@ public class Conveyor extends Subsystem{
                 case MOVE_ALL_STAGES:
                     setFirstStage(1);
                     setHopper(1);
-                    setFinalStage(1);
+                    setFinalStage(-1);
                     break;
                 case IDLE:
                     setFinalStageOnly(0);
@@ -80,6 +80,8 @@ public class Conveyor extends Subsystem{
     private Conveyor(){
         mFinalStageBottomMotor = new LazyTalonSRX(ConveyorConstants.kFinalStageBottomMotor);
         mFinalStageTopMotor = new LazyVictorSPX(ConveyorConstants.kFinalStageTopMotor);
+        mFinalStageBottomMotor.setInverted(true);
+        mFinalStageTopMotor.setInverted(false);
 
         mHopperMotor = new LazyVictorSPX(ConveyorConstants.kHopperMotor);
 

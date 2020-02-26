@@ -8,4 +8,9 @@ public interface IDriveControlBoard {
     boolean getQuickTurn();
 
     boolean getVisionEnable();
+
+    boolean getDropIntake();
+    
+    boolean getUpIntake();
+    
 }

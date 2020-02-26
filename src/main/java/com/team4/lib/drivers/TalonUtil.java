@@ -44,14 +44,15 @@ public class TalonUtil {
         }
         talon.setSensorPhase(true);
         
-        if(master){
+        // if(master){
             // talon.enableVoltageCompensation(true);
             // talon.configVoltageCompSaturation(12.0, IOConstants.kLongCANTimeoutMs);
             talon.configVelocityMeasurementPeriod(VelocityMeasPeriod.Period_50Ms, Constants.kLongCANTimeoutMs);
             talon.configVelocityMeasurementWindow(1, Constants.kLongCANTimeoutMs);
             //Most likely same for all subsystems, so sticking to drive temporarily
             talon.configClosedloopRamp(AutoConstants.kDriveVoltageRampRate, Constants.kLongCANTimeoutMs);
-        }
+        // }
+        
         talon.configNeutralDeadband(0.04, 0);
             
     }

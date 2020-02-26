@@ -34,7 +34,7 @@
               "Crosshair/Crosshair color": "#FFFFFFFF",
               "Controls/Show controls": true,
               "Controls/Rotation": "NONE",
-              "compression": -1.0,
+              "compression": 100.0,
               "fps": -1,
               "imageWidth": -1,
               "imageHeight": -1
@@ -230,6 +230,50 @@
               "_source0": "network_table:///SmartDashboard/Detected Color",
               "_title": "Detected Color"
             }
+          },
+          "4,1": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Camera A1",
+              "_title": "Camera A1"
+            }
+          },
+          "5,0": {
+            "size": [
+              1,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/FMS String",
+              "_title": "FMS String"
+            }
+          },
+          "8,6": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Shooter Velocity",
+              "_title": "Shooter Velocity"
+            }
+          },
+          "8,5": {
+            "size": [
+              2,
+              1
+            ],
+            "content": {
+              "_type": "Text View",
+              "_source0": "network_table:///SmartDashboard/Shooter Setpoint",
+              "_title": "Shooter Setpoint"
+            }
           }
         }
       }
@@ -248,9 +292,9 @@
     }
   ],
   "windowGeometry": {
-    "x": -8.0,
-    "y": -8.0,
-    "width": 1386.0,
-    "height": 788.0
+    "x": 1.0,
+    "y": 1.0,
+    "width": 1364.0,
+    "height": 726.0
   }
 }

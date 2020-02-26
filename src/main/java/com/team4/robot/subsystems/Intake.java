@@ -57,6 +57,7 @@ public class Intake extends Subsystem{
                 if(!mIsDown){
                     setDown();
                 }
+                break;
             case IDLE:
                 setOpenLoop(0);
                 break;
@@ -109,8 +110,8 @@ public class Intake extends Subsystem{
     }
 
     public void reset(){
-        mLeftPiston.set(false);
-        mRightPiston.set(false);
+        mLeftPiston.set(true);
+        mRightPiston.set(true);
 
         mIsDown = false;
     }
@@ -127,10 +128,19 @@ public class Intake extends Subsystem{
 
     public void setDown(){
         if(!mIsDown){
+            mLeftPiston.set(false);
+            mRightPiston.set(false);
+
+            mIsDown = true;
+        }
+    }
+
+    public void setUp(){
+        if(mIsDown){
             mLeftPiston.set(true);
             mRightPiston.set(true);
 
-            mIsDown = true;
+            mIsDown = false;
         }
     }
 

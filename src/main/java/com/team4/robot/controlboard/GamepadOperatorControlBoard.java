@@ -2,6 +2,7 @@ package com.team4.robot.controlboard;
 
 import com.team4.robot.constants.Constants;
 import com.team4.robot.controlboard.XboxController.Button;
+import com.team4.robot.controlboard.XboxController.Side;
 
 public class GamepadOperatorControlBoard implements IOperatorControlBoard{
     private static GamepadOperatorControlBoard instance = null;
@@ -61,6 +62,11 @@ public class GamepadOperatorControlBoard implements IOperatorControlBoard{
     @Override
     public boolean getNextSong() {
         return mController.getDPad() == 90;
+    }
+
+    @Override
+    public boolean getCompressor() {
+        return mController.getTrigger(Side.LEFT);
     }
     
 }

@@ -2,10 +2,12 @@ package com.team4.robot.subsystems;
 
 import java.util.ArrayList;
 
+import com.ctre.phoenix.motorcontrol.Faults;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
+import com.team4.lib.drivers.LazyTalonFX;
 import com.team4.lib.drivers.MotorChecker;
 import com.team4.lib.drivers.TalonFXChecker;
 import com.team4.lib.drivers.TalonUtil;
@@ -18,6 +20,7 @@ import com.team4.robot.constants.ShooterConstants;
 import com.team4.robot.subsystems.states.ShooterControlState;
 
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Shooter extends Subsystem{
     private static Shooter mInstance = null;
@@ -37,10 +40,11 @@ public class Shooter extends Subsystem{
             synchronized(this){
                 switch (mControlState){
                     case OPEN_LOOP:
-                        setOpenLoop(-.30);
+                        setOpenLoop(1);
                         break;
                     case VELOCITY:
-                        handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
+                        // handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
+                        setVelocity(4500, 0);
                         break;
                     case IDLE:
                         setOpenLoop(0);
@@ -66,17 +70,18 @@ public class Shooter extends Subsystem{
     
 
     private Shooter(){  
-        mMasterMotor = CANSpeedControllerFactory.createDefaultTalonFX(ShooterConstants.kMasterMotorId);
+        // mMasterMotor = CANSpeedControllerFactory.createDefaultTalonFX(ShooterConstants.kMasterMotorId);
+        mMasterMotor = new LazyTalonFX(ShooterConstants.kMasterMotorId);
         TalonUtil.configureTalonFX(mMasterMotor, true);
 
         // mSlaveMotor = CANSpeedControllerFactory.createDefaultTalonFX(ShooterConstants.kSlaveMotorId);
-        mSlaveMotor = CANSpeedControllerFactory.createPermanentSlaveTalonFX(ShooterConstants.kSlaveMotorId, mMasterMotor);
+        mSlaveMotor = new LazyTalonFX(ShooterConstants.kSlaveMotorId);
         TalonUtil.configureTalonFX(mSlaveMotor, false);
 
-        mMasterMotor.setInverted(TalonFXInvertType.Clockwise);
-        mSlaveMotor.setInverted(TalonFXInvertType.Clockwise);
+        mMasterMotor.setInverted(TalonFXInvertType.CounterClockwise);
+        mSlaveMotor.setInverted(TalonFXInvertType.CounterClockwise);
 
-        setBrakeMode(true);
+        setBrakeMode(false);
 
         mPeriodicIO = new PeriodicIO();
 
@@ -110,7 +115,7 @@ public class Shooter extends Subsystem{
     public void writePeriodicOutputs() {
         if(mControlState == ShooterControlState.OPEN_LOOP){
             mMasterMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
-            // mSlaveMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
+            mSlaveMotor.set(TalonFXControlMode.PercentOutput, mPeriodicIO.demand);
         }else if (mControlState == ShooterControlState.VELOCITY){
             mMasterMotor.set(TalonFXControlMode.Velocity, mPeriodicIO.demand);
             mSlaveMotor.set(TalonFXControlMode.Velocity, mPeriodicIO.demand);
@@ -171,6 +176,7 @@ public class Shooter extends Subsystem{
         //             }
 
 
+
         //     }
         // }    
         // double low_speed = firstCorrectVel;
@@ -189,14 +195,18 @@ public class Shooter extends Subsystem{
             // if(mFlyWheelDistance >= 12*12 && mFlyWheelDistance <= 13.2*12){
                 // rpm = 3750;
             // }else{
-                rpm = ((0.015533 * Math.pow(mFlyWheelDistance, 2)) + (1.0528 * mFlyWheelDistance) + 3205.6707); 
+                rpm = ((0.015533 * Math.pow(mFlyWheelDistance, 2)) + (1.0528 * mFlyWheelDistance) + 2505.6707); 
                 // rpm *= .9;
                 // rpm = (0.0035*Math.pow(mFlyWheelDistance, 3)) - (1.7421 * Math.pow(mFlyWheelDistance, 2)) + (244.28 * mFlyWheelDistance) - 2250;
             // }
         }
 
         // System.out.println("Actual RPM: " + rpm);
-        rpm = ElementMath.scaleRPM(rpm, ShooterConstants.kShooterGearRatio);
+        if(rpm < 5000){
+            rpm = ElementMath.scaleRPM(rpm, ShooterConstants.kShooterGearRatio);
+        }else{
+            rpm = 0;
+        }
         // mPeriodicIO.demand = rpm;
         setVelocity(rpm, 0);
     }
@@ -266,10 +276,10 @@ public class Shooter extends Subsystem{
 
     @Override
     public void outputTelemetry() {
-        // Nothing to output
+                // Nothing to output
         // SmartDashboard.putString("Current Shooter Mode", mControlState.toString());
-        // SmartDashboard.putNumber("Shooter Velocity in RPM", mPeriodicIO.velocity);
-        // SmartDashboard.putNumber("TalonFX RPM - Shooter", mPeriodicIO.demand);
+        SmartDashboard.putNumber("Shooter Velocity", mPeriodicIO.velocity);
+        SmartDashboard.putNumber("Shooter Setpoint", mPeriodicIO.demand);
         // SmartDashboard.putNumber("Get talon error ", mMasterMotor.getClosedLoopError());
     }
 

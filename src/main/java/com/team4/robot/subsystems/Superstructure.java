@@ -49,7 +49,6 @@ public class Superstructure extends Subsystem{
                         mConveyor.setControlState(ConveyorControlState.IDLE);
                         mIntake.setControlState(IntakeState.IDLE);
                         mWheelHandler.setWheelControlState(CurrentWheelMode.IDLE);
-                        mWheelHandler.setReadyToGo(false);
                         break;
                     case Convey_Shoot:
                         handleConveyAndShoot();
@@ -60,8 +59,16 @@ public class Superstructure extends Subsystem{
                     case Convey_Convey:
                         handleConveyAndConvey();
                         break;
+                    case Shoot:
+                        mIntake.setControlState(IntakeState.IDLE);
+                        mShooter.setControlState(ShooterControlState.VELOCITY);
+                        break;
                     case Enable_Wheel_Rotation:
                         handleWheelRotation();
+                        break;
+                    case Enable_Wheel_Position:
+                        handleWheelPosition();
+                        break;
                     default:
                         DriverStation.reportError("In an Invalid Superstructure State", false);
                 }
@@ -89,13 +96,13 @@ public class Superstructure extends Subsystem{
 
 
     public synchronized void handleIntakeAndConvey(){
-        if(mIntake.getIsDown()){
+        // if(mIntake.getIsDown()){
             mIntake.setControlState(IntakeState.OPEN_LOOP);
-        }else{
-            mIntake.setControlState(IntakeState.IDLE);
-        }
+        // }else{
+            // mIntake.setControlState(IntakeState.IDLE);
+        // }
 
-        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_STAGE);
+        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
         
     }
 
@@ -110,13 +117,13 @@ public class Superstructure extends Subsystem{
     }
 
     public synchronized void handleWheelRotation(){
+        mIntake.setControlState(IntakeState.IDLE);
         mWheelHandler.setWheelControlState(CurrentWheelMode.ROTATION);
-        mWheelHandler.setReadyToGo(true);
     }
 
     public synchronized void handleWheelPosition(){
+        mIntake.setControlState(IntakeState.IDLE);
         mWheelHandler.setWheelControlState(CurrentWheelMode.POSITION);
-        mWheelHandler.setReadyToGo(true);
     }
 
     public synchronized void countShooterVelocity(){

@@ -106,16 +106,16 @@ public class Drive extends Subsystem {
 
         // Start all Talons in open loop mode.
         mLeftMaster = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kLeftDriveMasterId);
-        TalonUtil.configureTalonFX(mLeftMaster, true, true);
+        TalonUtil.configureTalonFX(mLeftMaster, false, true);
 
-        mLeftSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kLeftDriveSlaveId, mLeftMaster);
-        TalonUtil.configureTalonFX(mLeftSlave, true, false);
+        mLeftSlave = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kLeftDriveSlaveId);
+        TalonUtil.configureTalonFX(mLeftSlave, false, false);
 
         mRightMaster = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kRightDriveMasterId);
-        TalonUtil.configureTalonFX(mRightMaster, false, true);
+        TalonUtil.configureTalonFX(mRightMaster, true, true);
 
-        mRightSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kRightDriveSlaveId, mRightMaster);
-        TalonUtil.configureTalonFX(mRightSlave, false, false);
+        mRightSlave = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kRightDriveSlaveId);
+        TalonUtil.configureTalonFX(mRightSlave, true, false);
 
         mNavX = new NavX();
         mLeftSlave.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer.value, 10, 10);
@@ -196,20 +196,29 @@ public class Drive extends Subsystem {
         if(mDriveControlState == DriveControlState.PATH_FOLLOWING){
             mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
+            mLeftSlave.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
+            mRightSlave.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
         }
         else if(mTalonControlState == TalonControlState.OPEN || mDriveControlState == DriveControlState.OPEN_LOOP){
             mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
+            mLeftSlave.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
+            mRightSlave.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
         } else if (mTalonControlState == TalonControlState.MOTION_MAGIC){
             mLeftMaster.set(ControlMode.MotionMagic, (int)mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.MotionMagic, (int)mPeriodicIO.right_demand);
+            mLeftSlave.set(ControlMode.MotionMagic, (int)mPeriodicIO.left_demand);
+            mRightSlave.set(ControlMode.MotionMagic, (int)mPeriodicIO.right_demand);
         } else if (mTalonControlState == TalonControlState.POSITION) {
             mLeftMaster.set(ControlMode.Position, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.Position, mPeriodicIO.right_demand);
+            mLeftSlave.set(ControlMode.Position, mPeriodicIO.left_demand);
+            mRightSlave.set(ControlMode.Position, mPeriodicIO.right_demand);
         } else {
             mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
-    
+            mLeftSlave.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
+            mRightSlave.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
         }
     }
 
@@ -565,11 +574,44 @@ public class Drive extends Subsystem {
         mRightMaster.config_kD(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKd, Constants.kLongCANTimeoutMs);
         mRightMaster.config_kF(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKf, Constants.kLongCANTimeoutMs);
         mRightMaster.config_IntegralZone(kLowGearPositionControlSlot, AutoConstants.kDrivePositionIZone, Constants.kLongCANTimeoutMs);
-        mLeftMaster.configMotionCruiseVelocity((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxVelocity*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
-        mLeftMaster.configMotionAcceleration((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxAccel*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
+        mRightSlave.configMotionCruiseVelocity((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxVelocity*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
+        mRightSlave.configMotionAcceleration((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxAccel*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
   
+        mLeftSlave.config_kP(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKp, Constants.kLongCANTimeoutMs);
+        mLeftSlave.config_kI(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKi, Constants.kLongCANTimeoutMs);
+        mLeftSlave.config_kD(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKd, Constants.kLongCANTimeoutMs);
+        mLeftSlave.config_kF(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKf, Constants.kLongCANTimeoutMs);
+        mLeftSlave.config_IntegralZone(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityIZone, Constants.kLongCANTimeoutMs);
+  
+        mRightSlave.config_kP(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKp, Constants.kLongCANTimeoutMs);
+        mRightSlave.config_kI(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKi, Constants.kLongCANTimeoutMs);
+        mRightSlave.config_kD(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKd, Constants.kLongCANTimeoutMs);
+        mRightSlave.config_kF(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKf, Constants.kLongCANTimeoutMs);
+        mRightSlave.config_IntegralZone(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityIZone, Constants.kLongCANTimeoutMs);
+  
+
+        //Position gains
+        mLeftSlave.config_kP(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKp, Constants.kLongCANTimeoutMs);
+        mLeftSlave.config_kI(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKi, Constants.kLongCANTimeoutMs);
+        mLeftSlave.config_kD(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKd, Constants.kLongCANTimeoutMs);
+        mLeftSlave.config_kF(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKf, Constants.kLongCANTimeoutMs);
+        mLeftSlave.config_IntegralZone(kLowGearPositionControlSlot, AutoConstants.kDrivePositionIZone, Constants.kLongCANTimeoutMs);
+        mLeftSlave.configMotionCruiseVelocity((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxVelocity*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
+        mLeftSlave.configMotionAcceleration((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxAccel*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
+  
+  
+        mRightSlave.config_kP(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKp, Constants.kLongCANTimeoutMs);
+        mRightSlave.config_kI(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKi, Constants.kLongCANTimeoutMs);
+        mRightSlave.config_kD(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKd, Constants.kLongCANTimeoutMs);
+        mRightSlave.config_kF(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKf, Constants.kLongCANTimeoutMs);
+        mRightSlave.config_IntegralZone(kLowGearPositionControlSlot, AutoConstants.kDrivePositionIZone, Constants.kLongCANTimeoutMs);
+        mRightSlave.configMotionCruiseVelocity((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxVelocity*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
+        mRightSlave.configMotionAcceleration((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxAccel*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
+  
+
     }
 
+    
     public synchronized void stopLogging() {
         if (mCSVWriter != null) {
             mCSVWriter.flush();

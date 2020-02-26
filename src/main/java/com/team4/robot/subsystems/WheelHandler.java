@@ -1,11 +1,14 @@
 package com.team4.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlMode;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
+import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
 import com.revrobotics.ColorSensorV3;
 import com.team254.lib.util.CrashTracker;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
+import com.team4.lib.drivers.LazyVictorSPX;
 import com.team4.lib.drivers.TalonUtil;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
@@ -14,6 +17,7 @@ import com.team4.robot.constants.WheelHandlerConstants;
 
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.I2C;
+import edu.wpi.first.wpilibj.Solenoid;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 
@@ -41,7 +45,9 @@ public class WheelHandler extends Subsystem{
 
     private boolean mFirstTime = true;
 
-    private TalonSRX mMotor;
+    private VictorSPX mMotor;
+
+    private Solenoid mPiston;
 
     private final Loop mLoop = new Loop(){
         public void onStart(double timestamp){
@@ -55,9 +61,9 @@ public class WheelHandler extends Subsystem{
                     }
                     break;
                 case POSITION:
-                    if(mIsReadyToControl){
+                    // if(mIsReadyToControl){
                         handlePositionControl();
-                    }     
+                    // }     
                     break;
                 case IDLE:
                     mPeriodicIO.demand = 0;
@@ -82,16 +88,16 @@ public class WheelHandler extends Subsystem{
         mPeriodicIO = new PeriodicIO();
         mColorSensor = new ColorSensorV3(I2C.Port.kOnboard);
 
-        mMotor = CANSpeedControllerFactory.createDefaultTalonSRX(WheelHandlerConstants.kWheelHandlerMotorID);
-        mMotor.configNeutralDeadband(0.04, 0);
-        TalonUtil.setBrakeMode(mMotor, true);
+        mMotor = new LazyVictorSPX(WheelHandlerConstants.kWheelHandlerMotorID);
 
         mColorMatch.addColorMatch(WheelHandlerConstants.kBlueTarget);
         mColorMatch.addColorMatch(WheelHandlerConstants.kGreenTarget);
         mColorMatch.addColorMatch(WheelHandlerConstants.kRedTarget);
         mColorMatch.addColorMatch(WheelHandlerConstants.kYellowTarget);  
         
-        mFMSSentString = "Change this init String";
+        mPiston = new Solenoid(WheelHandlerConstants.kWheelHandlerSolenoidId);
+
+        mFMSSentString = "G";
 
         mWheelMode = CurrentWheelMode.ROTATION;
     }
@@ -111,7 +117,8 @@ public class WheelHandler extends Subsystem{
 
     @Override
     public void writePeriodicOutputs() {
-    
+        mMotor.set(ControlMode.PercentOutput, mPeriodicIO.demand);
+        mPiston.set(mIsReadyToControl);
     }
 
     public void handleRotationControl(){
@@ -129,7 +136,7 @@ public class WheelHandler extends Subsystem{
             mPeriodicIO.demand = 0.0;
             mWheelMode = CurrentWheelMode.IDLE;
         }else{
-            mPeriodicIO.demand = 0.5;
+            mPeriodicIO.demand = 1;
         }
         
         mPrevSeenColor = mPeriodicIO.matched_color.color;
@@ -152,33 +159,33 @@ public class WheelHandler extends Subsystem{
                 {
                     case 'B' :
                         if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
-                            mPeriodicIO.demand = -.4;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
-                            mPeriodicIO.demand = .7;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
                             mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
+                            mPeriodicIO.demand = -.7;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
+                            mPeriodicIO.demand = -.4;
                         }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
                             mPeriodicIO.demand = 0;
                         }       
                         break;
                     case 'G' :
                         if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
-                            mPeriodicIO.demand = -.4;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
-                            mPeriodicIO.demand = .7;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
                             mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
+                            mPeriodicIO.demand = -.7;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
+                            mPeriodicIO.demand = -.4;
                         }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
                             mPeriodicIO.demand = 0;
                         }
                         break;
                     case 'R' :
                         if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
-                            mPeriodicIO.demand = -.4;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                            mPeriodicIO.demand = .7;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
                             mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
+                            mPeriodicIO.demand = -.7;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
+                            mPeriodicIO.demand = -.4;
                         }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
                             mPeriodicIO.demand = 0;
                         }
@@ -186,11 +193,11 @@ public class WheelHandler extends Subsystem{
                         break;
                     case 'Y' :
                         if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                            mPeriodicIO.demand = -.4;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
-                            mPeriodicIO.demand = .7;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
                             mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
+                            mPeriodicIO.demand = -.7;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
+                            mPeriodicIO.demand = -.4;
                         }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
                             mPeriodicIO.demand = 0;
                         }
@@ -213,8 +220,12 @@ public class WheelHandler extends Subsystem{
         mEnabledLooper.addLoop(mLoop);
     }
 
-    public void setReadyToGo(boolean isReady){
-        mIsReadyToControl = isReady;
+    public void setReadyToGo(){
+        mIsReadyToControl = true;
+    }
+
+    public void stopReady(){
+        mIsReadyToControl = false;
     }
 
     public String getColorString(){
@@ -239,6 +250,7 @@ public class WheelHandler extends Subsystem{
         SmartDashboard.putNumber("Blue", mPeriodicIO.detected_color.blue);
         SmartDashboard.putNumber("IR", mPeriodicIO.ir);
         SmartDashboard.putNumber("Proximity", mPeriodicIO.proximity);
+        SmartDashboard.putString("FMS String", mFMSSentString);
     }
     
     @Override

@@ -26,6 +26,7 @@ import com.team4.robot.subsystems.Superstructure;
 import com.team4.robot.subsystems.VisionTracker;
 import com.team4.robot.subsystems.WheelHandler;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Timer;
 
 public class Robot extends TimedRobot{
@@ -47,6 +48,8 @@ public class Robot extends TimedRobot{
     private final RobotState mRobotState = RobotState.getInstance();
     private final RobotStateEstimator mRobotStateEstimator = RobotStateEstimator.getInstance();
   
+    private final Compressor mCompressor = new Compressor(0);
+
     private AutoModeSelector mAutoSelector;
     private AutoModeExecutor mAutoModeExecutor;
 
@@ -120,7 +123,7 @@ public class Robot extends TimedRobot{
             mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
             mDrive.setHeading(Rotation2d.identity());
       
-            mShooter.setBrakeMode(true);
+            mShooter.setBrakeMode(false);
 
             mAutoModeExecutor.start();
       
@@ -203,6 +206,7 @@ public class Robot extends TimedRobot{
                 // System.out.println("Set auto mode to: " + autoMode.get().getClass().toString());
             }
             mAutoModeExecutor.setAutoMode(autoMode.get());
+            mCompressor.stop();
             // mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
         } catch (Throwable t) {
             CrashTracker.logThrowableCrash(t);

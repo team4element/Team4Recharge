@@ -6,6 +6,7 @@ public enum SuperstructureState{
     Convey_Shoot,
     Convey_Convey,
     Prepare_Climb,
+    Shoot,
     Climb,
     Enable_Wheel_Rotation,
     Enable_Wheel_Position,

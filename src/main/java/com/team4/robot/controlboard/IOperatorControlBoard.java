@@ -18,4 +18,7 @@ public interface IOperatorControlBoard{
     boolean getPrevSong();
 
     boolean getNextSong();
+
+
+    boolean getCompressor();
 }

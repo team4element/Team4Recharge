@@ -15,11 +15,14 @@ import com.team4.robot.constants.Constants;
 import com.team4.robot.controlboard.ControlBoard;
 import com.team4.robot.controlboard.IControlBoard;
 import com.team4.robot.subsystems.Drive;
+import com.team4.robot.subsystems.Intake;
 import com.team4.robot.subsystems.Shooter;
 import com.team4.robot.subsystems.Superstructure;
 import com.team4.robot.subsystems.VisionTracker;
+import com.team4.robot.subsystems.WheelHandler;
 import com.team4.robot.subsystems.states.superstructure.SuperstructureState;
 
+import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Notifier;
 
 public class HIDController{
@@ -35,6 +38,8 @@ public class HIDController{
     private final Drive mDrive = Drive.getInstance();
     private final Shooter mShooter = Shooter.getInstance();
     private final VisionTracker mVisionTracker = VisionTracker.getInstance();
+    private final Intake mIntake = Intake.getInstance();
+    private final WheelHandler mWheelHandler = WheelHandler.getInstance();
     private final Superstructure mSuperstructure = Superstructure.getInstance();
 
     private double kPeriod = .01; 
@@ -46,9 +51,16 @@ public class HIDController{
     private DriveHelper mDriveHelper = DriveHelper.getInstance();
     CheesyDriveHelper mCheesyDriveHelper = new CheesyDriveHelper();
 
+    private boolean compressVal = false;
+
+    private Compressor mCompressor;
+
     private boolean initSong = false;
     private boolean justPause = false;
     private boolean songJustChange = false;
+
+    private boolean intakeRelease = false;
+    private boolean wasDrop = false;
 
     private SynchronousPIDF autoSteerPID;
 
@@ -66,6 +78,8 @@ public class HIDController{
                                     ));
         
         OrchestraUtil.addOrchestra(mOrchestra);
+
+        mCompressor = new Compressor(0);
 
         mSongChooser = new SongChooser();
 
@@ -92,12 +106,11 @@ public class HIDController{
                 // mVisionTracker.setVisionEnabled(true);     
     
                 if (mVisionTracker.isVisionEnabled() && mVisionTracker.isTargetFound()) {
-                        turn = autoSteerPID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev());
+                        turn = -autoSteerPID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev());
                     // turn = 0d;
-                    // turn = Math.max(Math.min(VisionTracker.getInstance().getTargetHorizAngleDev() * 0.01, 0.1), -0.1);
                     mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
                 }else{
-                    turn = ElementMath.handleDeadband(-mControlBoard.getTurn(), Constants.kJoystickThreshold);                
+                    turn = -ElementMath.handleDeadband(-mControlBoard.getTurn(), Constants.kJoystickThreshold);                
                     mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
                 }
                 
@@ -110,7 +123,23 @@ public class HIDController{
                     mSuperstructure.setControlState(SuperstructureState.IDLE);
                 }
 
-                
+                if(mControlBoard.getDropIntake()){
+                    mIntake.setDown();
+                }else if(mControlBoard.getUpIntake()){
+                    mIntake.setUp();
+                }
+
+                if(mControlBoard.getCompressor()){
+                    mCompressor.start();
+                }else{
+                    mCompressor.stop();
+                }
+
+                if(mControlBoard.getUpdateControlPanelMode()){
+                }
+
+                if(mControlBoard.getReadyToManipulateControlPanel()){
+                }
 
                 if(mControlBoard.getPauseSong()){
                     if(!initSong){

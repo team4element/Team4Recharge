@@ -22,7 +22,7 @@ public class GamepadDriveControlBoard implements IDriveControlBoard {
 
     @Override
     public double getThrottle() {
-        return -mController.getJoystick(XboxController.Side.LEFT, XboxController.Axis.Y);
+        return  -mController.getJoystick(XboxController.Side.LEFT, XboxController.Axis.Y);
     }
 
     @Override
@@ -38,5 +38,15 @@ public class GamepadDriveControlBoard implements IDriveControlBoard {
     @Override
     public boolean getQuickTurn() {
         return mController.getTrigger(XboxController.Side.LEFT);
+    }
+
+    @Override
+    public boolean getDropIntake() {
+        return mController.getButton(Button.A);
+    }
+
+    @Override
+    public boolean getUpIntake() {
+        return mController.getButton(Button.B);
     }
 }

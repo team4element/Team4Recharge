@@ -82,4 +82,18 @@ public class ControlBoard implements IControlBoard{
     public boolean getNextSong() {
         return mOperatorControlBoard.getNextSong();
     }
+
+    public boolean getCompressor(){
+        return mOperatorControlBoard.getCompressor();
+    }
+
+    @Override
+    public boolean getDropIntake() {
+        return mDriveControlBoard.getDropIntake();
+    }
+
+    @Override
+    public boolean getUpIntake() {
+        return mDriveControlBoard.getUpIntake();
+    }
 }

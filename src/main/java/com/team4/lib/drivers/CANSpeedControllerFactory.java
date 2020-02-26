@@ -7,6 +7,7 @@ import com.ctre.phoenix.motorcontrol.LimitSwitchNormal;
 import com.ctre.phoenix.motorcontrol.LimitSwitchSource;
 import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.VelocityMeasPeriod;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
@@ -162,8 +163,8 @@ public class CANSpeedControllerFactory {
 
      public static TalonFX createPermanentSlaveTalonFX(int id, TalonFX master) {
         final TalonFX talon = createTalonFX(id, kSlaveConfiguration);
-        talon.follow(master);
-        // talon.set(TalonFXControlMode.Follower, master_id);
+        // talon.follow(master);
+        talon.set(TalonFXControlMode.Follower, master.getBaseID());
         return talon;
     }
 

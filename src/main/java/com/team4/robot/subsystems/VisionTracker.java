@@ -117,12 +117,12 @@ public class VisionTracker extends Subsystem {
 				mPeriodicIO.targetSkew = mCurrentTargetingLimelightNT.getEntry("ts").getDouble(0);
 				mPeriodicIO.targetLatency = mCurrentTargetingLimelightNT.getEntry("tl").getDouble(0);
 				mPeriodicIO.getPipelineValue = mCurrentTargetingLimelightNT.getEntry("getpipe").getDouble(0);
-				mPeriodicIO.cameraA1 = Math.toDegrees(Math.atan((TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens)/(240-20) /*240 inches to find what A1 is */))-mPeriodicIO.targetVerticalDeviation;
+				mPeriodicIO.cameraA1 = Math.toDegrees(Math.atan((TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens)/(144) /*240 inches to find what A1 is */))-mPeriodicIO.targetVerticalDeviation;
 	
 				mPeriodicIO.targetDistance =
 				(TargetingConstants.kFloorToTarget - TargetingConstants.kFloorToLens) /
 				/*	Math.toDegrees(*/Math.tan(Math.toRadians(TargetingConstants.kFloorToLensAngle + mPeriodicIO.targetVerticalDeviation))/*)*/;
-				mPeriodicIO.targetDistance += 20;
+				// mPeriodicIO.targetDistance += 20;
 		
 				try {
 					

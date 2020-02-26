@@ -22,7 +22,7 @@ public class ShooterConstants {
     public static final double kShooterMaxSpeed = 130; //in meters per second
     public static final double kShooterTimeConstraint = 2.5; // in seconds
 
-    public static final double kShooterGearRatio = 1.925; // 1 on comp bot
+    public static final double kShooterGearRatio = 1.0; // 1 on comp bot
     public static final double kShooterEnconderPPR = 2048.0;
 
 }
