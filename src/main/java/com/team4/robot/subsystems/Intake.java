@@ -19,7 +19,7 @@ public class Intake extends Subsystem{
 
     private TalonSRX mMotor;
     
-    private boolean mIsDown = true;
+    private boolean mIsDown = false;
     
     private Solenoid mLeftPiston, mRightPiston;
 
@@ -109,12 +109,7 @@ public class Intake extends Subsystem{
         SmartDashboard.putBoolean("Is Intake Down", mIsDown);
     }
 
-    public void reset(){
-        mLeftPiston.set(true);
-        mRightPiston.set(true);
 
-        mIsDown = false;
-    }
 
     @Override
     public boolean checkSystem() {

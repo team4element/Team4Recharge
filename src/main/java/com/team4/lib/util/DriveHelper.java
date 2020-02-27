@@ -3,7 +3,12 @@ package com.team4.lib.util;
 import com.team254.lib.geometry.Twist2d;
 import com.team254.lib.util.DriveSignal;
 import com.team254.lib.util.Util;
-
+/**
+ * A custom implementation of Cheesydrive. 
+ * 
+ * This is to provide our drivers with the ability to smoothly control the robot scaling both turn and throttle with a sign
+ * wave. It is changed to allow for turning in place versus only being able to turn while throttle is applied. 
+ */
 public class DriveHelper{
 
     private static DriveHelper instance = null;

@@ -44,7 +44,7 @@ public class Shooter extends Subsystem{
                         break;
                     case VELOCITY:
                         // handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
-                        setVelocity(4500, 0);
+                        setVelocity(4000, 0);
                         break;
                     case IDLE:
                         setOpenLoop(0);

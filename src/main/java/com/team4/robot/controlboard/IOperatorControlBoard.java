@@ -3,22 +3,21 @@ package com.team4.robot.controlboard;
 public interface IOperatorControlBoard{
     boolean getShoot();
 
-    boolean getIntake();
+    boolean getBackConvey();
 
-    boolean getUpdateControlPanelMode();
+    boolean getVisionOverride();
 
-    boolean getReadyToManipulateControlPanel();
+    boolean getReverseIntake();
 
-    boolean getKillCommand();
+    boolean getReverseConveyor();
 
-    boolean getPauseSong();
+    boolean getReverseSuperstructure();
 
-    boolean getStopSong();
+    boolean getClimbUp();
 
-    boolean getPrevSong();
+    boolean getClimbDown();
 
-    boolean getNextSong();
+    boolean getWinch();
 
-
-    boolean getCompressor();
+    boolean getCompress();
 }

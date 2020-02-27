@@ -12,8 +12,10 @@ import com.team4.lib.util.ElementMath;
 import com.team4.lib.util.SongChooser;
 import com.team4.robot.constants.AutoConstants;
 import com.team4.robot.constants.Constants;
-import com.team4.robot.controlboard.ControlBoard;
-import com.team4.robot.controlboard.IControlBoard;
+import com.team4.robot.controlboard.GamepadDriveControlBoard;
+import com.team4.robot.controlboard.GamepadOperatorControlBoard;
+import com.team4.robot.controlboard.IDriveControlBoard;
+import com.team4.robot.controlboard.IOperatorControlBoard;
 import com.team4.robot.subsystems.Drive;
 import com.team4.robot.subsystems.Intake;
 import com.team4.robot.subsystems.Shooter;
@@ -42,12 +44,14 @@ public class HIDController{
     private final WheelHandler mWheelHandler = WheelHandler.getInstance();
     private final Superstructure mSuperstructure = Superstructure.getInstance();
 
+    private final IDriveControlBoard mDriveControlBoard = GamepadDriveControlBoard.getInstance();
+    private final IOperatorControlBoard mOperatorControlBoard = GamepadOperatorControlBoard.getInstance();
+
     private double kPeriod = .01; 
     private Notifier mNotifier;
 
     private Orchestra mOrchestra;
 
-    private IControlBoard mControlBoard = ControlBoard.getInstance();
     private DriveHelper mDriveHelper = DriveHelper.getInstance();
     CheesyDriveHelper mCheesyDriveHelper = new CheesyDriveHelper();
 
@@ -55,12 +59,10 @@ public class HIDController{
 
     private Compressor mCompressor;
 
-    private boolean initSong = false;
-    private boolean justPause = false;
-    private boolean songJustChange = false;
-
     private boolean intakeRelease = false;
     private boolean wasDrop = false;
+
+    private boolean wheelRelease = false;
 
     private SynchronousPIDF autoSteerPID;
 
@@ -96,11 +98,9 @@ public class HIDController{
         @Override
         public void runCrashTracked() {
             if(running_){            
-                mSongChooser.updateSelectedChoice();
-
-                double throttle = ElementMath.handleDeadband(mControlBoard.getThrottle(), Constants.kJoystickThreshold);
+                double throttle = ElementMath.handleDeadband(mDriveControlBoard.getThrottle(), Constants.kJoystickThreshold);
                 double turn;
-                boolean wants_auto_steer = mControlBoard.getVisionEnable();
+                boolean wants_auto_steer = mDriveControlBoard.getVisionEnable() || mOperatorControlBoard.getVisionOverride();
                 
                 mVisionTracker.setVisionEnabled(wants_auto_steer);
                 // mVisionTracker.setVisionEnabled(true);     
@@ -108,82 +108,74 @@ public class HIDController{
                 if (mVisionTracker.isVisionEnabled() && mVisionTracker.isTargetFound()) {
                         turn = -autoSteerPID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev());
                     // turn = 0d;
-                    mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
+                    mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, false));
                 }else{
-                    turn = -ElementMath.handleDeadband(-mControlBoard.getTurn(), Constants.kJoystickThreshold);                
-                    mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, mControlBoard.getQuickTurn()));
+                    turn = -ElementMath.handleDeadband(-mDriveControlBoard.getTurn(), Constants.kJoystickThreshold);                
+                    mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, false));
+                }
+
+                if(mDriveControlBoard.getDropIntake()){
+                    if(!intakeRelease){
+                        if(!wasDrop){
+                            mIntake.setDown();
+                            wasDrop = true;
+                            intakeRelease = true;
+                        }else{
+                            mIntake.setUp();
+                            wasDrop = false;
+                            intakeRelease = true;
+                        }
+                    }
+                }else{
+                    intakeRelease = false;
                 }
                 
-            
-                if(mControlBoard.getShoot()){
+                
+                if(mDriveControlBoard.getWheelUp()){
+                    if(!wheelRelease){
+                        mWheelHandler.setReadyToGo();
+                        wheelRelease = true;
+                    }
+                }else{
+                    wheelRelease = false;
+                }
+                
+                if(mDriveControlBoard.getWheelDown()){
+                    if(!wheelRelease){
+                        mWheelHandler.stopReady();
+                        wheelRelease = true;
+                    }
+                }else{
+                    wheelRelease = false;
+                }
+
+                if(mOperatorControlBoard.getShoot()){
                     mSuperstructure.setControlState(SuperstructureState.Convey_Shoot);
-                }else if(mControlBoard.getIntake()){
+                }else if(mDriveControlBoard.getIntake()){
                     mSuperstructure.setControlState(SuperstructureState.Intake_Convey);
+                }else if(mOperatorControlBoard.getBackConvey()){
+                    mSuperstructure.setControlState(SuperstructureState.Convey_Convey);
+                }else if(mDriveControlBoard.getRotationControl()){
+                    mSuperstructure.setControlState(SuperstructureState.Enable_Wheel_Rotation);
+                }else if(mDriveControlBoard.getPositionControl()){
+                    mSuperstructure.setControlState(SuperstructureState.Enable_Wheel_Position);
+                }else if(mOperatorControlBoard.getReverseSuperstructure()){
+                    
+                }else if(mDriveControlBoard.getClimbUp() || mOperatorControlBoard.getClimbUp()) {
+                    
+                }else if(mDriveControlBoard.getClimbDown() || mOperatorControlBoard.getClimbDown()) {
+                    
+                }else if(mOperatorControlBoard.getWinch() || mDriveControlBoard.getWinch()){
+                
                 }else{
                     mSuperstructure.setControlState(SuperstructureState.IDLE);
+                }   
+     
+
+
                 }
-
-                if(mControlBoard.getDropIntake()){
-                    mIntake.setDown();
-                }else if(mControlBoard.getUpIntake()){
-                    mIntake.setUp();
-                }
-
-                if(mControlBoard.getCompressor()){
-                    mCompressor.start();
-                }else{
-                    mCompressor.stop();
-                }
-
-                if(mControlBoard.getUpdateControlPanelMode()){
-                }
-
-                if(mControlBoard.getReadyToManipulateControlPanel()){
-                }
-
-                if(mControlBoard.getPauseSong()){
-                    if(!initSong){
-                        OrchestraUtil.playLoadedSong();
-                        initSong = true;
-                    }else{
-                        if(!justPause){
-                            OrchestraUtil.pause();
-                            justPause = true;
-                        }
-                    }
-                }else if(mControlBoard.getStopSong()){
-                    if(!initSong){
-                        OrchestraUtil.playLoadedSong();
-                        initSong = true;
-                    }else{
-                        if(!justPause){
-                            OrchestraUtil.stop();
-                            justPause = true;
-                        }
-                    }
-                }else{
-                    justPause = false;
-                }
-
-                if(mControlBoard.getNextSong()){
-                    if(!songJustChange){
-                        OrchestraUtil.loadMusicSelection(true);
-                        songJustChange = true;
-                    }
-                }else if(mControlBoard.getPrevSong()){
-                    if(!songJustChange){
-                        OrchestraUtil.loadMusicSelection(false);
-                        songJustChange = true;
-                    }
-                }else{
-                    songJustChange = false;
-                }
-
-                // OrchestraUtil.playSong(mSongChooser.getSelectedSong());
-
-            }   
-        }
-    };
+            }
+        };
 
     public void start(){
         running_ = true;

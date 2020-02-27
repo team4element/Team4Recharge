@@ -17,6 +17,8 @@ import com.team4.lib.autobase.AutoModeExecutor;
 import com.team4.lib.loops.Looper;
 import com.team4.lib.util.SubsystemManager;
 import com.team4.lib.wpilib.TimedRobot;
+import com.team4.robot.controlboard.GamepadOperatorControlBoard;
+import com.team4.robot.subsystems.Climber;
 import com.team4.robot.subsystems.Conveyor;
 import com.team4.robot.subsystems.Drive;
 import com.team4.robot.subsystems.Intake;
@@ -28,6 +30,7 @@ import com.team4.robot.subsystems.WheelHandler;
 
 import edu.wpi.first.wpilibj.Compressor;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot{
     private final Looper mEnabledLooper = new Looper();
@@ -42,6 +45,7 @@ public class Robot extends TimedRobot{
     private final Conveyor mConveyor = Conveyor.getInstance();
     private final Intake mIntake = Intake.getInstance();
     private final WheelHandler mWheelHandler = WheelHandler.getInstance();
+    private final Climber mClimber = Climber.getInstance();
     private final Superstructure mSuperstructure = Superstructure.getInstance();
 
     //Robot State Initialization
@@ -69,8 +73,9 @@ public class Robot extends TimedRobot{
                 mShooter,
                 mIntake,
                 mConveyor,
-                mSuperstructure,
-                mWheelHandler);
+                mClimber,
+                mWheelHandler,
+                mSuperstructure);
               
                 mSubsystemManager.configEnabledLoop(mEnabledLooper);
                 mSubsystemManager.configDisabledLoop(mDisabledLooper);
@@ -78,11 +83,11 @@ public class Robot extends TimedRobot{
                 mRobotState.reset(Timer.getFPGATimestamp(), Pose2d.identity());
                 mDrive.setHeading(Rotation2d.identity());
         
-                mIntake.reset();
-
                 mAutoSelector = new AutoModeSelector();
                 mAutoModeExecutor = new AutoModeExecutor();
                 
+                mCompressor.setClosedLoopControl(true);
+
                 System.out.println("Finished robot init");
             } catch (Throwable t) {
               CrashTracker.logThrowableCrash(t);
@@ -180,8 +185,6 @@ public class Robot extends TimedRobot{
     @Override
     public void robotPeriodic() {
         try {
-            mWheelHandler.readPeriodicInputs();
-            mWheelHandler.writePeriodicOutputs();
             mSubsystemManager.outputToSmartDashboard();
             mRobotState.outputToSmartDashboard();
         } catch (Throwable t) {
@@ -220,6 +223,9 @@ public class Robot extends TimedRobot{
 
     @Override
     public void teleopPeriodic() {
+            // mCompressor.start();
+            // SmartDashboard.putBoolean("Current Data", mCompressor.getCompressorCurrentTooHighFault());
+            // SmartDashboard.putBoolean("Pressure Switch", mCompressor.getPressureSwitchValue());
     }
 
     @Override

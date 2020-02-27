@@ -5,9 +5,10 @@ public enum SuperstructureState{
     Intake_Convey,
     Convey_Shoot,
     Convey_Convey,
-    Prepare_Climb,
     Shoot,
-    Climb,
+    Climb_Up,
+    Climb_Down,
+    Winch,
     Enable_Wheel_Rotation,
     Enable_Wheel_Position,
     IDLE

@@ -24,49 +24,48 @@ public class GamepadOperatorControlBoard implements IOperatorControlBoard{
     public boolean getShoot() {
         return mController.getButton(Button.LB);
     }
+
     @Override
-    public boolean getIntake() {
+    public boolean getBackConvey() {
         return mController.getButton(Button.RB);
     }
 
     @Override
-    public boolean getUpdateControlPanelMode() {
-        return mController.getButton(Button.Y);
+    public boolean getVisionOverride() {
+        return mController.getTrigger(Side.LEFT);
     }
 
     @Override
-    public boolean getReadyToManipulateControlPanel() {
-        return mController.getButton(Button.X);
-    }
-
-    @Override
-    public boolean getKillCommand() {
+    public boolean getReverseIntake() {
         return mController.getButton(Button.A);
     }
 
     @Override
-    public boolean getPauseSong() {
-        return mController.getButton(Button.START);
-    }
-
-    @Override
-    public boolean getStopSong() {
+    public boolean getReverseConveyor() {
         return mController.getButton(Button.B);
     }
 
     @Override
-    public boolean getPrevSong() {
-        return mController.getDPad() == 270;
+    public boolean getReverseSuperstructure() {
+        return mController.getTrigger(Side.RIGHT);
     }
 
     @Override
-    public boolean getNextSong() {
-        return mController.getDPad() == 90;
+    public boolean getClimbUp() {
+        return mController.getButton(Button.X);
+    }
+
+    public boolean getClimbDown() {
+        return mController.getButton(Button.Y);
     }
 
     @Override
-    public boolean getCompressor() {
-        return mController.getTrigger(Side.LEFT);
+    public boolean getWinch() {
+        return mController.getButton(Button.START);
     }
-    
+
+    @Override
+    public boolean getCompress() {
+        return mController.getButton(Button.L_JOYSTICK);
+    }
 }

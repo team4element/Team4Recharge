@@ -2,6 +2,7 @@ package com.team4.robot.controlboard;
 
 import com.team4.robot.constants.Constants;
 import com.team4.robot.controlboard.XboxController.Button;
+import com.team4.robot.controlboard.XboxController.Side;
 
 public class GamepadDriveControlBoard implements IDriveControlBoard {
     private static GamepadDriveControlBoard mInstance = null;
@@ -36,17 +37,48 @@ public class GamepadDriveControlBoard implements IDriveControlBoard {
     }
 
     @Override
-    public boolean getQuickTurn() {
-        return mController.getTrigger(XboxController.Side.LEFT);
+    public boolean getDropIntake() {
+        return mController.getButton(Button.RB);
     }
 
     @Override
-    public boolean getDropIntake() {
+    public boolean getIntake() {
+        return mController.getTrigger(Side.RIGHT);
+    }
+
+    @Override
+    public boolean getRotationControl() {
         return mController.getButton(Button.A);
     }
 
     @Override
-    public boolean getUpIntake() {
+    public boolean getPositionControl() {
         return mController.getButton(Button.B);
     }
+
+    @Override
+    public boolean getWheelUp() {
+        return mController.getDPad() == 0;
+    }
+
+    @Override
+    public boolean getWheelDown() {
+        return mController.getDPad() == 180;
+    }
+
+    @Override
+    public boolean getClimbUp() {
+        return mController.getButton(Button.X);
+    }
+
+    @Override
+    public boolean getClimbDown() {
+        return mController.getButton(Button.Y);
+    }
+
+    @Override
+    public boolean getWinch() {
+        return mController.getButton(Button.START);
+    }
+
 }

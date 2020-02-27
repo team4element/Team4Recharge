@@ -90,8 +90,7 @@ public class Superstructure extends Subsystem{
     }
 
     public synchronized void handleConveyAndConvey(){
-        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
-        mConveyor.setFinalStage(.8);
+        mConveyor.setControlState(ConveyorControlState.MOVE_FINAL_STAGE);
     }
 
 
@@ -102,7 +101,7 @@ public class Superstructure extends Subsystem{
             // mIntake.setControlState(IntakeState.IDLE);
         // }
 
-        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
+        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_STAGE);
         
     }
 

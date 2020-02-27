@@ -21,9 +21,9 @@
               "_title": "Distance"
             }
           },
-          "11,0": {
+          "10,0": {
             "size": [
-              6,
+              7,
               5
             ],
             "content": {
@@ -40,7 +40,7 @@
               "imageHeight": -1
             }
           },
-          "9,0": {
+          "8,0": {
             "size": [
               2,
               2
@@ -108,7 +108,7 @@
               "_title": "limelight_Interface"
             }
           },
-          "2,0": {
+          "4,1": {
             "size": [
               2,
               1
@@ -130,7 +130,7 @@
               "_title": "Robot Pose Theta"
             }
           },
-          "7,0": {
+          "6,0": {
             "size": [
               2,
               2
@@ -178,7 +178,7 @@
           },
           "5,5": {
             "size": [
-              1,
+              2,
               1
             ],
             "content": {
@@ -231,20 +231,9 @@
               "_title": "Detected Color"
             }
           },
-          "4,1": {
+          "4,0": {
             "size": [
               2,
-              1
-            ],
-            "content": {
-              "_type": "Text View",
-              "_source0": "network_table:///SmartDashboard/Camera A1",
-              "_title": "Camera A1"
-            }
-          },
-          "5,0": {
-            "size": [
-              1,
               1
             ],
             "content": {

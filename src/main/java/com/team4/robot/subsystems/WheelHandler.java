@@ -36,7 +36,7 @@ public class WheelHandler extends Subsystem{
 
     private CurrentWheelMode mWheelMode;
 
-    private boolean mIsReadyToControl;
+    private boolean mIsReadyToControl = true;
 
     private double mSeenColorSetAmountOfTime = 0;
 
@@ -56,9 +56,9 @@ public class WheelHandler extends Subsystem{
         public void onLoop(double timestamp){
             switch(mWheelMode){
                 case ROTATION:
-                    if(mIsReadyToControl){
+                    // if(!mIsReadyToControl){
                         handleRotationControl();
-                    }
+                    // }
                     break;
                 case POSITION:
                     // if(mIsReadyToControl){
@@ -66,6 +66,7 @@ public class WheelHandler extends Subsystem{
                     // }     
                     break;
                 case IDLE:
+                    mFirstTime = true;
                     mPeriodicIO.demand = 0;
                     break;
                 default:
@@ -97,6 +98,8 @@ public class WheelHandler extends Subsystem{
         
         mPiston = new Solenoid(WheelHandlerConstants.kWheelHandlerSolenoidId);
 
+        mPiston.setPulseDuration(Double.POSITIVE_INFINITY);
+
         mFMSSentString = "G";
 
         mWheelMode = CurrentWheelMode.ROTATION;
@@ -118,7 +121,6 @@ public class WheelHandler extends Subsystem{
     @Override
     public void writePeriodicOutputs() {
         mMotor.set(ControlMode.PercentOutput, mPeriodicIO.demand);
-        mPiston.set(mIsReadyToControl);
     }
 
     public void handleRotationControl(){
@@ -132,7 +134,7 @@ public class WheelHandler extends Subsystem{
             mSeenColorSetAmountOfTime += 1;
         }
         
-        if(mSeenColorSetAmountOfTime >= 7){
+        if(mSeenColorSetAmountOfTime >= 9){
             mPeriodicIO.demand = 0.0;
             mWheelMode = CurrentWheelMode.IDLE;
         }else{
@@ -221,11 +223,13 @@ public class WheelHandler extends Subsystem{
     }
 
     public void setReadyToGo(){
-        mIsReadyToControl = true;
+        mPiston.set(true);
+        mIsReadyToControl = false;
     }
 
     public void stopReady(){
-        mIsReadyToControl = false;
+        mPiston.startPulse();;
+        mIsReadyToControl = true;
     }
 
     public String getColorString(){

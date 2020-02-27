@@ -5,12 +5,23 @@ public interface IDriveControlBoard {
 
     double getTurn();
 
-    boolean getQuickTurn();
-
     boolean getVisionEnable();
 
     boolean getDropIntake();
+
+    boolean getIntake();
+
+    boolean getRotationControl();
     
-    boolean getUpIntake();
-    
+    boolean getPositionControl();
+
+    boolean getWheelUp();
+
+    boolean getWheelDown();
+
+    boolean getClimbUp();
+
+    boolean getClimbDown();
+
+    boolean getWinch();
 }
