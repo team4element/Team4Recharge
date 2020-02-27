@@ -192,14 +192,9 @@ public class Shooter extends Subsystem{
         double rpm = 0;
 
         if(mFlyWheelDistance > 11.5 * 12 && mFlyWheelDistance < 23 * 12){
-            // if(mFlyWheelDistance >= 12*12 && mFlyWheelDistance <= 13.2*12){
-                // rpm = 3750;
-            // }else{
-                rpm = ((0.015533 * Math.pow(mFlyWheelDistance, 2)) + (1.0528 * mFlyWheelDistance) + 2505.6707); 
-                // rpm *= .9;
-                // rpm = (0.0035*Math.pow(mFlyWheelDistance, 3)) - (1.7421 * Math.pow(mFlyWheelDistance, 2)) + (244.28 * mFlyWheelDistance) - 2250;
-            // }
-        }
+                // rpm = ((0.015533 * Math.pow(mFlyWheelDistance, 2)) + (1.0528 * mFlyWheelDistance) + 2505.6707); 
+                rpm = (0.025533 * Math.pow(mFlyWheelDistance, 2)) + (1.028 * mFlyWheelDistance) + 2655.6707;
+            }
 
         // System.out.println("Actual RPM: " + rpm);
         if(rpm < 5000){
