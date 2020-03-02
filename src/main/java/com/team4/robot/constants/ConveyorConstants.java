@@ -1,7 +1,7 @@
 package com.team4.robot.constants;
 
 public class ConveyorConstants{
-    public static final int kFirstStageLeftMotor = 7;
+    public static final int kFirstStageLeftMotor = 9;
     public static final int kFirstStageRightMotor = 8;
     public static final int kHopperMotor = 10;
     

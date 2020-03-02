@@ -30,7 +30,5 @@ public abstract class Subsystem {
 
     public abstract void stop();
 
-    public abstract boolean checkSystem();
-
     public abstract void outputTelemetry();
 }

@@ -14,21 +14,19 @@ public class RightTrenchPath1 implements PathContainer{
     @Override
     public Path buildPath() {
         List<Waypoint> sWaypoints = new ArrayList<>();
-        sWaypoints.add(new Waypoint(105, 145, 0, 0));
-        sWaypoints.add(new Waypoint(160, 145, 0, 50, "Start Intake")); //change X to 205
-        sWaypoints.add(new Waypoint(220, 145, 5, 70)); // change X to 345
-        sWaypoints.add(new Waypoint(245, 140, 5, 70)); // change X to 370
-        sWaypoints.add(new Waypoint(270, 135, 0, 70));// change X to 395
+        sWaypoints.add(new Waypoint(-113, -145, 0, 0));
+        sWaypoints.add(new Waypoint(-205, -145, 0, 50, "Start Intake"));
+        sWaypoints.add(new Waypoint(-345, -145, 5, 70)); 
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 
     @Override
     public Pose2d getStartPose() {
-        return new Pose2d(105, 145, Rotation2d.fromDegrees(180.0));
+        return new Pose2d(-113, -145, Rotation2d.fromDegrees(180.0));
     }
 
     @Override
     public boolean isReversed() {
-        return false;
+        return true;
     }
 }

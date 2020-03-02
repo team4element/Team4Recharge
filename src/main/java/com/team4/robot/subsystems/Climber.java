@@ -103,11 +103,6 @@ public class Climber extends Subsystem{
     
     }
 
-    @Override
-    public boolean checkSystem() {
-        return false;
-    }
-
     public static class PeriodicIO{
         public double climb_demand;
         public double winch_demand;

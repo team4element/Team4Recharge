@@ -3,7 +3,6 @@ package com.team4.robot;
 import java.util.Optional;
 
 import com.team4.lib.autobase.AutoModeBase;
-import com.team4.robot.auto.modes.CharacterizeHighGearStraight;
 import com.team4.robot.auto.modes.DoNothingMode;
 import com.team4.robot.auto.modes.LeftToRendAndShootMode;
 import com.team4.robot.auto.modes.LeftToTrenchAndShootMode;
@@ -29,7 +28,6 @@ public class AutoModeSelector {
 
     enum DesiredMode {
         DO_NOTHING,
-        CHARACTERIZE_DRIVE_BASE,
         TEST,
         RENDEZVOUS,
         TRENCH,
@@ -53,7 +51,6 @@ public class AutoModeSelector {
 
         mModeChooser = new SendableChooser<>();
         mModeChooser.setDefaultOption("Do Nothing", DesiredMode.DO_NOTHING);
-        mModeChooser.addOption("Drive Characterization", DesiredMode.CHARACTERIZE_DRIVE_BASE);
         mModeChooser.addOption("Rendezvous", DesiredMode.RENDEZVOUS);
         mModeChooser.addOption("Trench", DesiredMode.TRENCH);
         mModeChooser.addOption("Test", DesiredMode.TEST);
@@ -77,8 +74,6 @@ public class AutoModeSelector {
         switch (mode) {
             case DO_NOTHING:
                 return Optional.of(new DoNothingMode());
-            case CHARACTERIZE_DRIVE_BASE:
-                return Optional.of(new CharacterizeHighGearStraight());
             case RENDEZVOUS:
                 switch (position){
                     case MID:

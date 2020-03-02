@@ -14,11 +14,11 @@ public class AutoConstants{
     public static final int kDriveCurrentUnThrottledLimit = 80; // amps
 
 
-    public static final double kDrivePositionKp = 1.5;
-    public static final double kDrivePositionKi = 0.0;
-    public static final double kDrivePositionKd = 2.0;
+    public static final double kDrivePositionKp = 0.4;
+    public static final double kDrivePositionKi = 0.002;
+    public static final double kDrivePositionKd = 60.0;
     public static final double kDrivePositionKf = 0.0;
-    public static final int kDrivePositionIZone = 0;
+    public static final int kDrivePositionIZone = 700;
 
     public static final int kDriveMaxVelocity = 18 * 12;
     public static final int kDriveMaxAccel = 20 * 12;
@@ -52,7 +52,7 @@ public class AutoConstants{
     public static final int kShooterIZone = 0;
     public static final double kShooterRampRate = 0.0;
 
-    public static final double kLimelightAngleKp = .02;
+    public static final double kLimelightAngleKp = .04;
     public static final double kLimelightAngleKi = .0;
     public static final double kLimelightAngleKd = 0.0;
 

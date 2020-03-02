@@ -6,6 +6,8 @@ import com.team254.lib.geometry.Translation2d;
 import com.team254.lib.geometry.Twist2d;
 
 /**
+ * Modified from 254's 2019 implementation 
+ * 
  * Implements an adaptive pure pursuit controller. See:
  * https://www.ri.cmu.edu/pub_files/pub1/kelly_alonzo_1994_4/kelly_alonzo_1994_4 .pdf
  * <p>
@@ -14,7 +16,7 @@ import com.team254.lib.geometry.Twist2d;
  * We also return the maximum speed we'd like to be going when we reach the target spot.
  */
 
-public class AdaptivePurePursuitController {
+public class PurePursuitController {
     private static final double kReallyBigNumber = 1E6;
 
     public static class Command {
@@ -43,7 +45,7 @@ public class AdaptivePurePursuitController {
     final boolean mReversed;
     final Lookahead mLookahead;
 
-    public AdaptivePurePursuitController(Path path, boolean reversed, Lookahead lookahead) {
+    public PurePursuitController(Path path, boolean reversed, Lookahead lookahead) {
         mPath = path;
         mReversed = reversed;
         mLookahead = lookahead;

@@ -1,11 +1,14 @@
 package com.team4.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlFrame;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
+import com.team4.robot.constants.Constants;
 import com.team4.robot.constants.IntakeConstants;
 import com.team4.robot.subsystems.states.IntakeState;
 
@@ -37,8 +40,16 @@ public class Intake extends Subsystem{
         mMotor = CANSpeedControllerFactory.createDefaultTalonSRX(IntakeConstants.kIntakeMotor);
         mMotor.setInverted(true);
 
-        mLeftPiston = new Solenoid(IntakeConstants.kLeftSolenoidId);
-        mRightPiston = new Solenoid(IntakeConstants.kRightSolenoidId);
+        mMotor.changeMotionControlFramePeriod(100);
+        mMotor.setControlFramePeriod(ControlFrame.Control_3_General, 20);
+        mMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General,
+                20, Constants.kCANTimeoutMs);
+        mMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0,
+                100, Constants.kCANTimeoutMs);
+
+
+        mLeftPiston = new Solenoid(1, IntakeConstants.kLeftSolenoidId);
+        mRightPiston = new Solenoid(1, IntakeConstants.kRightSolenoidId);
 
         mPeriodicIO = new PeriodicIO();
     }
@@ -51,12 +62,10 @@ public class Intake extends Subsystem{
       public void onLoop(double timestamp){
         switch(mCurrentState){
             case OPEN_LOOP:
-                setOpenLoop(.6);
+                setOpenLoop(.4);
                 break;
-            case DROP:
-                if(!mIsDown){
-                    setDown();
-                }
+            case REVERSE:
+                setOpenLoop(-.4);
                 break;
             case IDLE:
                 setOpenLoop(0);
@@ -112,19 +121,15 @@ public class Intake extends Subsystem{
 
 
     @Override
-    public boolean checkSystem() {
-        return false;
-    }
-    
-    @Override
     public void stop() {
         
     }
 
     public void setDown(){
         if(!mIsDown){
-            mLeftPiston.set(false);
-            mRightPiston.set(false);
+            mLeftPiston.set(true);
+            mRightPiston.set(true);
+
 
             mIsDown = true;
         }
@@ -132,8 +137,8 @@ public class Intake extends Subsystem{
 
     public void setUp(){
         if(mIsDown){
-            mLeftPiston.set(true);
-            mRightPiston.set(true);
+            mLeftPiston.set(false);
+            mRightPiston.set(false);
 
             mIsDown = false;
         }

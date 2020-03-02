@@ -193,11 +193,6 @@ public class VisionTracker extends Subsystem {
 	}
 
 	@Override
-	public boolean checkSystem() {
-		return false;
-	}
-
-	@Override
 	public void outputTelemetry() {
 		SmartDashboard.putNumber("Distance", mPeriodicIO.targetDistance);
 		SmartDashboard.putNumber("Camera A1", mPeriodicIO.cameraA1);

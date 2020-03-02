@@ -1,9 +1,9 @@
 package com.team4.robot.subsystems;
 
-import java.util.ArrayList;
-
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.StatusFrame;
 import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
+import com.ctre.phoenix.motorcontrol.SupplyCurrentLimitConfiguration;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
 import com.team254.lib.control.Lookahead;
 import com.team254.lib.control.Path;
@@ -12,11 +12,8 @@ import com.team254.lib.geometry.Pose2d;
 import com.team254.lib.geometry.Rotation2d;
 import com.team254.lib.geometry.Twist2d;
 import com.team254.lib.util.DriveSignal;
-import com.team254.lib.util.ReflectingCSVWriter;
 import com.team4.lib.drivers.CANSpeedControllerFactory;
-import com.team4.lib.drivers.MotorChecker;
 import com.team4.lib.drivers.NavX;
-import com.team4.lib.drivers.TalonFXChecker;
 import com.team4.lib.drivers.TalonUtil;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
@@ -54,7 +51,6 @@ public class Drive extends Subsystem {
     // Hardware states
     private PeriodicIO mPeriodicIO;
     private boolean mIsBrakeMode;
-    private ReflectingCSVWriter<PeriodicIO> mCSVWriter = null;
     private Rotation2d mGyroOffset = Rotation2d.identity();
     private Rotation2d mTargetHeading = new Rotation2d();
     private boolean mIsOnTarget = false;
@@ -96,7 +92,6 @@ public class Drive extends Subsystem {
         @Override
         public void onStop(double timestamp) {
             stop();
-            stopLogging();
         }
     };
 
@@ -106,20 +101,31 @@ public class Drive extends Subsystem {
 
         // Start all Talons in open loop mode.
         mLeftMaster = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kLeftDriveMasterId);
-        TalonUtil.configureTalonFX(mLeftMaster, false, true);
+        TalonUtil.configureTalonFX(mLeftMaster, true, true);
 
-        mLeftSlave = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kLeftDriveSlaveId);
-        TalonUtil.configureTalonFX(mLeftSlave, false, false);
+        mLeftSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kLeftDriveSlaveId, mLeftMaster);
+        mLeftSlave.follow(mLeftMaster);
+        TalonUtil.configureTalonFX(mLeftSlave, true, false);
 
         mRightMaster = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kRightDriveMasterId);
-        TalonUtil.configureTalonFX(mRightMaster, true, true);
+        TalonUtil.configureTalonFX(mRightMaster, false, true);
 
-        mRightSlave = CANSpeedControllerFactory.createDefaultTalonFX(DriveConstants.kRightDriveSlaveId);
-        TalonUtil.configureTalonFX(mRightSlave, true, false);
+        mRightSlave = CANSpeedControllerFactory.createPermanentSlaveTalonFX(DriveConstants.kRightDriveSlaveId, mRightMaster);
+        TalonUtil.configureTalonFX(mRightSlave, false, false);
+        
+        mRightSlave.follow(mRightMaster);
+        
+        mLeftSlave.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
+        mLeftSlave.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
 
         mNavX = new NavX();
         mLeftSlave.setStatusFramePeriod(StatusFrameEnhanced.Status_11_UartGadgeteer.value, 10, 10);
 
+
+        mLeftMaster.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 50, .5));  
+        mLeftSlave.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 50, .5));  
+        mRightMaster.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 50, .5));  
+        mRightSlave.configSupplyCurrentLimit(new SupplyCurrentLimitConfiguration(true, 40, 50, .5));  
 
         reloadGains();
 
@@ -186,9 +192,6 @@ public class Drive extends Subsystem {
                 * Math.PI;
         mPeriodicIO.right_distance += deltaRightTicks * (DriveConstants.kDriveWheelDiameterInches * DriveConstants.kDriveGearRatio);
 
-        if (mCSVWriter != null) {
-            mCSVWriter.add(mPeriodicIO);
-        }
     }
 
     @Override
@@ -196,29 +199,19 @@ public class Drive extends Subsystem {
         if(mDriveControlState == DriveControlState.PATH_FOLLOWING){
             mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
-            mLeftSlave.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
-            mRightSlave.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
         }
         else if(mTalonControlState == TalonControlState.OPEN || mDriveControlState == DriveControlState.OPEN_LOOP){
             mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
-            mLeftSlave.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
-            mRightSlave.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
         } else if (mTalonControlState == TalonControlState.MOTION_MAGIC){
             mLeftMaster.set(ControlMode.MotionMagic, (int)mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.MotionMagic, (int)mPeriodicIO.right_demand);
-            mLeftSlave.set(ControlMode.MotionMagic, (int)mPeriodicIO.left_demand);
-            mRightSlave.set(ControlMode.MotionMagic, (int)mPeriodicIO.right_demand);
         } else if (mTalonControlState == TalonControlState.POSITION) {
             mLeftMaster.set(ControlMode.Position, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.Position, mPeriodicIO.right_demand);
-            mLeftSlave.set(ControlMode.Position, mPeriodicIO.left_demand);
-            mRightSlave.set(ControlMode.Position, mPeriodicIO.right_demand);
         } else {
             mLeftMaster.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
             mRightMaster.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
-            mLeftSlave.set(ControlMode.PercentOutput, mPeriodicIO.left_demand);
-            mRightSlave.set(ControlMode.PercentOutput, mPeriodicIO.right_demand);
         }
     }
 
@@ -495,6 +488,9 @@ public class Drive extends Subsystem {
     
         System.out.println("Switching to open loop");
     
+        mLeftMaster.configOpenloopRamp(0.25);
+        mRightMaster.configOpenloopRamp(0.25);
+
         mTalonControlState = TalonControlState.OPEN;
     }
 
@@ -538,13 +534,6 @@ public class Drive extends Subsystem {
       }
 
 
-    public synchronized void startLogging() {
-        if (mCSVWriter == null) {
-            mCSVWriter = new ReflectingCSVWriter<>("/home/lvuser/DRIVE-LOGS.csv", PeriodicIO.class);
-        }
-    }
-
-
     public void reloadGains(){
         mLeftMaster.config_kP(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKp, Constants.kLongCANTimeoutMs);
         mLeftMaster.config_kI(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKi, Constants.kLongCANTimeoutMs);
@@ -565,60 +554,19 @@ public class Drive extends Subsystem {
         mLeftMaster.config_kD(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKd, Constants.kLongCANTimeoutMs);
         mLeftMaster.config_kF(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKf, Constants.kLongCANTimeoutMs);
         mLeftMaster.config_IntegralZone(kLowGearPositionControlSlot, AutoConstants.kDrivePositionIZone, Constants.kLongCANTimeoutMs);
-        mLeftMaster.configMotionCruiseVelocity((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxVelocity*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
-        mLeftMaster.configMotionAcceleration((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxAccel*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
-  
+        mLeftMaster.configMotionCruiseVelocity((int)ElementMath.rpmToTicksPer100ms(ElementMath.inchesToRotations(AutoConstants.kDriveMaxAccel / 60, DriveConstants.kDriveWheelCircumferenceInches, DriveConstants.kDriveGearRatio), DriveConstants.kDriveEncoderPPR));
+        mLeftMaster.configMotionAcceleration((int)ElementMath.rpmToTicksPer100ms(ElementMath.inchesToRotations(AutoConstants.kDriveMaxAccel / 60, DriveConstants.kDriveWheelCircumferenceInches, DriveConstants.kDriveGearRatio), DriveConstants.kDriveEncoderPPR));
+    
   
         mRightMaster.config_kP(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKp, Constants.kLongCANTimeoutMs);
         mRightMaster.config_kI(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKi, Constants.kLongCANTimeoutMs);
         mRightMaster.config_kD(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKd, Constants.kLongCANTimeoutMs);
         mRightMaster.config_kF(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKf, Constants.kLongCANTimeoutMs);
         mRightMaster.config_IntegralZone(kLowGearPositionControlSlot, AutoConstants.kDrivePositionIZone, Constants.kLongCANTimeoutMs);
-        mRightSlave.configMotionCruiseVelocity((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxVelocity*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
-        mRightSlave.configMotionAcceleration((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxAccel*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
+        mRightMaster.configMotionCruiseVelocity((int)ElementMath.rpmToTicksPer100ms(ElementMath.inchesToRotations(AutoConstants.kDriveMaxAccel / 60, DriveConstants.kDriveWheelCircumferenceInches, DriveConstants.kDriveGearRatio), DriveConstants.kDriveEncoderPPR));
+        mRightMaster.configMotionAcceleration((int)ElementMath.rpmToTicksPer100ms(ElementMath.inchesToRotations(AutoConstants.kDriveMaxAccel / 60, DriveConstants.kDriveWheelCircumferenceInches, DriveConstants.kDriveGearRatio), DriveConstants.kDriveEncoderPPR));
   
-        mLeftSlave.config_kP(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKp, Constants.kLongCANTimeoutMs);
-        mLeftSlave.config_kI(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKi, Constants.kLongCANTimeoutMs);
-        mLeftSlave.config_kD(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKd, Constants.kLongCANTimeoutMs);
-        mLeftSlave.config_kF(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKf, Constants.kLongCANTimeoutMs);
-        mLeftSlave.config_IntegralZone(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityIZone, Constants.kLongCANTimeoutMs);
-  
-        mRightSlave.config_kP(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKp, Constants.kLongCANTimeoutMs);
-        mRightSlave.config_kI(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKi, Constants.kLongCANTimeoutMs);
-        mRightSlave.config_kD(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKd, Constants.kLongCANTimeoutMs);
-        mRightSlave.config_kF(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityKf, Constants.kLongCANTimeoutMs);
-        mRightSlave.config_IntegralZone(kHighGearVelocityControlSlot, AutoConstants.kDriveVelocityIZone, Constants.kLongCANTimeoutMs);
-  
-
-        //Position gains
-        mLeftSlave.config_kP(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKp, Constants.kLongCANTimeoutMs);
-        mLeftSlave.config_kI(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKi, Constants.kLongCANTimeoutMs);
-        mLeftSlave.config_kD(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKd, Constants.kLongCANTimeoutMs);
-        mLeftSlave.config_kF(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKf, Constants.kLongCANTimeoutMs);
-        mLeftSlave.config_IntegralZone(kLowGearPositionControlSlot, AutoConstants.kDrivePositionIZone, Constants.kLongCANTimeoutMs);
-        mLeftSlave.configMotionCruiseVelocity((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxVelocity*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
-        mLeftSlave.configMotionAcceleration((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxAccel*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
-  
-  
-        mRightSlave.config_kP(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKp, Constants.kLongCANTimeoutMs);
-        mRightSlave.config_kI(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKi, Constants.kLongCANTimeoutMs);
-        mRightSlave.config_kD(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKd, Constants.kLongCANTimeoutMs);
-        mRightSlave.config_kF(kLowGearPositionControlSlot, AutoConstants.kDrivePositionKf, Constants.kLongCANTimeoutMs);
-        mRightSlave.config_IntegralZone(kLowGearPositionControlSlot, AutoConstants.kDrivePositionIZone, Constants.kLongCANTimeoutMs);
-        mRightSlave.configMotionCruiseVelocity((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxVelocity*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
-        mRightSlave.configMotionAcceleration((int)ElementMath.radiansPerSecondToTicksPer100ms(AutoConstants.kDriveMaxAccel*(DriveConstants.kDriveWheelCircumferenceInches * DriveConstants.kDriveGearRatio)/60, DriveConstants.kDriveEncoderPPR));
-  
-
     }
-
-    
-    public synchronized void stopLogging() {
-        if (mCSVWriter != null) {
-            mCSVWriter.flush();
-            mCSVWriter = null;
-        }
-    }
-
 
     
     @Override
@@ -649,55 +597,9 @@ public class Drive extends Subsystem {
     }
 
     @Override
-    public boolean checkSystem() {
-        setBrakeMode(false);
-
-        boolean leftSide = TalonFXChecker.checkMotors(this,
-            new ArrayList<MotorChecker.MotorConfig<TalonFX>>() {
-                private static final long serialVersionUID = 3643247888353037677L;
-
-                {
-                    add(new MotorChecker.MotorConfig<>("left_master", mLeftMaster));
-                    add(new MotorChecker.MotorConfig<>("left_slave", mLeftSlave));
-                }
-            }, new MotorChecker.CheckerConfig() {
-                {
-                    mCurrentFloor = 2;
-                    mRPMFloor = 1500;
-                    mCurrentEpsilon = 2.0;
-                    mRPMEpsilon = 250;
-                    mRPMSupplier = () -> mLeftMaster.getSelectedSensorVelocity(0);
-               }
-            });
-        boolean rightSide = TalonFXChecker.checkMotors(this,
-            new ArrayList<MotorChecker.MotorConfig<TalonFX>>() {
-                private static final long serialVersionUID = -1212959188716158751L;
-
-                {
-                    add(new MotorChecker.MotorConfig<>("right_master", mRightMaster));
-                    add(new MotorChecker.MotorConfig<>("right_slave", mRightSlave));
-                }
-            }, new MotorChecker.CheckerConfig() {
-                {
-                    mCurrentFloor = 2;
-                    mRPMFloor = 1500;
-                    mCurrentEpsilon = 2.0;
-                    mRPMEpsilon = 250;
-                    mRPMSupplier = () -> mRightMaster.getSelectedSensorVelocity(0);
-               }
-            });
-
-        return leftSide && rightSide;
-    }
-
-    @Override
     public void outputTelemetry() {
         if (getHeading() != null) {
             SmartDashboard.putNumber("Gyro Heading", getHeading().getDegrees());
-        }
-
-        if (mCSVWriter != null) {
-            mCSVWriter.write();
         }
     }
 

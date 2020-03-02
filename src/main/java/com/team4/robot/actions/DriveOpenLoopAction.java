@@ -12,6 +12,8 @@ public class DriveOpenLoopAction implements Action {
     private double mStartTime;
     private final double mDuration, mLeft, mRight;
 
+    private double startRot;
+
     public DriveOpenLoopAction(double left, double right, double duration) {
         mDuration = duration;
         mLeft = left;
@@ -22,6 +24,7 @@ public class DriveOpenLoopAction implements Action {
     public void start() {
         mDrive.setOpenLoop(new DriveSignal(mLeft, mRight));
         mStartTime = Timer.getFPGATimestamp();
+        startRot = mDrive.getHeadingDouble();
     }
 
     @Override
@@ -29,11 +32,12 @@ public class DriveOpenLoopAction implements Action {
 
     @Override
     public boolean isFinished() {
-        return Timer.getFPGATimestamp() - mStartTime > mDuration;
+        return Timer.getFPGATimestamp() - mStartTime > mDuration || Math.abs(mDrive.getHeadingDouble() - startRot) >= 45;
     }
 
     @Override
     public void stop() {
+        mDrive.setBrakeMode(true);
         mDrive.setOpenLoop(new DriveSignal(0.0, 0.0));
     }
 }

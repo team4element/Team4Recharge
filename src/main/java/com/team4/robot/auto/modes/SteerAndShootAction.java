@@ -6,6 +6,7 @@ import com.team4.lib.autobase.AutoModeBase;
 import com.team4.lib.autobase.AutoModeEndedException;
 import com.team4.robot.AutoModeSelector.StartingPosition;
 import com.team4.robot.actions.AutoSteerAndDistanceAction;
+import com.team4.robot.actions.DriveOpenLoopAction;
 import com.team4.robot.actions.ShootAction;
 import com.team4.robot.actions.TurnToHeadingAction;
 
@@ -37,11 +38,11 @@ public class SteerAndShootAction extends AutoModeBase{
     @Override
     protected void routine() throws AutoModeEndedException {
     
-        runAction(new TurnToHeadingAction(getAngle(), 1, true));
-
-        runAction(new AutoSteerAndDistanceAction(200, 3));
+        // runAction(new TurnToHeadingAction(getAngle(), 1, true));
+// 
         runAction(new ShootAction(5));
-
+        // runAction(new AutoSteerAndDistanceAction(180, 3));
+        runAction(new DriveOpenLoopAction(-.3, -.3, 1));
         runAction(new WaitAction(15));
     }
 }

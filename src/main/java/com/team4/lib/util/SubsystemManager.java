@@ -32,16 +32,6 @@ public class SubsystemManager implements ILooper {
         mAllSubsystems.forEach(Subsystem::outputTelemetry);
     }
 
-    public boolean checkSubsystems() {
-        boolean ret_val = true;
-
-        for (Subsystem s : mAllSubsystems) {
-            ret_val &= s.checkSystem();
-        }
-
-        return ret_val;
-    }
-
     public void stop() {
         mAllSubsystems.forEach(Subsystem::stop);
     }

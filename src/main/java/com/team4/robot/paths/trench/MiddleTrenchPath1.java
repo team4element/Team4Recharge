@@ -14,20 +14,21 @@ public class MiddleTrenchPath1 implements PathContainer{
     @Override
     public Path buildPath() {
         List<Waypoint> sWaypoints = new ArrayList<>();
-        sWaypoints.add(new Waypoint(105, 75, 0, 0));
-        sWaypoints.add(new Waypoint(170, 75, 10, 70, "Start Intake"));
-        sWaypoints.add(new Waypoint(230, 115, 5, 70));
-        sWaypoints.add(new Waypoint(300, 140, 0, 80));
+        sWaypoints.add(new Waypoint(-105, -75, 0, 0));
+        sWaypoints.add(new Waypoint(-130, -75, 5, 70, "Start Intake"));
+        sWaypoints.add(new Waypoint(-200, -115, 5, 70));
+        sWaypoints.add(new Waypoint(-260, -145, 0, 80));
+        sWaypoints.add(new Waypoint(-305, -145, 0, 80));
         return PathBuilder.buildPathFromWaypoints(sWaypoints);
     }
 
     @Override
     public Pose2d getStartPose() {
-        return new Pose2d(105, 75, Rotation2d.fromDegrees(180));
+        return new Pose2d(-105, -75, Rotation2d.fromDegrees(180));
     }
 
     @Override
     public boolean isReversed() {
-        return false;
+        return true;
     }
 }

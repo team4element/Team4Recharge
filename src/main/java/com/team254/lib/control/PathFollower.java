@@ -10,7 +10,7 @@ import com.team254.lib.motion.ProfileFollower;
 
 /**
  * A PathFollower follows a predefined path using a combination of feedforward and feedback control. It uses an
- * AdaptivePurePursuitController to choose a reference pose and generate a steering command (curvature), and then a
+ * PurePursuitController to choose a reference pose and generate a steering command (curvature), and then a
  * ProfileFollower to generate a profile (displacement and velocity) command.
  */
 public class PathFollower {
@@ -73,7 +73,7 @@ public class PathFollower {
         }
     }
 
-    AdaptivePurePursuitController mSteeringController;
+    PurePursuitController mSteeringController;
     Twist2d mLastSteeringDelta;
     ProfileFollower mVelocityController;
     final double mInertiaGain;
@@ -93,7 +93,7 @@ public class PathFollower {
      * Create a new PathFollower for a given path.
      */
     public PathFollower(Path path, boolean reversed, Parameters parameters) {
-        mSteeringController = new AdaptivePurePursuitController(path, reversed, parameters.lookahead);
+        mSteeringController = new PurePursuitController(path, reversed, parameters.lookahead);
         mLastSteeringDelta = Twist2d.identity();
         mVelocityController = new ProfileFollower(parameters.profile_kp, parameters.profile_ki, parameters.profile_kv,
                 parameters.profile_kffv, parameters.profile_kffa, parameters.profile_ks);
@@ -118,7 +118,7 @@ public class PathFollower {
      */
     public synchronized Twist2d update(double t, Pose2d pose, double displacement, double velocity) {
         if (!mSteeringController.isFinished()) {
-            final AdaptivePurePursuitController.Command steering_command = mSteeringController.update(pose);
+            final PurePursuitController.Command steering_command = mSteeringController.update(pose);
             mDebugOutput.lookahead_point_x = steering_command.lookahead_point.x();
             mDebugOutput.lookahead_point_y = steering_command.lookahead_point.y();
             mDebugOutput.lookahead_point_velocity = steering_command.end_velocity;

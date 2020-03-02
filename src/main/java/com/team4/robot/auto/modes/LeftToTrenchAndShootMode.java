@@ -1,10 +1,12 @@
 package com.team4.robot.auto.modes;
 
+import java.util.Arrays;
+
+import com.team4.lib.actionbase.ParallelAction;
 import com.team4.lib.actionbase.WaitAction;
 import com.team4.lib.autobase.AutoModeBase;
 import com.team4.lib.autobase.AutoModeEndedException;
 import com.team4.lib.path.PathContainer;
-import com.team4.robot.actions.AutoSteerAndDistanceAction;
 import com.team4.robot.actions.DrivePathAction;
 import com.team4.robot.actions.DropIntakeAction;
 import com.team4.robot.actions.ResetPoseFromPathAction;
@@ -30,15 +32,12 @@ public class LeftToTrenchAndShootMode extends AutoModeBase{
         double startTime =Timer.getFPGATimestamp();
 
         runAction(new ResetPoseFromPathAction(path1));
-        runAction(new DropIntakeAction());
-        runAction(new AutoSteerAndDistanceAction(180, 10));
-        runAction(new ShootAction(3));
+        runAction(new ParallelAction(Arrays.asList(new DropIntakeAction(), new ShootAction(4))));
+        runAction(new ParallelAction(Arrays.asList(new DropIntakeAction(), new ShootAction(4))));
         runAction(new DrivePathAction(path1));
         runAction(new WaitAction(.25));
         runAction(new DrivePathAction(path2));
         runAction(new WaitAction(.25));
-        runAction(new AutoSteerAndDistanceAction(245, 10));
-        runAction(new ShootAction(3));
 
         System.out.println(Timer.getFPGATimestamp()- startTime);
     }

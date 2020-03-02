@@ -1,15 +1,9 @@
 package com.team4.robot;
 
-import java.util.Arrays;
-
-import com.ctre.phoenix.music.Orchestra;
-import com.team254.lib.util.CheesyDriveHelper;
 import com.team254.lib.util.CrashTrackingRunnable;
 import com.team254.lib.util.SynchronousPIDF;
-import com.team4.lib.drivers.OrchestraUtil;
 import com.team4.lib.util.DriveHelper;
 import com.team4.lib.util.ElementMath;
-import com.team4.lib.util.SongChooser;
 import com.team4.robot.constants.AutoConstants;
 import com.team4.robot.constants.Constants;
 import com.team4.robot.controlboard.GamepadDriveControlBoard;
@@ -50,12 +44,8 @@ public class HIDController{
     private double kPeriod = .01; 
     private Notifier mNotifier;
 
-    private Orchestra mOrchestra;
 
     private DriveHelper mDriveHelper = DriveHelper.getInstance();
-    CheesyDriveHelper mCheesyDriveHelper = new CheesyDriveHelper();
-
-    private boolean compressVal = false;
 
     private Compressor mCompressor;
 
@@ -66,24 +56,10 @@ public class HIDController{
 
     private SynchronousPIDF autoSteerPID;
 
-    private SongChooser mSongChooser;
-
     private HIDController(){
         mNotifier = new Notifier(runnable_);
 
-        mOrchestra = new Orchestra(Arrays.asList(mDrive.getLeftMaster(), 
-                                    mDrive.getLeftSlave(), 
-                                    mDrive.getRightMaster(), 
-                                    mDrive.getRightSlave(), 
-                                    mShooter.getMasterTalon(), 
-                                    mShooter.getSlaveTalon()
-                                    ));
-        
-        OrchestraUtil.addOrchestra(mOrchestra);
-
-        mCompressor = new Compressor(0);
-
-        mSongChooser = new SongChooser();
+        mCompressor = new Compressor(Constants.kPCMPort);
 
         autoSteerPID = new SynchronousPIDF(AutoConstants.kLimelightAngleKp, AutoConstants.kLimelightAngleKi, AutoConstants.kLimelightAngleKd);
 
@@ -98,7 +74,7 @@ public class HIDController{
         @Override
         public void runCrashTracked() {
             if(running_){            
-                double throttle = ElementMath.handleDeadband(mDriveControlBoard.getThrottle(), Constants.kJoystickThreshold);
+                double throttle = -ElementMath.handleDeadband(mDriveControlBoard.getThrottle(), Constants.kJoystickThreshold);
                 double turn;
                 boolean wants_auto_steer = mDriveControlBoard.getVisionEnable() || mOperatorControlBoard.getVisionOverride();
                 
@@ -106,11 +82,11 @@ public class HIDController{
                 // mVisionTracker.setVisionEnabled(true);     
     
                 if (mVisionTracker.isVisionEnabled() && mVisionTracker.isTargetFound()) {
-                        turn = -autoSteerPID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev());
+                        turn =autoSteerPID.calculate(VisionTracker.getInstance().getTargetHorizAngleDev());
                     // turn = 0d;
                     mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, false));
                 }else{
-                    turn = -ElementMath.handleDeadband(-mDriveControlBoard.getTurn(), Constants.kJoystickThreshold);                
+                    turn = ElementMath.handleDeadband(-mDriveControlBoard.getTurn(), .07);                
                     mDrive.setOpenLoop(mDriveHelper.elementDrive(throttle, turn, false));
                 }
 
@@ -160,7 +136,7 @@ public class HIDController{
                 }else if(mDriveControlBoard.getPositionControl()){
                     mSuperstructure.setControlState(SuperstructureState.Enable_Wheel_Position);
                 }else if(mOperatorControlBoard.getReverseSuperstructure()){
-                    
+                    mSuperstructure.setControlState(SuperstructureState.Reverse);
                 }else if(mDriveControlBoard.getClimbUp() || mOperatorControlBoard.getClimbUp()) {
                     
                 }else if(mDriveControlBoard.getClimbDown() || mOperatorControlBoard.getClimbDown()) {
@@ -172,6 +148,11 @@ public class HIDController{
                 }   
      
 
+                if(mOperatorControlBoard.getCompress()){
+                    mCompressor.start();
+                }else{
+                    mCompressor.stop();
+                }
 
                 }
             }
@@ -179,12 +160,10 @@ public class HIDController{
 
     public void start(){
         running_ = true;
-        OrchestraUtil.loadMusicSelection(false);
         mSuperstructure.resetCount();
         mNotifier.startPeriodic(kPeriod);
     }
     public void stop(){
-        OrchestraUtil.stop();
         if(running_){   
            running_ = false;
         }

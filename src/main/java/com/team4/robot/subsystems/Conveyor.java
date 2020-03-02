@@ -1,6 +1,9 @@
 package com.team4.robot.subsystems;
 
+import com.ctre.phoenix.motorcontrol.ControlFrame;
 import com.ctre.phoenix.motorcontrol.ControlMode;
+import com.ctre.phoenix.motorcontrol.StatusFrame;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.team4.lib.drivers.LazyTalonSRX;
@@ -8,8 +11,9 @@ import com.team4.lib.drivers.LazyVictorSPX;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
-import com.team4.robot.subsystems.states.ConveyorControlState;
+import com.team4.robot.constants.Constants;
 import com.team4.robot.constants.ConveyorConstants;
+import com.team4.robot.subsystems.states.ConveyorControlState;
 
 public class Conveyor extends Subsystem{
     private static Conveyor mInstance = null;
@@ -32,7 +36,7 @@ public class Conveyor extends Subsystem{
         public void onLoop(double timestamp) {
             switch(mCurrentState){
                 case MOVE_FINAL_STAGE:
-                    setFinalStageOnly(-1);
+                    setFinalStageOnly(-.7);
                     break;
                 case MOVE_FIRST_STAGE:
                     setFirstStageOnly(1);
@@ -55,6 +59,10 @@ public class Conveyor extends Subsystem{
                 case IDLE:
                     setFinalStageOnly(0);
                     break;
+                case REVERSE:
+                    setFirstStage(-1);
+                    setFinalStage(-1);
+                    setHopper(-1);
                 default:
                     break;
             }
@@ -88,28 +96,46 @@ public class Conveyor extends Subsystem{
         mFirstStageLeftMotor = new LazyTalonSRX(ConveyorConstants.kFirstStageLeftMotor);
         mFirstStageRightMotor = new LazyVictorSPX(ConveyorConstants.kFirstStageRightMotor);
 
-        mFirstStageRightMotor.follow(mFirstStageLeftMotor);
+        mFirstStageLeftMotor.setInverted(false);
         mFirstStageRightMotor.setInverted(false);
+
+        mFirstStageRightMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
+        mFirstStageRightMotor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
+
+        mFinalStageTopMotor.setStatusFramePeriod(StatusFrame.Status_1_General, 255);
+        mFinalStageTopMotor.setStatusFramePeriod(StatusFrame.Status_2_Feedback0, 255);
+
+        mFirstStageLeftMotor.changeMotionControlFramePeriod(100);
+        mFirstStageLeftMotor.setControlFramePeriod(ControlFrame.Control_3_General, 20);
+        mFirstStageLeftMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General,
+                20, Constants.kCANTimeoutMs);
+        mFirstStageLeftMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0,
+                100, Constants.kCANTimeoutMs);
+
+        mFinalStageBottomMotor.changeMotionControlFramePeriod(100);
+        mFinalStageBottomMotor.setControlFramePeriod(ControlFrame.Control_3_General, 20);
+        mFinalStageBottomMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General,
+                        20, Constants.kCANTimeoutMs);
+        mFinalStageBottomMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0,
+                        100, Constants.kCANTimeoutMs);
+        
+
         mPeriodicIO = new PeriodicIO();
     }
 
     @Override
     public void writePeriodicOutputs() {
         mFirstStageLeftMotor.set(ControlMode.PercentOutput, mPeriodicIO.first_demand);
+        mFirstStageRightMotor.set(ControlMode.PercentOutput, mPeriodicIO.first_demand);
         mHopperMotor.set(ControlMode.PercentOutput, mPeriodicIO.unjam_demand);
         mFinalStageBottomMotor.set(ControlMode.PercentOutput, mPeriodicIO.final_demand);
         mFinalStageTopMotor.set(ControlMode.PercentOutput, mPeriodicIO.final_demand);
     }
 
     @Override
-    public boolean checkSystem() {
-        //no talons currently to test
-        return false;
-    }
-
-    @Override
     public void outputTelemetry() {
-        //does nothing
+        // System.out.println("Left: " + mFirstStageLeftMotor.getSupplyCurrent());
+        // System.out.println("Right: " + mFirstStageRightMotor.getSupplyCurrent());
     }
 
     @Override

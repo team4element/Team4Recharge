@@ -42,6 +42,7 @@ public class ElementMath {
 		return isTrue;
 	}
 
+	// Unit Conversions
 	
 	public static double inchesToRotations(double inches, double circumference, double gearRatio) {
 		return inches / ((circumference * gearRatio));
@@ -83,25 +84,5 @@ public class ElementMath {
 	public static double unscaleRPM(double finRPM, double gearRatio){
 		return finRPM * gearRatio;
 	}
-
-	/**
-	public static double[] addElementToArray(double[] arr, double a){
-		
-		arr = Arrays.copyOf(arr, arr.length + 1);
-
-		arr[arr.length-1] = a;
-
-		return arr;
-	}
-
-	public static double[][] addArrayToMultArray(double[][] arr, double[] a){
-		
-		arr = Arrays.copyOf(arr, arr.length + 1);
-
-		arr[arr.length-1] = a;
-		
-
-		return arr;
-	}*/
 
 }

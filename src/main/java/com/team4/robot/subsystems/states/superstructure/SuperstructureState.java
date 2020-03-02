@@ -6,6 +6,7 @@ public enum SuperstructureState{
     Convey_Shoot,
     Convey_Convey,
     Shoot,
+    Reverse,
     Climb_Up,
     Climb_Down,
     Winch,

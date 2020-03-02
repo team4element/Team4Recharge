@@ -8,4 +8,6 @@ public class Constants{
     public static final int kOperatorController = 1;
 
     public static final double kJoystickThreshold = .04;
+
+    public static final int kPCMPort = 1;
 }

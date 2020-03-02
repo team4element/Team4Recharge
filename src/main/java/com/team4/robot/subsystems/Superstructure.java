@@ -69,6 +69,9 @@ public class Superstructure extends Subsystem{
                     case Enable_Wheel_Position:
                         handleWheelPosition();
                         break;
+                    case Reverse:
+                        handleReverse();
+                        break;                    
                     default:
                         DriverStation.reportError("In an Invalid Superstructure State", false);
                 }
@@ -93,6 +96,10 @@ public class Superstructure extends Subsystem{
         mConveyor.setControlState(ConveyorControlState.MOVE_FINAL_STAGE);
     }
 
+    public synchronized void handleReverse(){
+        mIntake.setControlState(IntakeState.REVERSE);
+        mConveyor.setControlState(ConveyorControlState.REVERSE);
+    }
 
     public synchronized void handleIntakeAndConvey(){
         // if(mIntake.getIsDown()){
@@ -101,7 +108,7 @@ public class Superstructure extends Subsystem{
             // mIntake.setControlState(IntakeState.IDLE);
         // }
 
-        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_STAGE);
+        mConveyor.setControlState(ConveyorControlState.MOVE_FIRST_UNJAM);
         
     }
 
@@ -169,12 +176,5 @@ public class Superstructure extends Subsystem{
     public void outputTelemetry() {
         
     }
-
-    @Override
-    public boolean checkSystem() {
-        return false;
-    }
-
-
 
 }

@@ -79,11 +79,6 @@ public class RobotStateEstimator extends Subsystem {
     public void stop() {}
 
     @Override
-    public boolean checkSystem() {
-        return true;
-    }
-
-    @Override
     public void outputTelemetry() {
         mRobotState.outputToSmartDashboard();
     }

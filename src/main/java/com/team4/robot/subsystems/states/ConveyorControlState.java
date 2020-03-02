@@ -8,6 +8,7 @@ public enum ConveyorControlState{
     UNJAM,
     MOVE_FINAL_STAGE,
     MOVE_FINAL_UNJAM,
-    MOVE_FIRST_UNJAM
+    MOVE_FIRST_UNJAM,
+    REVERSE
 
 }

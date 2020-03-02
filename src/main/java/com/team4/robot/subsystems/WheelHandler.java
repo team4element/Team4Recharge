@@ -1,15 +1,12 @@
 package com.team4.robot.subsystems;
 
 import com.ctre.phoenix.motorcontrol.ControlMode;
-import com.ctre.phoenix.motorcontrol.can.TalonSRX;
 import com.ctre.phoenix.motorcontrol.can.VictorSPX;
 import com.revrobotics.ColorMatch;
 import com.revrobotics.ColorMatchResult;
 import com.revrobotics.ColorSensorV3;
 import com.team254.lib.util.CrashTracker;
-import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.drivers.LazyVictorSPX;
-import com.team4.lib.drivers.TalonUtil;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.Subsystem;
@@ -35,8 +32,6 @@ public class WheelHandler extends Subsystem{
     private String mFMSSentString;
 
     private CurrentWheelMode mWheelMode;
-
-    private boolean mIsReadyToControl = true;
 
     private double mSeenColorSetAmountOfTime = 0;
 
@@ -96,9 +91,7 @@ public class WheelHandler extends Subsystem{
         mColorMatch.addColorMatch(WheelHandlerConstants.kRedTarget);
         mColorMatch.addColorMatch(WheelHandlerConstants.kYellowTarget);  
         
-        mPiston = new Solenoid(WheelHandlerConstants.kWheelHandlerSolenoidId);
-
-        mPiston.setPulseDuration(Double.POSITIVE_INFINITY);
+        mPiston = new Solenoid(1, WheelHandlerConstants.kWheelHandlerSolenoidId);
 
         mFMSSentString = "G";
 
@@ -195,13 +188,13 @@ public class WheelHandler extends Subsystem{
                         break;
                     case 'Y' :
                         if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kBlueTarget){
-                            mPeriodicIO.demand = .4;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
-                            mPeriodicIO.demand = -.7;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
                             mPeriodicIO.demand = -.4;
-                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kGreenTarget){
                             mPeriodicIO.demand = 0;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kRedTarget){
+                            mPeriodicIO.demand = .4;
+                        }else if(mPeriodicIO.matched_color.color == WheelHandlerConstants.kYellowTarget){
+                            mPeriodicIO.demand = -.7;
                         }
                     
                         break;
@@ -224,12 +217,10 @@ public class WheelHandler extends Subsystem{
 
     public void setReadyToGo(){
         mPiston.set(true);
-        mIsReadyToControl = false;
     }
 
     public void stopReady(){
-        mPiston.startPulse();;
-        mIsReadyToControl = true;
+        mPiston.set(false);
     }
 
     public String getColorString(){
@@ -255,11 +246,6 @@ public class WheelHandler extends Subsystem{
         SmartDashboard.putNumber("IR", mPeriodicIO.ir);
         SmartDashboard.putNumber("Proximity", mPeriodicIO.proximity);
         SmartDashboard.putString("FMS String", mFMSSentString);
-    }
-    
-    @Override
-    public boolean checkSystem() {
-        return false;
     }
     
     @Override

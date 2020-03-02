@@ -11,13 +11,13 @@ import java.util.Optional;
 
 import com.team254.lib.geometry.Pose2d;
 import com.team254.lib.geometry.Rotation2d;
+import com.team254.lib.geometry.Translation2d;
 import com.team254.lib.util.CrashTracker;
 import com.team4.lib.autobase.AutoModeBase;
 import com.team4.lib.autobase.AutoModeExecutor;
 import com.team4.lib.loops.Looper;
 import com.team4.lib.util.SubsystemManager;
 import com.team4.lib.wpilib.TimedRobot;
-import com.team4.robot.controlboard.GamepadOperatorControlBoard;
 import com.team4.robot.subsystems.Climber;
 import com.team4.robot.subsystems.Conveyor;
 import com.team4.robot.subsystems.Drive;
@@ -29,8 +29,8 @@ import com.team4.robot.subsystems.VisionTracker;
 import com.team4.robot.subsystems.WheelHandler;
 
 import edu.wpi.first.wpilibj.Compressor;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 public class Robot extends TimedRobot{
     private final Looper mEnabledLooper = new Looper();
@@ -132,7 +132,7 @@ public class Robot extends TimedRobot{
 
             mAutoModeExecutor.start();
       
-            // mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
+            mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
 
             mEnabledLooper.start();
           } catch (Throwable t) {
@@ -152,12 +152,14 @@ public class Robot extends TimedRobot{
     
         mDisabledLooper.stop();
         
+        
         mDrive.setBrakeMode(false);
         mShooter.setBrakeMode(false);
-
+        mRobotState.reset(Timer.getFPGATimestamp(), new Pose2d(Translation2d.identity(), Rotation2d.fromDegrees(180)));
+        
         HIDController.getInstance().start();
 
-    //   mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
+      mWheelHandler.updateFMSString(DriverStation.getInstance().getGameSpecificMessage());
 
       mEnabledLooper.start();
     }
@@ -165,17 +167,8 @@ public class Robot extends TimedRobot{
     @Override
     public void testInit() {
         try {
-            CrashTracker.logTestInit();
-            System.out.println("Starting check systems.");
 
-            mDisabledLooper.stop();
-            mEnabledLooper.stop();
 
-            if (mSubsystemManager.checkSubsystems()) {
-                System.out.println("ALL SYSTEMS PASSED");
-            } else {
-                System.out.println("CHECK ABOVE OUTPUT SOME SYSTEMS FAILED!!!");
-            }
         } catch (Throwable t) {
             CrashTracker.logThrowableCrash(t);
             throw t;

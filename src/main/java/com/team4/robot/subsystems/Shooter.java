@@ -1,21 +1,18 @@
 package com.team4.robot.subsystems;
 
-import java.util.ArrayList;
-
-import com.ctre.phoenix.motorcontrol.Faults;
+import com.ctre.phoenix.motorcontrol.ControlFrame;
+import com.ctre.phoenix.motorcontrol.StatusFrameEnhanced;
 import com.ctre.phoenix.motorcontrol.TalonFXControlMode;
 import com.ctre.phoenix.motorcontrol.TalonFXInvertType;
 import com.ctre.phoenix.motorcontrol.can.TalonFX;
-import com.team4.lib.drivers.CANSpeedControllerFactory;
 import com.team4.lib.drivers.LazyTalonFX;
-import com.team4.lib.drivers.MotorChecker;
-import com.team4.lib.drivers.TalonFXChecker;
 import com.team4.lib.drivers.TalonUtil;
 import com.team4.lib.loops.ILooper;
 import com.team4.lib.loops.Loop;
 import com.team4.lib.util.ElementMath;
 import com.team4.lib.util.Subsystem;
 import com.team4.robot.constants.AutoConstants;
+import com.team4.robot.constants.Constants;
 import com.team4.robot.constants.ShooterConstants;
 import com.team4.robot.subsystems.states.ShooterControlState;
 
@@ -43,8 +40,8 @@ public class Shooter extends Subsystem{
                         setOpenLoop(1);
                         break;
                     case VELOCITY:
-                        // handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
-                        setVelocity(4000, 0);
+                        handleDistanceRPM(VisionTracker.getInstance().getTargetDistance());
+                        // setVelocity(3875, 0);
                         break;
                     case IDLE:
                         setOpenLoop(0);
@@ -73,10 +70,27 @@ public class Shooter extends Subsystem{
         // mMasterMotor = CANSpeedControllerFactory.createDefaultTalonFX(ShooterConstants.kMasterMotorId);
         mMasterMotor = new LazyTalonFX(ShooterConstants.kMasterMotorId);
         TalonUtil.configureTalonFX(mMasterMotor, true);
+        mMasterMotor.changeMotionControlFramePeriod(100);
+        mMasterMotor.setControlFramePeriod(ControlFrame.Control_3_General, 10);
+        mMasterMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General,
+                10, Constants.kCANTimeoutMs);
+        mMasterMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0,
+                100, Constants.kCANTimeoutMs);
+
 
         // mSlaveMotor = CANSpeedControllerFactory.createDefaultTalonFX(ShooterConstants.kSlaveMotorId);
         mSlaveMotor = new LazyTalonFX(ShooterConstants.kSlaveMotorId);
         TalonUtil.configureTalonFX(mSlaveMotor, false);
+        mSlaveMotor.changeMotionControlFramePeriod(100);
+        mSlaveMotor.setControlFramePeriod(ControlFrame.Control_3_General, 10);
+        mSlaveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_1_General,
+                10, Constants.kCANTimeoutMs);
+        mSlaveMotor.setStatusFramePeriod(StatusFrameEnhanced.Status_2_Feedback0,
+                100, Constants.kCANTimeoutMs);
+
+        //TODO: test follow mode
+        mSlaveMotor.follow(mMasterMotor);
+
 
         mMasterMotor.setInverted(TalonFXInvertType.CounterClockwise);
         mSlaveMotor.setInverted(TalonFXInvertType.CounterClockwise);
@@ -106,7 +120,7 @@ public class Shooter extends Subsystem{
         mPeriodicIO.timestamp = Timer.getFPGATimestamp();
         mPeriodicIO.position_ticks = mMasterMotor.getSelectedSensorPosition(0);
        
-        mPeriodicIO.velocity = mSlaveMotor.getSelectedSensorVelocity(0);
+        mPeriodicIO.velocity = mMasterMotor.getSelectedSensorVelocity(0);
         // mPeriodicIO.velocity = ElementMath.tickPer100msToScaledRPM(mMasterMotor.getSelectedSensorVelocity(0), ShooterConstants.kShooterEnconderPPR, ShooterConstants.kShooterGearRatio);
 
     }
@@ -140,59 +154,9 @@ public class Shooter extends Subsystem{
 
         double mFlyWheelDistance = (distance);
 
-        // double distanceInMeters = Units.inches_to_meters(distance); 
-        // boolean isFirstCorrectVel = true; 
-
-        // double firstCorrectVel = 0;
-        // double mPrevVel = 0;
-
-        // for(double i=4; i <=ShooterConstants.kShooterMaxSpeed; i = i + .05 ){
-        //     for(double j = 0; j <= 6; j = j + .05){
-        //             double t = j;
-
-        //             double x = (ShooterConstants.kMass / ShooterConstants.kDrag) * 
-        //             i * Math.cos(ShooterConstants.kShooterAngle) * 
-            //             (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass)));
-
-        //             double y = ((-(ShooterConstants.kMass*ShooterConstants.kGravityConstant) * t)/ 
-        //             ShooterConstants.kDrag) + (ShooterConstants.kMass/ShooterConstants.kDrag) *
-        //             (i*Math.sin(ShooterConstants.kShooterAngle)+(ShooterConstants.kMass*ShooterConstants.kGravityConstant)/ShooterConstants.kDrag) * 
-        //             (1 - Math.pow(Math.E, (-(ShooterConstants.kDrag*t)/ShooterConstants.kMass))) + ShooterConstants.kShooterHeight;
-
-        //             if (y < 0){
-        //                 break;
-        //             }
-
-        //             if(Math.abs(x - distanceInMeters) < .2 && Math.abs(y - ShooterConstants.kTargetInMeters) < .2){
-        //                 if(isFirstCorrectVel){
-        //                     firstCorrectVel = i;
-        //                     isFirstCorrectVel = false;
-        //                     // System.out.println("x: " + x + "y: " + y + "velocity: " + firstCorrectVel);
-        //                 }
-        //                 if(mPrevVel <= i){
-        //                     // System.out.println("x: " + x + "y: " + y + "velocity: " + i);
-        //                     mPrevVel = i;
-        //                 }        
-        //             }
-
-
-
-        //     }
-        // }    
-        // double low_speed = firstCorrectVel;
-        // double high_speed = mPrevVel;  
-        
-
-        // double low_speed_rpm = findRPM(low_speed);
-        // double high_speed_rpm = findRPM(high_speed);
-
-        // double rpm = Math.abs(low_speed_rpm + high_speed_rpm)/2;
-
-
         double rpm = 0;
 
-        if(mFlyWheelDistance > 11.5 * 12 && mFlyWheelDistance < 23 * 12){
-                // rpm = ((0.015533 * Math.pow(mFlyWheelDistance, 2)) + (1.0528 * mFlyWheelDistance) + 2505.6707); 
+        if(mFlyWheelDistance > 90 && mFlyWheelDistance < 270){
                 rpm = (0.025533 * Math.pow(mFlyWheelDistance, 2)) + (1.028 * mFlyWheelDistance) + 2655.6707;
             }
 
@@ -204,12 +168,6 @@ public class Shooter extends Subsystem{
         }
         // mPeriodicIO.demand = rpm;
         setVelocity(rpm, 0);
-    }
-
-    public double findRPM(double mps){
-        double t_speed = 2 * mps;
-        double rpm = (60*t_speed)/(2*Math.PI*ShooterConstants.kShooterFlyWheelRadius);
-        return rpm;
     }
 
     public void setOpenLoop(double pow){
@@ -245,28 +203,6 @@ public class Shooter extends Subsystem{
 
     public TalonFX getSlaveTalon(){
         return mSlaveMotor;
-    }
-
-    @Override
-    public boolean checkSystem() {
-        boolean master = TalonFXChecker.checkMotors(this,
-        new ArrayList<MotorChecker.MotorConfig<TalonFX>>() {
-            private static final long serialVersionUID = 3643247888353037677L;
-
-            {
-                add(new MotorChecker.MotorConfig<>("Master", mMasterMotor));
-                add(new MotorChecker.MotorConfig<>("Slave", mSlaveMotor));
-            }
-        }, new MotorChecker.CheckerConfig() {
-            {
-                mCurrentFloor = 2;
-                mRPMFloor = 1600;
-                mCurrentEpsilon = 2.0;
-                mRPMEpsilon = 250;
-                mRPMSupplier = () -> mMasterMotor.getSelectedSensorVelocity(0);
-           }
-        });
-        return master;
     }
 
     @Override

@@ -33,17 +33,13 @@ public class DriveHelper{
             wheel = 0.0;
         }
 
-
         final double kThrottleGain = .05;
         final double kThrottleLinearity = 0.05;
         final double throttleDenom = Math.sin(Math.PI / 2.0 * kThrottleLinearity);
         throttle = Math.sin(Math.PI / 2.0 * kThrottleLinearity * throttle);
         // throttle = Math.sin(Math.PI / 2.0 * kThrottleLinearity * throttle);
         throttle = throttle / (throttleDenom * throttleDenom);
-        throttle *= kThrottleGain;
-
-
-        
+        throttle *= kThrottleGain;        
         
         final double kWheelGain = 0.05;
         final double kWheelNonlinearity = 0.05;
@@ -56,7 +52,7 @@ public class DriveHelper{
         }        
         
         wheel *= kWheelGain;
-        wheel *= .75;
+        wheel *= .5;
         
         DriveSignal signal = Kinematics.inverseKinematics(new Twist2d(throttle, 0.0, wheel));
         double scaling_factor = Math.max(1.0, Math.max(Math.abs(signal.getLeft()), Math.abs(signal.getRight())));
